@@ -4,6 +4,23 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
+// ── יומן תורים פנויים ───────────────────────────────────────
+const SLOTS_FILE = path.join(__dirname, 'slots.json');
+
+function loadSlots() {
+  if (!fs.existsSync(SLOTS_FILE)) fs.writeFileSync(SLOTS_FILE, '[]');
+  try { return JSON.parse(fs.readFileSync(SLOTS_FILE, 'utf8')); } catch(e) { return []; }
+}
+
+function saveSlots(data) {
+  fs.writeFileSync(SLOTS_FILE, JSON.stringify(data, null, 2));
+}
+
+function getAvailableSlots() {
+  const now = new Date();
+  return loadSlots().filter(s => !s.booked && new Date(s.datetime) > now);
+}
+
 // ── CRM ─────────────────────────────────────────────────────
 const CRM_FILE = path.join(__dirname, 'customers.json');
 
@@ -333,6 +350,83 @@ const JULIET_NUMBER = '972512973311@c.us';
 // ── פקודות ג'וליאט לאישור/ביטול תורים ───────────────────────
 async function handleJulietCommand(message) {
   const body = message.body.trim();
+
+  // ── הוספת תורים פנויים ──────────────────────────────────
+  // פורמט: "פנויים" ואז רשימה כמו:
+  // שישי 28/3 09:00
+  // שישי 28/3 11:00
+  // שני 31/3 10:00
+  if (body.startsWith('פנויים') || body.startsWith('תורים')) {
+    const lines = body.split('\n').slice(1).map(l => l.trim()).filter(Boolean);
+    if (!lines.length) {
+      await message.reply(
+        `💎 *הוספת תורים פנויים*\n\n` +
+        `שלחי בפורמט:\n\`\`\`פנויים\nשישי 28/3 09:00\nשישי 28/3 11:00\nשני 31/3 10:00\`\`\`\n\n` +
+        `כל שורה = תור אחד 📅`
+      );
+      return;
+    }
+
+    const DAYS_MAP = { 'ראשון':0,'שני':1,'שלישי':2,'רביעי':3,'חמישי':4,'שישי':5,'שבת':6 };
+    const slots = loadSlots();
+    let added = 0, errors = [];
+
+    for (const line of lines) {
+      // מנתח: "שישי 28/3 09:00" או "שישי 09:00"
+      const match = line.match(/(\S+)\s+(?:(\d{1,2})\/(\d{1,2})\s+)?(\d{1,2}:\d{2})/);
+      if (!match) { errors.push(line); continue; }
+
+      const [, dayName, dayNum, monthNum, time] = match;
+      const [h, m] = time.split(':').map(Number);
+      let date = new Date();
+
+      if (dayNum && monthNum) {
+        // תאריך מפורש
+        date = new Date(date.getFullYear(), parseInt(monthNum) - 1, parseInt(dayNum), h, m);
+      } else {
+        // מצא את היום הקרוב ביותר
+        const targetDay = DAYS_MAP[dayName];
+        if (targetDay === undefined) { errors.push(line); continue; }
+        const diff = (targetDay - date.getDay() + 7) % 7 || 7;
+        date.setDate(date.getDate() + diff);
+        date.setHours(h, m, 0, 0);
+      }
+
+      // בדוק שלא קיים כבר
+      const key = date.toISOString();
+      if (!slots.find(s => s.datetime === key)) {
+        slots.push({ datetime: key, label: `${dayName} ${date.toLocaleDateString('he-IL')} ${time}`, booked: false });
+        added++;
+      }
+    }
+
+    saveSlots(slots);
+    let reply = `✅ נוספו *${added}* תורים פנויים!\n\n📅 *תורים פנויים לשבוע הקרוב:*\n`;
+    const available = getAvailableSlots().slice(0, 10);
+    reply += available.map((s, i) => `${i+1}. ${s.label}`).join('\n');
+    if (errors.length) reply += `\n\n⚠️ לא הבנתי: ${errors.join(', ')}`;
+    await message.reply(reply);
+    return;
+  }
+
+  // ── הצגת תורים פנויים ───────────────────────────────────
+  if (body === 'תורים פנויים' || body === 'פנוי' || body === 'יומן') {
+    const available = getAvailableSlots();
+    if (!available.length) {
+      await message.reply(`📅 אין תורים פנויים מוגדרים.\n\nשלחי \`פנויים\` עם רשימה להוסיף.`);
+    } else {
+      await message.reply(`📅 *תורים פנויים:*\n\n` + available.map((s,i) => `${i+1}. ${s.label}`).join('\n'));
+    }
+    return;
+  }
+
+  // ── מחיקת תורים ────────────────────────────────────────
+  if (body === 'נקה תורים' || body === 'מחק תורים') {
+    saveSlots([]);
+    await message.reply(`🗑️ כל התורים הפנויים נמחקו.`);
+    return;
+  }
+
   // פורמט: "אישרתי 0521234567 10:00" או "ביטלתי 0521234567"
   const confirmMatch = body.match(/אישרתי\s+(05\d{8})\s+(\d{1,2}:\d{2})/);
   const cancelMatch  = body.match(/ביטלתי\s+(05\d{8})/);
@@ -546,20 +640,88 @@ client.on('message', async (message) => {
     return;
   }
 
-  // ── קביעת תור — שלב 1: בחירת יום ──────────────────────────
+  // ── קביעת תור — שלב 1: בחירת תור פנוי ──────────────────────
   if (state.step === 'booking') {
     if (bodyLower.includes('קביעה') || bodyLower.includes('רוצה') || bodyLower.includes('כן') || body === '4') {
-      const days = getNextDays();
-      userState[from].step = 'booking_day';
-      userState[from].dayOptions = days;
-      await message.reply(
-        `מעולה ${name}! 💎 נקבע לך תור 📅\n\n*איזה יום מתאים?*\n\n` +
-        days.map((d, i) => `${i + 1}. ${d.label}`).join('\n') +
-        `\n\nשלחי את המספר המתאים 😊`
-      );
+      const available = getAvailableSlots();
+      if (available.length > 0) {
+        // יש תורים מוגדרים — הצג אותם
+        userState[from].step = 'booking_slot';
+        userState[from].slotOptions = available.slice(0, 8);
+        await message.reply(
+          `מעולה ${name}! 💎 נקבע לך תור 📅\n\n*בחרי תור פנוי:*\n\n` +
+          available.slice(0, 8).map((s, i) => `${i + 1}. ${s.label}`).join('\n') +
+          `\n\nשלחי את המספר המתאים 😊`
+        );
+      } else {
+        // אין תורים מוגדרים — שאלה חופשית
+        const days = getNextDays();
+        userState[from].step = 'booking_day';
+        userState[from].dayOptions = days;
+        await message.reply(
+          `מעולה ${name}! 💎 נקבע לך תור 📅\n\n*איזה יום מתאים?*\n\n` +
+          days.map((d, i) => `${i + 1}. ${d.label}`).join('\n') +
+          `\n\nשלחי את המספר המתאים 😊`
+        );
+      }
     } else {
       userState[from].step = 'beauty';
       await message.reply(BEAUTY_MENU);
+    }
+    return;
+  }
+
+  // ── קביעת תור — שלב 1ב: בחירה מתורים פנויים ────────────────
+  if (state.step === 'booking_slot') {
+    const idx = parseInt(body) - 1;
+    const slots = state.slotOptions || [];
+    if (idx >= 0 && idx < slots.length) {
+      const chosen = slots[idx];
+      userState[from].selectedSlot = chosen;
+      userState[from].step = 'booking_slot_confirm';
+      await message.reply(
+        `נהדר! בחרת *${chosen.label}* 💎\n\n` +
+        `לאישור הבקשה — שלחי *כן* ✅`
+      );
+    } else {
+      await message.reply(`שלחי בבקשה מספר בין 1-${slots.length} 🙏`);
+    }
+    return;
+  }
+
+  if (state.step === 'booking_slot_confirm') {
+    if (bodyLower.includes('כן') || bodyLower.includes('אישור') || bodyLower.includes('ok')) {
+      const chosen = state.selectedSlot;
+      const service = state.lastService || 'שירות כללי';
+
+      // סמן תור כתפוס
+      const slots = loadSlots();
+      const slot = slots.find(s => s.datetime === chosen.datetime);
+      if (slot) { slot.booked = true; slot.bookedBy = name; slot.bookedPhone = from.replace('@c.us',''); }
+      saveSlots(slots);
+      updateCustomer(from, { pendingAppointmentRequest: `${chosen.label} — ${service}` });
+
+      await message.reply(
+        `✅ *הבקשה נשלחה לג'וליאט!*\n\n` +
+        `📅 ${chosen.label}\n💇‍♀️ ${service}\n\n` +
+        `ג'וליאט תאשר בקרוב 💎🙏`
+      );
+
+      // התראה לג'וליאט
+      const customerPhone = from.replace('@c.us', '');
+      try {
+        await client.sendMessage(JULIET_NUMBER,
+          `💎 *בקשת תור חדשה!*\n\n` +
+          `👤 שם: *${name}*\n📞 טלפון: *${customerPhone}*\n` +
+          `📅 זמן: *${chosen.label}*\n💇‍♀️ שירות: *${service}*\n\n` +
+          `לאישור: \`אישרתי ${customerPhone} ${chosen.label.split(' ').pop()}\`\n` +
+          `לביטול: \`ביטלתי ${customerPhone}\``
+        );
+      } catch(e) {}
+      userState[from].step = 'main';
+    } else {
+      userState[from].step = 'main';
+      await message.reply(`בסדר! כשתרצי לקבוע שלחי *קביעה* 😊`);
     }
     return;
   }
