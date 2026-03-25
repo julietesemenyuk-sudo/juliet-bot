@@ -327,6 +327,77 @@ function getNextDays() {
 // ── מילות פתיחה ─────────────────────────────────────────────
 const GREETINGS = ['היי', 'הי', 'שלום', 'בוקר טוב', 'ערב טוב', 'תפריט', 'menu', 'התחל', 'start', 'hello', 'hi', '0'];
 
+// ── מספר ג'וליאט ────────────────────────────────────────────
+const JULIET_NUMBER = '972512973311@c.us';
+
+// ── פקודות ג'וליאט לאישור/ביטול תורים ───────────────────────
+async function handleJulietCommand(message) {
+  const body = message.body.trim();
+  // פורמט: "אישרתי 0521234567 10:00" או "ביטלתי 0521234567"
+  const confirmMatch = body.match(/אישרתי\s+(05\d{8})\s+(\d{1,2}:\d{2})/);
+  const cancelMatch  = body.match(/ביטלתי\s+(05\d{8})/);
+
+  if (confirmMatch) {
+    const phone = confirmMatch[1];
+    const time  = confirmMatch[2];
+    const crm   = loadCRM();
+    if (!crm[phone]) { await message.reply(`❌ לא נמצאה לקוחה ${phone}`); return; }
+
+    // בנה תאריך מהבקשה השמורה
+    const req = crm[phone].pendingAppointmentRequest || '';
+    const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+    const [h, m]   = time.split(':').map(Number);
+    const apptDate = new Date(tomorrow);
+    apptDate.setHours(h, m, 0, 0);
+    crm[phone].pendingAppointment = apptDate.toISOString();
+    crm[phone].reminderSent = false;
+    saveCRM(crm);
+
+    // אשר ללקוחה
+    const chatId = '972' + phone.replace(/^0/, '') + '@c.us';
+    const custName = crm[phone].name || 'יקרה';
+    try {
+      await client.sendMessage(chatId,
+        `✅ *אושר!* ${custName} 💎\n\nהתור שלך נקבע לשעה *${time}*\n📍 Juliet Beauty Boutique\n\nמחכות לך! 🌟\n\n_(תקבלי תזכורת יום לפני)_`
+      );
+    } catch(e) {}
+
+    await message.reply(`✅ אישרתי ל-${phone} בשעה ${time} — תזכורת תישלח אוטומטית יום לפני!`);
+    return;
+  }
+
+  if (cancelMatch) {
+    const phone = cancelMatch[1];
+    const crm   = loadCRM();
+    if (!crm[phone]) { await message.reply(`❌ לא נמצאה לקוחה ${phone}`); return; }
+    delete crm[phone].pendingAppointment;
+    delete crm[phone].pendingAppointmentRequest;
+    delete crm[phone].reminderSent;
+    saveCRM(crm);
+
+    const chatId = '972' + phone.replace(/^0/, '') + '@c.us';
+    const custName = crm[phone].name || 'יקרה';
+    try {
+      await client.sendMessage(chatId,
+        `שלום ${custName} 💎\n\nלצערנו התור לא יכול להתקיים בזמן המבוקש.\nתרצי לקבוע זמן אחר? כתבי לנו ונשמח לעזור 🙏`
+      );
+    } catch(e) {}
+
+    await message.reply(`✅ ביטלתי את התור של ${phone} — הלקוחה קיבלה הודעה.`);
+    return;
+  }
+
+  // הוראות שימוש אם ג'וליאט כתבה משהו לא מובן
+  if (body.startsWith('אישרתי') || body.startsWith('ביטלתי')) {
+    await message.reply(
+      `💎 *פקודות לניהול תורים:*\n\n` +
+      `✅ אישור: \`אישרתי 05XXXXXXXX HH:MM\`\n` +
+      `❌ ביטול: \`ביטלתי 05XXXXXXXX\`\n\n` +
+      `_דוגמה: אישרתי 0521234567 10:30_`
+    );
+  }
+}
+
 // ── לוגיקה ראשית ───────────────────────────────────────────
 client.on('message', async (message) => {
   const from = message.from;
@@ -335,6 +406,12 @@ client.on('message', async (message) => {
   if (from.endsWith('@g.us')) return;
   if (message.isGroupMsg) return;
   if (message.id && message.id.remote && message.id.remote.endsWith('@g.us')) return;
+
+  // פקודות ג'וליאט לניהול תורים
+  if (from === JULIET_NUMBER && !message.fromMe) {
+    await handleJulietCommand(message);
+    return;
+  }
 
   // התעלם מהודעות שלך
   if (message.fromMe) return;
@@ -526,7 +603,6 @@ client.on('message', async (message) => {
     );
 
     // שלח התראה לג'וליאט
-    const JULIET_NUMBER = '972512973311@c.us';
     const customerPhone = from.replace('@c.us', '');
     try {
       await client.sendMessage(JULIET_NUMBER,
