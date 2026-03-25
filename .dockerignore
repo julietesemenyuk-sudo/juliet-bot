@@ -1,0 +1,7 @@
+node_modules
+.wwebjs_auth
+*.mp4
+*.png
+*.jpg
+index.html
+index.html.html

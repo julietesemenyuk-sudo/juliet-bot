@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Juliet Universe — CRM 💎</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#0a0a0a;color:#e0d5c0;font-family:'Segoe UI',Arial,sans-serif;min-height:100vh;padding:20px}
+  h1{text-align:center;font-size:28px;color:#c8a84b;margin-bottom:6px;letter-spacing:.1em}
+  .sub{text-align:center;color:#5e5c58;font-size:13px;margin-bottom:30px}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:30px}
+  .stat{background:#111;border:1px solid rgba(200,168,75,.2);border-radius:8px;padding:18px;text-align:center}
+  .stat-n{font-size:32px;font-weight:700;color:#c8a84b}
+  .stat-l{font-size:12px;color:#5e5c58;margin-top:4px}
+  .search{width:100%;padding:12px 16px;background:#111;border:1px solid rgba(200,168,75,.2);border-radius:8px;color:#e0d5c0;font-size:14px;margin-bottom:20px}
+  .search:focus{outline:none;border-color:#c8a84b}
+  table{width:100%;border-collapse:collapse;background:#111;border-radius:8px;overflow:hidden}
+  th{background:rgba(200,168,75,.1);color:#c8a84b;padding:14px 16px;text-align:right;font-size:12px;letter-spacing:.05em;font-weight:600}
+  td{padding:13px 16px;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px;vertical-align:middle}
+  tr:hover td{background:rgba(200,168,75,.03)}
+  .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+  .badge-beauty{background:rgba(200,168,75,.15);color:#c8a84b;border:1px solid rgba(200,168,75,.3)}
+  .badge-ai{background:rgba(90,150,255,.15);color:#5a96ff;border:1px solid rgba(90,150,255,.3)}
+  .badge-new{background:rgba(90,220,100,.1);color:#5adf8a;border:1px solid rgba(90,220,100,.3)}
+  .phone{color:#c8a84b;font-size:12px}
+  .date{color:#5e5c58;font-size:11px}
+  .visits{background:rgba(200,168,75,.1);color:#c8a84b;border-radius:50%;width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+  .empty{text-align:center;padding:60px;color:#3e3c38}
+  .refresh{background:rgba(200,168,75,.1);border:1px solid rgba(200,168,75,.3);color:#c8a84b;padding:8px 20px;border-radius:6px;cursor:pointer;font-size:13px;margin-bottom:20px}
+  .refresh:hover{background:rgba(200,168,75,.2)}
+  .toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+  .count{font-size:13px;color:#5e5c58}
+</style>
+</head>
+<body>
+<h1>💎 Juliet Universe — CRM</h1>
+<p class="sub">מערכת ניהול לקוחות אוטומטית</p>
+
+<div class="stats">
+  <div class="stat"><div class="stat-n" id="total">0</div><div class="stat-l">סה"כ לקוחות</div></div>
+  <div class="stat"><div class="stat-n" id="today">0</div><div class="stat-l">היום</div></div>
+  <div class="stat"><div class="stat-n" id="week">0</div><div class="stat-l">השבוע</div></div>
+  <div class="stat"><div class="stat-n" id="appointments">0</div><div class="stat-l">תורים קבועים</div></div>
+</div>
+
+<div class="toolbar">
+  <input class="search" id="search" placeholder="🔍 חיפוש לפי שם או טלפון..." oninput="filterTable()"/>
+  <button class="refresh" onclick="loadData()">↻ רענן</button>
+</div>
+
+<div class="count" id="count"></div>
+<br/>
+
+<table id="crm-table">
+  <thead>
+    <tr>
+      <th>שם</th>
+      <th>טלפון</th>
+      <th>שירות אחרון</th>
+      <th>ביקורים</th>
+      <th>ראינו לאחרונה</th>
+      <th>פנייה ראשונה</th>
+    </tr>
+  </thead>
+  <tbody id="tbody"></tbody>
+</table>
+
+<script>
+let allRows = [];
+
+function formatDate(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return d.toLocaleDateString('he-IL') + ' ' + d.toLocaleTimeString('he-IL', {hour:'2-digit',minute:'2-digit'});
+}
+
+function daysDiff(iso) {
+  if (!iso) return 999;
+  return Math.floor((Date.now() - new Date(iso)) / 86400000);
+}
+
+function serviceBadge(s) {
+  if (!s) return '<span style="color:#3e3c38">—</span>';
+  const isBeauty = s.includes('החלק') || s.includes('תוספות') || s.includes('צבע') || s.includes('תור');
+  return `<span class="badge ${isBeauty ? 'badge-beauty' : 'badge-ai'}">${s}</span>`;
+}
+
+function getPass() {
+  const p = new URLSearchParams(window.location.search).get('pass');
+  return p || 'juliet2026';
+}
+
+async function loadData() {
+  try {
+    const res = await fetch('customers.json?pass=' + getPass() + '&t=' + Date.now());
+    const crm = await res.json();
+    const rows = Object.values(crm);
+    allRows = rows;
+    renderRows(rows);
+    updateStats(rows);
+  } catch(e) {
+    document.getElementById('tbody').innerHTML = '<tr><td colspan="6" class="empty">⚠️ שגיאה בטעינת נתונים</td></tr>';
+  }
+}
+
+function renderRows(rows) {
+  const tbody = document.getElementById('tbody');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty">אין לקוחות עדיין 💎</td></tr>';
+    return;
+  }
+  rows.sort((a,b) => new Date(b.lastSeen||0) - new Date(a.lastSeen||0));
+  document.getElementById('count').textContent = `מציג ${rows.length} לקוחות`;
+  tbody.innerHTML = rows.map(c => `
+    <tr>
+      <td><strong>${c.name || '—'}</strong> ${daysDiff(c.firstContact) < 3 ? '<span class="badge badge-new">חדשה</span>' : ''}</td>
+      <td><span class="phone">${c.phone || '—'}</span></td>
+      <td>${serviceBadge(c.lastService)}</td>
+      <td><span class="visits">${(c.visits||[]).length}</span></td>
+      <td><span class="date">${formatDate(c.lastSeen)}</span></td>
+      <td><span class="date">${formatDate(c.firstContact)}</span></td>
+    </tr>
+  `).join('');
+}
+
+function updateStats(rows) {
+  const now = Date.now();
+  document.getElementById('total').textContent = rows.length;
+  document.getElementById('today').textContent = rows.filter(r => daysDiff(r.lastSeen) < 1).length;
+  document.getElementById('week').textContent = rows.filter(r => daysDiff(r.lastSeen) < 7).length;
+  document.getElementById('appointments').textContent = rows.filter(r => r.pendingAppointment).length;
+}
+
+function filterTable() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const filtered = allRows.filter(r =>
+    (r.name||'').toLowerCase().includes(q) || (r.phone||'').includes(q)
+  );
+  renderRows(filtered);
+}
+
+loadData();
+setInterval(loadData, 30000);
+</script>
+</body>
+</html>

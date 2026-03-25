@@ -1,0 +1,13 @@
+{
+  "name": "juliet-whatsapp-bot",
+  "version": "1.0.0",
+  "description": "Juliet Universe WhatsApp Bot",
+  "main": "juliet-menu-bot.js",
+  "scripts": {
+    "start": "node juliet-menu-bot.js"
+  },
+  "dependencies": {
+    "whatsapp-web.js": "^1.23.0",
+    "qrcode-terminal": "^0.12.0"
+  }
+}
