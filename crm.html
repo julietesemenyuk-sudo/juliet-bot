@@ -58,6 +58,7 @@
       <th>שם</th>
       <th>טלפון</th>
       <th>שירות אחרון</th>
+      <th>תור קרוב</th>
       <th>ביקורים</th>
       <th>ראינו לאחרונה</th>
       <th>פנייה ראשונה</th>
@@ -112,16 +113,20 @@ function renderRows(rows) {
   }
   rows.sort((a,b) => new Date(b.lastSeen||0) - new Date(a.lastSeen||0));
   document.getElementById('count').textContent = `מציג ${rows.length} לקוחות`;
-  tbody.innerHTML = rows.map(c => `
+  tbody.innerHTML = rows.map(c => {
+    const hasAppt = c.pendingAppointment && new Date(c.pendingAppointment) > new Date();
+    const apptStr = hasAppt ? `<span class="badge badge-new">📅 ${formatDate(c.pendingAppointment)}</span>` : '<span style="color:#3e3c38">—</span>';
+    return `
     <tr>
       <td><strong>${c.name || '—'}</strong> ${daysDiff(c.firstContact) < 3 ? '<span class="badge badge-new">חדשה</span>' : ''}</td>
       <td><span class="phone">${c.phone || '—'}</span></td>
       <td>${serviceBadge(c.lastService)}</td>
+      <td>${apptStr}</td>
       <td><span class="visits">${(c.visits||[]).length}</span></td>
       <td><span class="date">${formatDate(c.lastSeen)}</span></td>
       <td><span class="date">${formatDate(c.firstContact)}</span></td>
     </tr>
-  `).join('');
+  `;}).join('');
 }
 
 function updateStats(rows) {

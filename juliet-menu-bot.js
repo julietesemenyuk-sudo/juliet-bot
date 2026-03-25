@@ -523,9 +523,101 @@ client.on('qr', (qr) => {
   qrcode.generate(qr, { small: true });
 });
 
+// ── זיהוי שירות מהודעות עבר ─────────────────────────────────
+const SERVICE_KEYWORDS = {
+  'החלקה אורגנית': ['החלק', 'אורגנית', 'אורגני'],
+  'קרטין': ['קרטין'],
+  'תוספות שיער': ['תוספות', 'תוסף'],
+  'צבע ועיצוב': ['צבע', 'גוון', 'הבהרה', 'אומברה', 'בלונד', 'שורשים'],
+  'תספורת': ['תספורת', 'קיצוץ', 'קצצתי'],
+  'פן': ['פן', 'פן חם', 'ישור'],
+  'טיפול שיער': ['טיפול', 'מסכה', 'לחות'],
+};
+
+function detectService(text) {
+  if (!text) return null;
+  const t = text.toLowerCase();
+  for (const [service, keywords] of Object.entries(SERVICE_KEYWORDS)) {
+    if (keywords.some(k => t.includes(k))) return service;
+  }
+  return null;
+}
+
+async function scanPastMessages() {
+  console.log('\n🔍 סורק הודעות עבר לזיהוי שירותים...');
+  try {
+    const chats = await client.getChats();
+    let updated = 0;
+    const crm = loadCRM();
+
+    for (const chat of chats) {
+      if (chat.isGroup) continue;
+      const phone = '0' + chat.id.user.replace('972', '');
+      const customer = crm[phone];
+      if (!customer) continue;
+
+      try {
+        const messages = await chat.fetchMessages({ limit: 50 });
+        for (const msg of messages.reverse()) {
+          if (!msg.body) continue;
+          const service = detectService(msg.body);
+          if (service) {
+            if (!crm[phone].lastService) {
+              crm[phone].lastService = service;
+              updated++;
+            }
+            break;
+          }
+        }
+      } catch(e) {}
+    }
+
+    saveCRM(crm);
+    console.log(`✅ עודכנו ${updated} לקוחות עם שירות אחרון`);
+  } catch(e) {
+    console.log('שגיאה בסריקה:', e.message);
+  }
+}
+
+// ── תזכורת יום לפני תור ──────────────────────────────────────
+function startReminderJob() {
+  setInterval(async () => {
+    const crm = loadCRM();
+    const now = Date.now();
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowDate = tomorrow.toLocaleDateString('he-IL');
+
+    for (const [phone, customer] of Object.entries(crm)) {
+      if (!customer.pendingAppointment) continue;
+      const apptTime = new Date(customer.pendingAppointment).getTime();
+      const hoursUntil = (apptTime - now) / 3600000;
+
+      // שלח תזכורת 20-24 שעות לפני
+      if (hoursUntil > 20 && hoursUntil <= 24 && !customer.reminderSent) {
+        const name = customer.name || 'יקרה';
+        const apptStr = new Date(customer.pendingAppointment).toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem', hour: '2-digit', minute: '2-digit' });
+        try {
+          const chatId = '972' + phone.replace(/^0/, '') + '@c.us';
+          await client.sendMessage(chatId,
+            `💎 תזכורת תור — Juliet Beauty Boutique\n\nשלום ${name}! 🌟\n\nמזכירים לך שיש לך תור *מחר* בשעה *${apptStr}*\n\nאנחנו מחכים לך! 💫\n\nאם צריך לשנות — שלחי לנו הודעה 🙏`
+          );
+          crm[phone].reminderSent = true;
+          saveCRM(crm);
+          console.log(`📅 נשלחה תזכורת ל-${phone}`);
+        } catch(e) {}
+      }
+    }
+  }, 60 * 60 * 1000); // בדיקה כל שעה
+}
+
 client.on('ready', () => {
   console.log('\n✅ הבוט של ג\'וליאט פעיל! 💎\n');
   console.log('לקוחות שכותבות "היי" יקבלו תפריט אוטומטי\n');
+  // סרוק הודעות עבר לזיהוי שירותים
+  setTimeout(scanPastMessages, 5000);
+  // הפעל תזכורות תורים
+  startReminderJob();
 });
 
 client.on('auth_failure', () => {
