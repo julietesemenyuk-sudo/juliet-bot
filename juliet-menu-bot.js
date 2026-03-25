@@ -309,6 +309,21 @@ function getIsraelHour() {
   return new Date().toLocaleString('en-US', { timeZone: 'Asia/Jerusalem', hour: 'numeric', hour12: false }) * 1;
 }
 
+// ── חישוב 5 ימים קרובים ─────────────────────────────────────
+const DAYS_HE = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+function getNextDays() {
+  const days = [];
+  const today = new Date();
+  for (let i = 1; i <= 6; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
+    const dayName = DAYS_HE[d.getDay()];
+    const dateStr = d.toLocaleDateString('he-IL', { day: 'numeric', month: 'numeric' });
+    days.push({ label: `יום ${dayName} ${dateStr}`, date: d.toISOString() });
+  }
+  return days;
+}
+
 // ── מילות פתיחה ─────────────────────────────────────────────
 const GREETINGS = ['היי', 'הי', 'שלום', 'בוקר טוב', 'ערב טוב', 'תפריט', 'menu', 'התחל', 'start', 'hello', 'hi', '0'];
 
@@ -454,11 +469,17 @@ client.on('message', async (message) => {
     return;
   }
 
-  // ── קביעת תור ──────────────────────────────
+  // ── קביעת תור — שלב 1: בחירת יום ──────────────────────────
   if (state.step === 'booking') {
-    if (bodyLower.includes('קביעה') || bodyLower.includes('רוצה') || bodyLower.includes('כן')) {
-      await message.reply(`מעולה ${name}! 💎\n\nשלחי לי:\n📅 *איזה יום* מתאים לך?\n⏰ *באיזו שעה*?\n\nוג'וליאט תאשר לך 🙏`);
-      userState[from].step = 'confirm_booking';
+    if (bodyLower.includes('קביעה') || bodyLower.includes('רוצה') || bodyLower.includes('כן') || body === '4') {
+      const days = getNextDays();
+      userState[from].step = 'booking_day';
+      userState[from].dayOptions = days;
+      await message.reply(
+        `מעולה ${name}! 💎 נקבע לך תור 📅\n\n*איזה יום מתאים?*\n\n` +
+        days.map((d, i) => `${i + 1}. ${d.label}`).join('\n') +
+        `\n\nשלחי את המספר המתאים 😊`
+      );
     } else {
       userState[from].step = 'beauty';
       await message.reply(BEAUTY_MENU);
@@ -466,19 +487,71 @@ client.on('message', async (message) => {
     return;
   }
 
-  // ── אישור תור ──────────────────────────────
+  // ── קביעת תור — שלב 2: בחירת שעה ──────────────────────────
+  if (state.step === 'booking_day') {
+    const idx = parseInt(body) - 1;
+    const days = state.dayOptions || [];
+    if (idx >= 0 && idx < days.length) {
+      userState[from].selectedDay = days[idx];
+      userState[from].step = 'booking_time';
+      await message.reply(
+        `נהדר! *${days[idx].label}* 💎\n\n*באיזו שעה נוח לך?*\n\n` +
+        `1. בוקר (09:00-11:00)\n2. צהריים (11:00-14:00)\n3. אחר הצהריים (14:00-17:00)\n4. ערב (17:00-20:00)\n\nשלחי את המספר 😊`
+      );
+    } else {
+      await message.reply(`שלחי בבקשה מספר בין 1-${days.length} 🙏`);
+    }
+    return;
+  }
+
+  // ── קביעת תור — שלב 3: שליחה לג'וליאט ──────────────────────
+  if (state.step === 'booking_time') {
+    const timeSlots = { '1': 'בוקר (09:00-11:00)', '2': 'צהריים (11:00-14:00)', '3': 'אחה"צ (14:00-17:00)', '4': 'ערב (17:00-20:00)' };
+    const timeSlot = timeSlots[body];
+    if (!timeSlot) {
+      await message.reply(`שלחי בבקשה מספר בין 1-4 🙏`);
+      return;
+    }
+    const day = state.selectedDay;
+    const service = state.lastService || 'שירות כללי';
+
+    // שמור ב-CRM עם פרטי הבקשה
+    updateCustomer(from, { pendingAppointmentRequest: `${day.label} ${timeSlot} — ${service}` });
+
+    // שלח ללקוחה אישור
+    await message.reply(
+      `✅ *קיבלנו את הבקשה שלך!*\n\n` +
+      `📅 יום: *${day.label}*\n⏰ שעה: *${timeSlot}*\n💇‍♀️ שירות: *${service}*\n\n` +
+      `ג'וליאט תאשר את התור בקרוב ותשלח לך אישור סופי 💎🙏`
+    );
+
+    // שלח התראה לג'וליאט
+    const JULIET_NUMBER = '972512973311@c.us';
+    const customerPhone = from.replace('@c.us', '');
+    try {
+      await client.sendMessage(JULIET_NUMBER,
+        `💎 *בקשת תור חדשה!*\n\n` +
+        `👤 שם: *${name}*\n📞 טלפון: *${customerPhone}*\n` +
+        `📅 יום: *${day.label}*\n⏰ שעה: *${timeSlot}*\n💇‍♀️ שירות: *${service}*\n\n` +
+        `לאישור — כתבי ללקוחה ב-WhatsApp ועדכני את התור ב-CRM 🙏`
+      );
+    } catch(e) {
+      console.log('שגיאה בשליחה לג\'וליאט:', e.message);
+    }
+
+    userState[from].step = 'main';
+    return;
+  }
+
+  // ── אישור תור סופי (אחרי שג'וליאט מאשרת) ───────────────────
   if (state.step === 'confirm_booking') {
     addVisit(from, state.lastService || 'תור כללי');
-    updateCustomer(from, { pendingAppointment: body });
-    await message.reply(`✅ קיבלתי! ג'וליאט תאשר את התור בקרוב 💎\n\nאחרי הביקור נשמח לשמוע איך היה! ⭐`);
-    // תזכורת יום לפני (24 שעות)
-    const reminderTime = 24 * 60 * 60 * 1000;
-    setTimeout(async () => {
-      try {
-        const chat = await message.getChat();
-        await chat.sendMessage(`היי ${name}! 💎\n\nרק תזכורת — יש לך תור אצלנו מחר!\n\n📍 Juliet Beauty Boutique\n\nמחכות לך! 🙏`);
-      } catch(e) {}
-    }, reminderTime);
+    // חשב תאריך מדויק מהבחירה
+    const apptDate = state.selectedDay ? new Date(state.selectedDay.date) : null;
+    if (apptDate) {
+      updateCustomer(from, { pendingAppointment: apptDate.toISOString(), reminderSent: false });
+    }
+    await message.reply(`✅ התור אושר! ג'וליאט מחכה לך 💎\n\nתקבלי תזכורת יום לפני 🗓️`);
     userState[from].step = 'main';
     return;
   }
