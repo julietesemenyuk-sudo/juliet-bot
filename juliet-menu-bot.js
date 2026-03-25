@@ -299,6 +299,8 @@ client.on('message', async (message) => {
 
   // התעלם מקבוצות
   if (from.endsWith('@g.us')) return;
+  if (message.isGroupMsg) return;
+  if (message.id && message.id.remote && message.id.remote.endsWith('@g.us')) return;
 
   // התעלם מהודעות שלך
   if (message.fromMe) return;
