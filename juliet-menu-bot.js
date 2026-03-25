@@ -501,6 +501,7 @@ client.on('message', async (message) => {
 client.on('qr', (qr) => {
   console.log('\n💎 סרקי את ה-QR עם וואטסאפ שלך:\n');
   qrcode.generate(qr, { small: true });
+  console.log('\n🔗 קישור לסריקה (פתחי בטלפון):\nhttps://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(qr) + '\n');
 });
 
 client.on('ready', () => {
