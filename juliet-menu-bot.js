@@ -38,9 +38,28 @@ function addVisit(phone, service) {
 // ── שרת CRM — נגיש מכל מקום ────────────────────────────────
 const CRM_HTML = path.join(__dirname, 'crm.html');
 const CRM_PASS = process.env.CRM_PASSWORD || 'juliet2026';
+let currentQR = null; // שמירת ה-QR הנוכחי
 
 http.createServer((req, res) => {
   const url = new URL(req.url, 'http://localhost');
+
+  // דף QR לסריקה
+  if (url.pathname === '/qr') {
+    if (currentQR) {
+      const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(currentQR);
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      res.end(`<html><body style="background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;margin:0">
+        <h2 style="color:#c8a84b;font-family:Arial">💎 סרקי עם WhatsApp</h2>
+        <img src="${qrUrl}" style="width:300px;height:300px;border:4px solid #c8a84b;border-radius:12px"/>
+        <p style="color:#888;font-family:Arial;margin-top:16px">הגדרות → מכשירים מקושרים → קשרי מכשיר</p>
+        <script>setTimeout(()=>location.reload(),30000)</script>
+      </body></html>`);
+    } else {
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      res.end('<html><body style="background:#000;color:#c8a84b;font-family:Arial;display:flex;align-items:center;justify-content:center;height:100vh"><h2>✅ הבוט כבר מחובר! אין צורך ב-QR</h2></body></html>');
+    }
+    return;
+  }
 
   // דף CRM — עם סיסמה
   if (url.pathname === '/crm') {
@@ -499,9 +518,9 @@ client.on('message', async (message) => {
 
 // ── QR & Ready ─────────────────────────────────────────────
 client.on('qr', (qr) => {
-  console.log('\n💎 סרקי את ה-QR עם וואטסאפ שלך:\n');
+  currentQR = qr;
+  console.log('\n💎 סרקי את ה-QR — פתחי בדפדפן הטלפון: [כתובת השרת]/qr\n');
   qrcode.generate(qr, { small: true });
-  console.log('\n🔗 קישור לסריקה (פתחי בטלפון):\nhttps://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(qr) + '\n');
 });
 
 client.on('ready', () => {
