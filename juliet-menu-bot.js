@@ -501,6 +501,12 @@ client.on('message', async (message) => {
   if (message.isGroupMsg) return;
   if (message.id && message.id.remote && message.id.remote.endsWith('@g.us')) return;
 
+  // התעלם מסטורי / סטטוס
+  if (from === 'status@broadcast') return;
+  if (message.type === 'status') return;
+  if (from.includes('broadcast')) return;
+  if (message.isStatus) return;
+
   // פקודות ג'וליאט לניהול תורים
   if (from === JULIET_NUMBER && !message.fromMe) {
     await handleJulietCommand(message);
