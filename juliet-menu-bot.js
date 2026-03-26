@@ -124,9 +124,10 @@ const client = new Client({
     args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
   },
   webVersionCache: { type: 'none' },
-  // אל תצפה בסטורי ואל תסמן כנקרא
   markOnlineOnConnect: false,
-  restartOnAuthFail: true
+  restartOnAuthFail: true,
+  // נטרל סטטוס לחלוטין
+  bypassCSP: false
 });
 
 // ── State ──────────────────────────────────────────────────
@@ -505,20 +506,23 @@ client.on('message', async (message) => {
   if (message.isGroupMsg) return;
   if (message.id && message.id.remote && message.id.remote.endsWith('@g.us')) return;
 
-  // התעלם מסטורי / סטטוס
+  // התעלם לחלוטין מסטורי / סטטוס / broadcast
   if (from === 'status@broadcast') return;
   if (message.type === 'status') return;
   if (from.includes('broadcast')) return;
   if (message.isStatus) return;
 
-  // פקודות ג'וליאט לניהול תורים
-  if (from === JULIET_NUMBER && !message.fromMe) {
-    await handleJulietCommand(message);
-    return;
+  // פקודות ג'וליאט — כשהיא שולחת לעצמה (fromMe)
+  // היא מזוהה לפי fromMe=true + הודעת ניהול
+  if (message.fromMe) {
+    const adminKeywords = ['פנויים','תורים','יומן','פנוי','נקה','אישרתי','ביטלתי','לקוחות','crm','סטטיסטיקה','עזרה','help'];
+    const bodyLow = (message.body || '').trim().toLowerCase();
+    const isAdmin = adminKeywords.some(k => bodyLow.startsWith(k) || bodyLow.includes(k));
+    if (isAdmin) {
+      await handleJulietCommand(message);
+    }
+    return; // תמיד התעלם מהודעות של עצמה מלבד פקודות
   }
-
-  // התעלם מהודעות שלך
-  if (message.fromMe) return;
 
   const body = message.body.trim();
   const bodyLower = body.toLowerCase();
