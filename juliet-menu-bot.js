@@ -497,7 +497,24 @@ async function handleJulietCommand(message) {
   }
 }
 
-// ── לוגיקה ראשית ───────────────────────────────────────────
+// ── פקודות ג'וליאט — הודעות שהיא שולחת לעצמה ──────────────
+const ADMIN_KEYWORDS = ['פנויים','תורים','יומן','פנוי','נקה','אישרתי','ביטלתי','לקוחות','crm','סטטיסטיקה','עזרה','help'];
+
+client.on('message_create', async (message) => {
+  if (!message.fromMe) return;
+  const from = message.from || '';
+  if (from === 'status@broadcast' || from.includes('broadcast') || from.endsWith('@g.us')) return;
+  if (message.isStatus) return;
+
+  const bodyLow = (message.body || '').trim().toLowerCase();
+  const isAdmin = ADMIN_KEYWORDS.some(k => bodyLow.startsWith(k) || bodyLow.includes(k));
+  if (isAdmin) {
+    console.log(`📋 פקודת מנהל: ${message.body}`);
+    await handleJulietCommand(message);
+  }
+});
+
+// ── לוגיקה ראשית — הודעות נכנסות מלקוחות ──────────────────
 client.on('message', async (message) => {
   const from = message.from;
 
@@ -512,17 +529,8 @@ client.on('message', async (message) => {
   if (from.includes('broadcast')) return;
   if (message.isStatus) return;
 
-  // פקודות ג'וליאט — כשהיא שולחת לעצמה (fromMe)
-  // היא מזוהה לפי fromMe=true + הודעת ניהול
-  if (message.fromMe) {
-    const adminKeywords = ['פנויים','תורים','יומן','פנוי','נקה','אישרתי','ביטלתי','לקוחות','crm','סטטיסטיקה','עזרה','help'];
-    const bodyLow = (message.body || '').trim().toLowerCase();
-    const isAdmin = adminKeywords.some(k => bodyLow.startsWith(k) || bodyLow.includes(k));
-    if (isAdmin) {
-      await handleJulietCommand(message);
-    }
-    return; // תמיד התעלם מהודעות של עצמה מלבד פקודות
-  }
+  // התעלם מהודעות שלך (מטופל ב-message_create)
+  if (message.fromMe) return;
 
   const body = message.body.trim();
   const bodyLower = body.toLowerCase();
