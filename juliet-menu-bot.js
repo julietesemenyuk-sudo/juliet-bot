@@ -349,7 +349,7 @@ function getNextDays() {
 const GREETINGS = ['היי', 'הי', 'שלום', 'בוקר טוב', 'ערב טוב', 'תפריט', 'menu', 'התחל', 'start', 'hello', 'hi', '0'];
 
 // ── מספר ג'וליאט ────────────────────────────────────────────
-const JULIET_NUMBER = '972512973311@c.us';
+const JULIET_NUMBER = '972586210365@c.us';
 
 // ── פקודות ג'וליאט לאישור/ביטול תורים ───────────────────────
 async function handleJulietCommand(message) {
