@@ -122,7 +122,11 @@ const client = new Client({
     headless: true,
     executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
     args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
-  }
+  },
+  webVersionCache: { type: 'none' },
+  // אל תצפה בסטורי ואל תסמן כנקרא
+  markOnlineOnConnect: false,
+  restartOnAuthFail: true
 });
 
 // ── State ──────────────────────────────────────────────────
@@ -935,6 +939,18 @@ client.on('ready', () => {
   setTimeout(scanPastMessages, 5000);
   // הפעל תזכורות תורים
   startReminderJob();
+
+  // מנע צפייה אוטומטית בסטורי
+  try {
+    client.pupPage.evaluate(() => {
+      window.WAPI && window.WAPI.unsubscribePresence && window.WAPI.unsubscribePresence();
+    }).catch(() => {});
+  } catch(e) {}
+});
+
+// התעלם לחלוטין מאירועי סטורי
+client.on('message_create', (msg) => {
+  if (msg.from === 'status@broadcast' || msg.isStatus || (msg.from && msg.from.includes('broadcast'))) return;
 });
 
 client.on('auth_failure', () => {
