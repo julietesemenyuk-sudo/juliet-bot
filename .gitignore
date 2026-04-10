@@ -1,0 +1,28 @@
+# Secrets
+.env
+
+# WhatsApp auth sessions
+.wwebjs_auth/
+.wwebjs_cache/
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Netlify
+.netlify
+
+# Large media files
+*.mp4
+juliet.png
+juliet.png.png
+juliet.png1.png
+juliet-logo.png
+
+# Logs & temp
+bot-log.txt
+tunnel.log
+tunnel-url.txt
+
+# Backups
+backups/
