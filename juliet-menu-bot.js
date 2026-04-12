@@ -162,6 +162,11 @@ function getAvailableSlots() {
 
 // ── CRM ─────────────────────────────────────────────────────
 const CRM_FILE = path.join(DATA_DIR, 'customers.json');
+const CRM_FILE_BUNDLED = path.join(__dirname, 'customers.json');
+// על Railway — העתק את customers.json מהריפו אם /data ריק
+if (IS_RAILWAY && !fs.existsSync(CRM_FILE) && fs.existsSync(CRM_FILE_BUNDLED)) {
+  try { fs.copyFileSync(CRM_FILE_BUNDLED, CRM_FILE); console.log('📋 customers.json הועתק ל-/data'); } catch(e) {}
+}
 
 function loadCRM() {
   if (!fs.existsSync(CRM_FILE)) fs.writeFileSync(CRM_FILE, '{}');
