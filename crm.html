@@ -156,21 +156,49 @@
   .form-btn-danger{background:rgba(255,60,60,.1);border-color:rgba(255,60,60,.5);color:#ff6060}
   .form-btn-danger:hover{background:rgba(255,60,60,.22)}
 
-  /* רספונסיבי */
+  /* ── רספונסיבי נייד ── */
   @media(max-width:600px){
-    body{padding:10px 6px}
-    h1{font-size:20px}
+    body{padding:8px 4px}
+    h1{font-size:18px;letter-spacing:.05em}
+    .sub{font-size:11px;margin-bottom:14px}
+
+    /* טאבים — גלילה אופקית */
+    .tabs{flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;gap:6px;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+    .tabs::-webkit-scrollbar{display:none}
+    .tab{padding:8px 14px;font-size:12px;white-space:nowrap;flex-shrink:0}
+
+    /* סטטיסטיקות — 2 עמודות */
+    .stats{grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px}
+    .stat{padding:12px 8px}
+    .stat-n{font-size:24px}
+    .stat-l{font-size:10px}
+
+    /* toolbar — שורה שנייה */
+    .toolbar{flex-wrap:wrap;gap:6px}
+    .search{font-size:13px;padding:10px 12px;order:-1;width:100%}
+    .refresh{padding:10px 14px;font-size:12px;min-height:42px}
+
+    /* טבלה — גלילה אופקית, עמודות מינימום */
+    #crm-table{font-size:12px}
+    .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:8px}
+    th,td{padding:10px 10px;white-space:nowrap}
+
+    /* הסתר עמודות פחות חשובות בנייד */
+    .col-hide-mobile{display:none}
+
+    /* כפתור + */
+    .fab{bottom:20px;left:12px;width:54px;height:54px;font-size:26px}
+
+    /* מודאל — מלא מסך */
+    .modal{width:96%;max-height:92vh}
+    .modal2{width:96%;padding:16px}
+
+    /* יומן */
     .cal-grid{gap:2px}
-    .cal-day{min-height:52px;padding:3px 2px}
+    .cal-day{min-height:48px;padding:3px 2px}
     .cal-day-num{font-size:11px}
     .cal-appt{font-size:9px;padding:1px 3px}
-    .stats{grid-template-columns:repeat(3,1fr);gap:6px}
-    .stat{padding:10px 5px}
-    .stat-n{font-size:20px}
-    .stat-l{font-size:9px}
-    .tabs{gap:4px}
-    .tab{padding:7px 12px;font-size:12px}
-    .fab{bottom:20px;left:16px;width:52px;height:52px;font-size:24px}
+    .cal-title{font-size:16px;min-width:140px}
   }
 
   /* ── מודאל תור / הערה ── */
@@ -254,14 +282,16 @@
   </div>
   <div class="count" id="count"></div>
   <br/>
+  <div class="tbl-wrap">
   <table id="crm-table">
     <thead>
       <tr>
-        <th>שם</th><th>טלפון</th><th>סוג</th><th>שירות / עניין</th><th>תור / סטטוס</th><th>ביקורים</th><th>פעילות אחרונה</th>
+        <th>שם</th><th>טלפון</th><th class="col-hide-mobile">סוג</th><th class="col-hide-mobile">שירות / עניין</th><th>תור / סטטוס</th><th class="col-hide-mobile">ביקורים</th><th>פעילות אחרונה</th>
       </tr>
     </thead>
     <tbody id="tbody"></tbody>
   </table>
+  </div>
 </div>
 
 <!-- תצוגת יומן -->
@@ -663,10 +693,10 @@ function renderRows(rows) {
     return `<tr class="clickable" onclick="openChat('${c.phone}')">
       <td><strong>${c.name||'—'}</strong>${isNew?' <span class="badge badge-new">חדשה</span>':''}</td>
       <td><span class="phone">${c.phone||'—'}</span></td>
-      <td>${typeBadge}</td>
-      <td>${serviceCell}</td>
+      <td class="col-hide-mobile">${typeBadge}</td>
+      <td class="col-hide-mobile">${serviceCell}</td>
       <td>${statusCell}</td>
-      <td><span class="visits">${(c.visits||[]).length}</span></td>
+      <td class="col-hide-mobile"><span class="visits">${(c.visits||[]).length}</span></td>
       <td><span class="date">${formatDate(c.lastSeen)}</span></td>
     </tr>`;
   }).join('');
