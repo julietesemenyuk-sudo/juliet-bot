@@ -254,6 +254,26 @@ http.createServer((req, res) => {
   const url = new URL(req.url, 'http://localhost');
 
   // דף QR לסריקה
+  // ── Reset session ─────────────────────────────────────────
+  if (url.pathname === '/reset-session') {
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    res.end('<html><body style="background:#000;color:#c8a84b;font-family:Arial;display:flex;align-items:center;justify-content:center;height:100vh"><h2>♻️ מנקה סשן... הבוט יופעל מחדש בעוד 5 שניות</h2></body></html>');
+    console.log('🔄 מאפס סשן WhatsApp לפי בקשה...');
+    setTimeout(async () => {
+      try {
+        await client.logout();
+      } catch(e) {}
+      try {
+        await client.destroy();
+      } catch(e) {}
+      // מחק תיקיית auth
+      const authPath = IS_RAILWAY ? '/data/.wwebjs_auth' : path.join(__dirname, '.wwebjs_auth');
+      try { fs.rmSync(authPath, { recursive: true, force: true }); console.log('✅ סשן נמחק'); } catch(e) {}
+      process.exit(0); // Railway יפעיל מחדש אוטומטית
+    }, 1000);
+    return;
+  }
+
   if (url.pathname === '/qr') {
     if (currentQR) {
       const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(currentQR);
@@ -262,11 +282,14 @@ http.createServer((req, res) => {
         <h2 style="color:#c8a84b;font-family:Arial">💎 סרקי עם WhatsApp</h2>
         <img src="${qrUrl}" style="width:300px;height:300px;border:4px solid #c8a84b;border-radius:12px"/>
         <p style="color:#888;font-family:Arial;margin-top:16px">הגדרות → מכשירים מקושרים → קשרי מכשיר</p>
-        <script>setTimeout(()=>location.reload(),30000)</script>
+        <script>setTimeout(()=>location.reload(),25000)</script>
       </body></html>`);
     } else {
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-      res.end('<html><body style="background:#000;color:#c8a84b;font-family:Arial;display:flex;align-items:center;justify-content:center;height:100vh"><h2>✅ הבוט כבר מחובר! אין צורך ב-QR</h2></body></html>');
+      res.end(`<html><body style="background:#000;color:#c8a84b;font-family:Arial;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:20px">
+        <h2>✅ הבוט כבר מחובר! אין צורך ב-QR</h2>
+        <a href="/reset-session" style="color:#888;font-size:14px;font-family:Arial">לא עובד? לחצי כאן לאיפוס חיבור</a>
+      </body></html>`);
     }
     return;
   }
