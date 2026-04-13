@@ -59,6 +59,21 @@
         "from": "customer",
         "text": "או גם החלקה",
         "time": "2026-04-09T11:49:41.925Z"
+      },
+      {
+        "from": "customer",
+        "text": "כן מצויין והחלקה מתי נעשה",
+        "time": "2026-04-10T14:04:08.253Z"
+      },
+      {
+        "from": "customer",
+        "text": "את זמינה אני אתקשר?",
+        "time": "2026-04-10T14:04:11.414Z"
+      },
+      {
+        "from": "customer",
+        "text": "אני והודעות זה בעיה",
+        "time": "2026-04-10T14:04:16.439Z"
       }
     ],
     "name": "לזה",
@@ -171,12 +186,21 @@
         "source": "lee",
         "status": "scheduled",
         "notes": "0546838349"
+      },
+      {
+        "date": "2026-04-23T10:00:00.000Z",
+        "service": "החלקת שורש",
+        "source": "lee_excel",
+        "status": "scheduled",
+        "price": 850
       }
     ],
     "source": "lee",
     "businessType": "beauty",
     "lastSeen": "2026-04-10T09:47:46.170Z",
-    "lastService": "גוונים"
+    "lastService": "החלקת שורש",
+    "pendingAppointment": "2026-04-23T10:00:00.000Z",
+    "lastPrice": 850
   },
   "0546536311": {
     "phone": "0546536311",
@@ -352,12 +376,21 @@
         "source": "lee",
         "status": "scheduled",
         "notes": ""
+      },
+      {
+        "date": "2026-04-24T06:00:00.000Z",
+        "service": "החלקת שורש",
+        "source": "lee_excel",
+        "status": "scheduled",
+        "price": 850
       }
     ],
     "source": "lee",
     "businessType": "beauty",
     "lastSeen": "2026-04-10T10:00:58.105Z",
-    "lastService": "החלקת שורש"
+    "lastService": "החלקת שורש",
+    "pendingAppointment": "2026-04-24T06:00:00.000Z",
+    "lastPrice": 850
   },
   "0544712163": {
     "phone": "0544712163",
@@ -443,8 +476,20 @@
         "from": "customer",
         "text": "היי יוליה,\nאני רוצה לתאם איתך החלקה לאחר חצי שנה ..יש לך תור לשבןע הבא בצהריים?",
         "time": "2026-04-10T13:21:50.026Z"
+      },
+      {
+        "from": "customer",
+        "text": "יש לך ב 15:00?",
+        "time": "2026-04-10T14:23:16.721Z"
+      },
+      {
+        "from": "customer",
+        "text": "4",
+        "time": "2026-04-10T14:23:31.228Z"
       }
-    ]
+    ],
+    "name": "יש לך ב 15:00?",
+    "lastSeen": "2026-04-10T14:23:16.729Z"
   },
   "2620030742723@lid": {
     "phone": "2620030742723@lid",
@@ -479,5 +524,211 @@
     ],
     "source": "crm",
     "lastSeen": "2026-04-10T13:30:28.174Z"
+  },
+  "199703278915724@lid": {
+    "phone": "199703278915724@lid",
+    "firstContact": "2026-04-10T14:16:21.946Z",
+    "visits": [],
+    "chatLog": [
+      {
+        "from": "customer",
+        "text": "תגידי לאמילי להתארגן אני אבוא עוד חצי שעה בערך לאסוף אותה להורים שלי",
+        "time": "2026-04-10T14:16:21.946Z"
+      },
+      {
+        "from": "customer",
+        "text": "אמילי מוכנה ?",
+        "time": "2026-04-10T14:45:00.968Z"
+      }
+    ],
+    "name": "אמילי מוכנה ?",
+    "lastSeen": "2026-04-10T14:45:00.981Z"
+  },
+  "lee_יובל_": {
+    "phone": "lee_יובל_",
+    "name": "יובל .",
+    "firstContact": "2026-04-15T08:00:00.000Z",
+    "visits": [
+      {
+        "date": "2026-04-15T08:00:00.000Z",
+        "service": "החלקת שורש",
+        "source": "lee_excel",
+        "status": "scheduled",
+        "price": 850
+      }
+    ],
+    "source": "lee",
+    "businessType": "beauty",
+    "needsPhone": true,
+    "lastService": "החלקת שורש",
+    "pendingAppointment": "2026-04-15T08:00:00.000Z",
+    "lastPrice": 850
+  },
+  "lee_עינב_וולפגור": {
+    "phone": "lee_עינב_וולפגור",
+    "name": "עינב וולפגור",
+    "firstContact": "2026-04-17T06:30:00.000Z",
+    "visits": [
+      {
+        "date": "2026-04-17T06:30:00.000Z",
+        "service": "החלקת שורש",
+        "source": "lee_excel",
+        "status": "scheduled",
+        "price": 850
+      }
+    ],
+    "source": "lee",
+    "businessType": "beauty",
+    "needsPhone": true,
+    "lastService": "החלקת שורש",
+    "pendingAppointment": "2026-04-17T06:30:00.000Z",
+    "lastPrice": 850
+  },
+  "lee_עדן_ירושלמי": {
+    "phone": "lee_עדן_ירושלמי",
+    "name": "עדן ירושלמי",
+    "firstContact": "2026-04-19T10:00:00.000Z",
+    "visits": [
+      {
+        "date": "2026-04-19T10:00:00.000Z",
+        "service": "החלקת שורש",
+        "source": "lee_excel",
+        "status": "scheduled",
+        "price": 850
+      }
+    ],
+    "source": "lee",
+    "businessType": "beauty",
+    "needsPhone": true,
+    "lastService": "החלקת שורש",
+    "pendingAppointment": "2026-04-19T10:00:00.000Z",
+    "lastPrice": 850
+  },
+  "lee_הדר_שפירא": {
+    "phone": "lee_הדר_שפירא",
+    "name": "הדר שפירא",
+    "firstContact": "2026-04-14T12:30:00.000Z",
+    "visits": [
+      {
+        "date": "2026-04-14T12:30:00.000Z",
+        "service": "החלקה מלאה",
+        "source": "lee_excel",
+        "status": "scheduled",
+        "price": 1000
+      }
+    ],
+    "source": "lee",
+    "businessType": "beauty",
+    "needsPhone": true,
+    "lastService": "החלקה מלאה",
+    "pendingAppointment": "2026-04-14T12:30:00.000Z",
+    "lastPrice": 1000
+  },
+  "lee_שולי_כהן": {
+    "phone": "lee_שולי_כהן",
+    "name": "שולי כהן",
+    "firstContact": "2026-04-24T09:00:00.000Z",
+    "visits": [
+      {
+        "date": "2026-04-24T09:00:00.000Z",
+        "service": "החלקת שורש",
+        "source": "lee_excel",
+        "status": "scheduled",
+        "price": 850
+      }
+    ],
+    "source": "lee",
+    "businessType": "beauty",
+    "needsPhone": true,
+    "lastService": "החלקת שורש",
+    "pendingAppointment": "2026-04-24T09:00:00.000Z",
+    "lastPrice": 850
+  },
+  "lee_לורין_אחות_קארין": {
+    "phone": "lee_לורין_אחות_קארין",
+    "name": "לורין אחות קארין",
+    "firstContact": "2026-04-14T08:30:00.000Z",
+    "visits": [
+      {
+        "date": "2026-04-14T08:30:00.000Z",
+        "service": "הרמת תוספות קרטין",
+        "source": "lee_excel",
+        "status": "scheduled",
+        "price": 9
+      },
+      {
+        "date": "2026-04-15T12:00:00.000Z",
+        "service": "החלקת שורש",
+        "source": "lee_excel",
+        "status": "scheduled",
+        "price": 850
+      }
+    ],
+    "source": "lee",
+    "businessType": "beauty",
+    "needsPhone": true,
+    "lastService": "החלקת שורש",
+    "pendingAppointment": "2026-04-15T12:00:00.000Z",
+    "lastPrice": 850
+  },
+  "lee_חדווה_חימי": {
+    "phone": "lee_חדווה_חימי",
+    "name": "חדווה חימי",
+    "firstContact": "2026-04-13T11:00:00.000Z",
+    "visits": [
+      {
+        "date": "2026-04-13T11:00:00.000Z",
+        "service": "החלקת שורש",
+        "source": "lee_excel",
+        "status": "scheduled",
+        "price": 850
+      }
+    ],
+    "source": "lee",
+    "businessType": "beauty",
+    "needsPhone": true,
+    "lastService": "החלקת שורש",
+    "pendingAppointment": "2026-04-13T11:00:00.000Z",
+    "lastPrice": 850
+  },
+  "lee_מירב_ראשלצ": {
+    "phone": "lee_מירב_ראשלצ",
+    "name": "מירב ראשלצ",
+    "firstContact": "2026-04-16T10:00:00.000Z",
+    "visits": [
+      {
+        "date": "2026-04-16T10:00:00.000Z",
+        "service": "תיקון",
+        "source": "lee_excel",
+        "status": "scheduled",
+        "price": 1
+      }
+    ],
+    "source": "lee",
+    "businessType": "beauty",
+    "needsPhone": true,
+    "lastService": "תיקון",
+    "pendingAppointment": "2026-04-16T10:00:00.000Z",
+    "lastPrice": 1
+  },
+  "lee_נינה_מילוי": {
+    "phone": "lee_נינה_מילוי",
+    "name": "נינה מילוי",
+    "firstContact": "2026-04-17T09:30:00.000Z",
+    "visits": [
+      {
+        "date": "2026-04-17T09:30:00.000Z",
+        "service": "החלקת שורש",
+        "source": "lee_excel",
+        "status": "scheduled",
+        "price": 850
+      }
+    ],
+    "source": "lee",
+    "businessType": "beauty",
+    "needsPhone": true,
+    "lastService": "החלקת שורש",
+    "pendingAppointment": "2026-04-17T09:30:00.000Z",
+    "lastPrice": 850
   }
 }
