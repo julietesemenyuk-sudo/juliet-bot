@@ -590,6 +590,36 @@ http.createServer((req, res) => {
     return;
   }
 
+  // ── גיבוי ידני ל-GitHub ───────────────────────────────────────
+  if (url.pathname === '/backup-now' && req.method === 'POST') {
+    const pass = url.searchParams.get('pass');
+    if (pass !== CRM_PASS) { res.writeHead(401); res.end('Unauthorized'); return; }
+    res.writeHead(200, {'Content-Type':'application/json'});
+    const crm = loadCRM();
+    const count = Object.keys(crm).length;
+    backupToGithub().then(() => {
+      res.end(JSON.stringify({ ok: true, count, lastBackup: lastGithubBackupDate, message: `גיבוי הופעל — ${count} לקוחות` }));
+    }).catch(e => {
+      res.end(JSON.stringify({ ok: false, error: e.message }));
+    });
+    return;
+  }
+
+  // ── סטטוס גיבוי ──────────────────────────────────────────────
+  if (url.pathname === '/backup-status') {
+    const pass = url.searchParams.get('pass');
+    if (pass !== CRM_PASS) { res.writeHead(401); res.end('Unauthorized'); return; }
+    const crm = loadCRM();
+    const hasToken = !!process.env.GITHUB_TOKEN;
+    res.writeHead(200, {'Content-Type':'application/json'});
+    res.end(JSON.stringify({
+      githubToken: hasToken,
+      lastBackup: lastGithubBackupDate || 'לא גובה עדיין',
+      customers: Object.keys(crm).length
+    }));
+    return;
+  }
+
   // ── ניקוי תורים שגויים מ-Lee ──────────────────────────────────
   if (url.pathname === '/clear-lee-data' && req.method === 'POST') {
     const pass = url.searchParams.get('pass');
@@ -2876,7 +2906,7 @@ function startHolidayGreetings() {
   }, 60 * 60 * 1000); // בדיקה כל שעה
 }
 
-// ── גיבוי יומי ──────────────────────────────────────────────
+// ── גיבוי יומי (לוקאלי) ────────────────────────────────────
 function startDailyBackup() {
   const BACKUP_DIR = path.join(__dirname, 'backups');
   if (!fs.existsSync(BACKUP_DIR)) fs.mkdirSync(BACKUP_DIR);
@@ -2896,9 +2926,101 @@ function startDailyBackup() {
           fs.unlinkSync(path.join(BACKUP_DIR, f))
         );
       }
-      console.log(`💾 גיבוי יומי נשמר: ${dest}`);
-    } catch(e) { console.log('⚠️ שגיאה בגיבוי:', e.message); }
+      console.log(`💾 גיבוי יומי לוקאלי נשמר: ${dest}`);
+    } catch(e) { console.log('⚠️ שגיאה בגיבוי לוקאלי:', e.message); }
   }, 60 * 60 * 1000);
+}
+
+// ── גיבוי אוטומטי ל-GitHub ───────────────────────────────────
+// נדרש: GITHUB_TOKEN ו-GITHUB_REPO ב-Railway Environment Variables
+// GITHUB_TOKEN = Personal Access Token עם הרשאת repo
+// GITHUB_REPO  = julietesemenyuk-sudo/juliet-bot
+let lastGithubBackupDate = '';
+
+async function backupToGithub() {
+  const token = process.env.GITHUB_TOKEN;
+  const repo  = process.env.GITHUB_REPO || 'julietesemenyuk-sudo/juliet-bot';
+  if (!token) return; // אם אין token — דלג בשקט
+
+  try {
+    const content = fs.readFileSync(CRM_FILE, 'utf8');
+    const encoded = Buffer.from(content).toString('base64');
+    const date    = new Date().toISOString().split('T')[0];
+
+    // קבל את ה-SHA הנוכחי של הקובץ (חובה ל-update)
+    const getRes = await new Promise((resolve, reject) => {
+      const opts = {
+        hostname: 'api.github.com',
+        path: `/repos/${repo}/contents/customers.json`,
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'User-Agent': 'juliet-bot',
+          'Accept': 'application/vnd.github+json'
+        }
+      };
+      const req = https.request(opts, res => {
+        let data = '';
+        res.on('data', d => data += d);
+        res.on('end', () => resolve({ status: res.statusCode, body: data }));
+      });
+      req.on('error', reject);
+      req.end();
+    });
+
+    let sha = null;
+    if (getRes.status === 200) {
+      sha = JSON.parse(getRes.body).sha;
+    }
+
+    // העלה גרסה מעודכנת
+    const payload = JSON.stringify({
+      message: `💾 Auto-backup customers.json ${date} (${Object.keys(JSON.parse(content)).length} customers)`,
+      content: encoded,
+      ...(sha ? { sha } : {})
+    });
+
+    const putRes = await new Promise((resolve, reject) => {
+      const opts = {
+        hostname: 'api.github.com',
+        path: `/repos/${repo}/contents/customers.json`,
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'User-Agent': 'juliet-bot',
+          'Accept': 'application/vnd.github+json',
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(payload)
+        }
+      };
+      const req = https.request(opts, res => {
+        let data = '';
+        res.on('data', d => data += d);
+        res.on('end', () => resolve({ status: res.statusCode, body: data }));
+      });
+      req.on('error', reject);
+      req.write(payload);
+      req.end();
+    });
+
+    if (putRes.status === 200 || putRes.status === 201) {
+      console.log(`✅ גיבוי GitHub הצליח! (${date})`);
+      lastGithubBackupDate = date;
+    } else {
+      console.log(`⚠️ גיבוי GitHub נכשל: ${putRes.status} — ${putRes.body.slice(0,200)}`);
+    }
+  } catch(e) {
+    console.log('⚠️ שגיאה בגיבוי GitHub:', e.message);
+  }
+}
+
+function startGithubBackupJob() {
+  setInterval(async () => {
+    if (getIsraelHour() !== 4) return; // כל לילה בשעה 4:00
+    const today = new Date().toISOString().split('T')[0];
+    if (lastGithubBackupDate === today) return; // כבר גובה היום
+    await backupToGithub();
+  }, 60 * 60 * 1000); // בדיקה כל שעה
 }
 
 // ── עזר: קריאת Lee API עם auth headers שונים ────────────────
@@ -3614,8 +3736,12 @@ client.on('ready', () => {
   startWeeklySlotReminder();
   // ברכות חגים אוטומטיות
   startHolidayGreetings();
-  // גיבוי יומי
+  // גיבוי יומי לוקאלי
   startDailyBackup();
+  // גיבוי אוטומטי ל-GitHub כל לילה
+  startGithubBackupJob();
+  // גיבוי ראשוני ל-GitHub עם עלייה (אחרי 10 שניות)
+  setTimeout(backupToGithub, 10000);
   // דו"ח בוקר יומי
   startDailyMorningReport();
   // סנכרון lee כל 2 שעות

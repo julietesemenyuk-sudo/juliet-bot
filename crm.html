@@ -454,7 +454,8 @@
   <div class="toolbar">
     <input class="search" id="search" placeholder="🔍 חיפוש לפי שם, טלפון או שירות..." oninput="filterTable()"/>
     <button class="refresh" onclick="loadData()">↻</button>
-    <button class="refresh" onclick="exportCSV()" style="background:rgba(90,220,100,.08);border-color:rgba(90,220,100,.3);color:#5adf8a">📥</button>
+    <button class="refresh" onclick="exportCSV()" style="background:rgba(90,220,100,.08);border-color:rgba(90,220,100,.3);color:#5adf8a" title="ייצוא CSV">📥</button>
+    <button class="refresh" onclick="backupNow()" id="backup-btn" style="background:rgba(167,139,250,.1);border-color:rgba(167,139,250,.4);color:#a78bfa" title="גיבוי ל-GitHub עכשיו">☁️</button>
     <button class="refresh" onclick="openApptModal()" style="background:rgba(200,168,75,.15);border-color:#c8a84b;color:#c8a84b">➕ תור</button>
   </div>
   <!-- פילטר מתקדם -->
@@ -1636,6 +1637,36 @@ async function submitAppointment() {
       alert(`✅ תור נשמר!\n${name} — ${date} ${time}`);
     }
   } catch(e) { alert('שגיאה בשמירה'); }
+}
+
+// ── גיבוי ל-GitHub ──────────────────────────────────────────
+async function backupNow() {
+  const btn = document.getElementById('backup-btn');
+  btn.textContent = '⏳';
+  btn.disabled = true;
+  try {
+    const res = await fetch('/backup-now?pass=' + getPass(), { method: 'POST' });
+    const data = await res.json();
+    if (data.ok) {
+      btn.textContent = '✅';
+      btn.style.color = '#5adf8a';
+      btn.style.borderColor = 'rgba(90,220,100,.5)';
+      setTimeout(() => {
+        btn.textContent = '☁️';
+        btn.style.color = '#a78bfa';
+        btn.style.borderColor = 'rgba(167,139,250,.4)';
+        btn.disabled = false;
+      }, 3000);
+      alert(`✅ גיבוי הצליח!\n${data.message}\n\nהנתונים שמורים ב-GitHub 🔐`);
+    } else {
+      btn.textContent = '⚠️';
+      btn.disabled = false;
+      alert('⚠️ גיבוי נכשל\n\nוודאי שהגדרת GITHUB_TOKEN ב-Railway\n(ראי הוראות למטה)');
+    }
+  } catch(e) {
+    btn.textContent = '☁️';
+    btn.disabled = false;
+  }
 }
 
 // ── ייצוא CSV ───────────────────────────────────────────────
