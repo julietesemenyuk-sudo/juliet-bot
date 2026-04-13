@@ -1552,6 +1552,28 @@ async function saveNotes() {
   } catch(e) { alert('שגיאה בשמירה'); }
 }
 
+// ── פתיחת/סגירת מודאל — inline style בלי CSS ────────────────
+function showModal(id) {
+  const el = document.getElementById(id);
+  el.style.cssText = [
+    'display:flex',
+    'position:fixed',
+    'top:0','left:0','right:0','bottom:0',
+    'width:100vw','height:100vh',
+    'background:rgba(0,0,0,0.82)',
+    'z-index:99999',
+    'align-items:center',
+    'justify-content:center',
+    'overflow-y:auto',
+    '-webkit-overflow-scrolling:touch'
+  ].join(';');
+  document.body.style.overflow = 'hidden';
+}
+function hideModal(id) {
+  document.getElementById(id).style.cssText = 'display:none';
+  document.body.style.overflow = '';
+}
+
 // ── תור חדש ─────────────────────────────────────────────────
 function openApptModal(prefillDate, prefillTime) {
   const today = new Date().toISOString().split('T')[0];
@@ -1560,15 +1582,15 @@ function openApptModal(prefillDate, prefillTime) {
   document.getElementById('appt-date').value = prefillDate || today;
   document.getElementById('appt-time').value = prefillTime || '10:00';
   document.getElementById('appt-service').value = '';
-  document.getElementById('appt-modal-bg').classList.add('open');
+  if (document.getElementById('appt-notes')) document.getElementById('appt-notes').value = '';
+  showModal('appt-modal-bg');
 }
 function openApptModalForDay(key, time) {
-  // key = "YYYY-MM-DD"
   openApptModal(key, time || '10:00');
 }
 function closeApptModal(e) {
   if (e && e.target !== document.getElementById('appt-modal-bg')) return;
-  document.getElementById('appt-modal-bg').classList.remove('open');
+  hideModal('appt-modal-bg');
 }
 
 // ── עריכת תור ────────────────────────────────────────────────
@@ -1594,11 +1616,11 @@ function openEditApptModal(phone, visitIndex) {
   }
   if (!matched) sel.value = '';
   document.getElementById('edit-appt-notes').value = v.notes || '';
-  document.getElementById('edit-appt-modal-bg').classList.add('open');
+  showModal('edit-appt-modal-bg');
 }
 function closeEditApptModal(e) {
   if (e && e.target !== document.getElementById('edit-appt-modal-bg')) return;
-  document.getElementById('edit-appt-modal-bg').classList.remove('open');
+  hideModal('edit-appt-modal-bg');
 }
 async function submitEditAppointment() {
   const phone = document.getElementById('edit-appt-phone-hidden').value;
