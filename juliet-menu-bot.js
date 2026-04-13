@@ -216,6 +216,39 @@ function sendToGoogleSheets(data) {
   } catch(e) { console.log('❌ שיטס שגיאה:', e.message); }
 }
 
+// ── הודעה לג'ולייט עם הקשר לקוחה + הצעות פעולה ──────────────
+async function notifyJulietWithContext(from, name, customerMsg, aiReply, crm) {
+  const cleanPhone = from.replace('@c.us','').replace('972','0');
+  const cust = crm[cleanPhone] || {};
+  const visits = (cust.visits || []).length;
+  const lastService = cust.lastService || '';
+  const isNew = visits === 0 && !lastService;
+  const chatLog = (cust.chatLog || []).slice(-3).map(m => `${m.from === 'customer' ? '👤' : '🤖'} ${m.text}`).join('\n');
+
+  const contextLine = isNew
+    ? `🆕 *לקוחה חדשה*`
+    : `🔄 ${visits} ביקורים${lastService ? ` | אחרון: ${lastService}` : ''}`;
+
+  try {
+    await client.sendMessage(JULIET_NUMBER,
+      `💬 *הודעה מ${name || cleanPhone}*\n` +
+      `${contextLine}\n` +
+      `─────────────────\n` +
+      `👤 "${customerMsg}"\n` +
+      `─────────────────\n` +
+      `🤖 *הבוט ענה:*\n"${aiReply}"\n\n` +
+      `📌 *פקודות מהירות:*\n` +
+      `▪️ \`שלחי ${cleanPhone} [הודעה]\` — שלחי הודעה ישירות\n` +
+      `▪️ \`תאמי ${cleanPhone}\` — התחילי תהליך קביעת תור\n` +
+      `▪️ \`מחיר ${cleanPhone} [סכום]\` — שלחי פיץ' מחיר\n` +
+      `▪️ \`השתק ${cleanPhone}\` — השתיקי את הבוט 3 שעות`
+    );
+  } catch(e) {}
+}
+
+// ── שליחת הודעה ישירות ללקוחה על-פי פקודת ג'ולייט ───────────
+// פורמט: "שלחי 0521234567 הטקסט כאן"
+// פורמט: "תאמי 0521234567" — מתחיל תהליך קביעת תור
 // ── Follow-up אוטומטי ל-Leads של AI ─────────────────────────
 const aiFollowups = {};
 
@@ -1326,6 +1359,54 @@ async function handleJulietCommand(message) {
     return;
   }
 
+  // ── שלחי הודעה ישירות ללקוחה ─────────────────────────────────
+  // פורמט: "שלחי 0521234567 הטקסט כאן"
+  const sendMatch = body.match(/^שלחי\s+(05\d{8})\s+([\s\S]+)/);
+  if (sendMatch) {
+    const phone = sendMatch[1];
+    const text = sendMatch[2].trim();
+    const chatId = '972' + phone.replace(/^0/, '') + '@c.us';
+    try {
+      await client.sendMessage(chatId, text);
+      await message.reply(`✅ נשלח ל-${phone}:\n"${text.slice(0,80)}${text.length>80?'...':''}"`);
+    } catch(e) {
+      await message.reply(`❌ שגיאה: ${e.message}`);
+    }
+    return;
+  }
+
+  // ── תאמי תור עם לקוחה ─────────────────────────────────────
+  // פורמט: "תאמי 0521234567"
+  const bookMatch = body.match(/^תאמי\s+(05\d{8})/);
+  if (bookMatch) {
+    const phone = bookMatch[1];
+    const chatId = '972' + phone.replace(/^0/, '') + '@c.us';
+    const crm = loadCRM();
+    const custName = (crm[phone] && crm[phone].name) || '';
+    const available = getAvailableSlots();
+    if (!available.length) {
+      await message.reply(`⚠️ אין תורים פנויים — הוסיפי קודם עם:\n\`\`\`פנויים\nשישי 28/3 10:00\`\`\``);
+      return;
+    }
+    const slotsText = available.slice(0,5).map((s,i) => `${i+1}. ${s.label}`).join('\n');
+    try {
+      await client.sendMessage(chatId,
+        `היי${custName ? ' ' + custName : ''}! 💎\n\n` +
+        `ג'ולייט רוצה לקבוע לך תור 🙏\n\n` +
+        `📅 *הזמנים הפנויים הקרובים:*\n${slotsText}\n\n` +
+        `כתבי מספר לבחור זמן 😊`
+      );
+      // שמור state לקביעת תור
+      userState[chatId] = userState[chatId] || {};
+      userState[chatId].step = 'booking_slots';
+      userState[chatId].name = custName;
+      await message.reply(`✅ שלחתי ל-${custName || phone} את הזמנים הפנויים 📅`);
+    } catch(e) {
+      await message.reply(`❌ שגיאה: ${e.message}`);
+    }
+    return;
+  }
+
   // ── פקודת מחיר — שליחת פיץ' מלא + מחיר ללקוחה ────────────
   // פורמט: "מחיר 0586210365 1200" או "מחיר 0586210365 1200 החלקה מלאה"
   const priceMatch = body.match(/^מחיר\s+(05\d{8})\s+([\d₪]+)\s*(.*)/);
@@ -1445,8 +1526,14 @@ async function handleJulietCommand(message) {
       `\`השתק 05XXXXXXXX\`\n` +
       `\`בטל השתק 05XXXXXXXX\`\n\n` +
 
+      `💬 *שלחי הודעה ישירות ללקוחה:*\n` +
+      `\`שלחי 05XXXXXXXX הטקסט כאן\`\n\n` +
+
+      `📅 *קבעי תור ללקוחה:*\n` +
+      `\`תאמי 05XXXXXXXX\`\n\n` +
+
       `📋 *CRM מלא:*\n` +
-      `http://localhost:3000/crm?pass=juliet2026`
+      `https://juliet-bot-production.up.railway.app/crm?pass=juliet2026`
     );
     return;
   }
@@ -1463,7 +1550,7 @@ async function handleJulietCommand(message) {
 }
 
 // ── פקודות ג'ולייט — הודעות שהיא שולחת לעצמה ──────────────
-const ADMIN_KEYWORDS = ['פנויים','תורים','יומן','פנוי','נקה','אישרתי','ביטלתי','לקוחות','crm','סטטיסטיקה','עזרה','help','מחיר','שידור','חפשי','חפש','היעדרות','חזרתי','בדיקה','תפריט לקוחה','תצוגה','השתק','בטל השתק'];
+const ADMIN_KEYWORDS = ['פנויים','תורים','יומן','פנוי','נקה','אישרתי','ביטלתי','לקוחות','crm','סטטיסטיקה','עזרה','help','מחיר','שידור','חפשי','חפש','היעדרות','חזרתי','בדיקה','תפריט לקוחה','תצוגה','השתק','בטל השתק','שלחי','תאמי'];
 
 client.on('message_create', async (message) => {
   if (!message.fromMe) return;
@@ -2331,8 +2418,17 @@ client.on('message', async (message) => {
 
     // נסה Claude AI קודם
     const aiReply = await askClaude(body, name, chatHistory);
+    let finalReply = aiReply;
     if (aiReply) {
       await message.reply(aiReply);
+      // שמור תגובת בוט בלוג
+      const crmNow = loadCRM();
+      if (crmNow[cleanPhoneFb]) {
+        crmNow[cleanPhoneFb].chatLog = crmNow[cleanPhoneFb].chatLog || [];
+        crmNow[cleanPhoneFb].chatLog.push({ from: 'bot', text: aiReply, time: new Date().toISOString() });
+        if (crmNow[cleanPhoneFb].chatLog.length > 50) crmNow[cleanPhoneFb].chatLog = crmNow[cleanPhoneFb].chatLog.slice(-50);
+        saveCRM(crmNow);
+      }
       console.log(`🤖 Claude ענה ל-${cleanPhoneFb}`);
     } else {
       // פולבק — שאלת הבהרה לפי תוכן
@@ -2351,17 +2447,13 @@ client.on('message', async (message) => {
       } else {
         clarifyReply = `היי${name ? ' ' + name : ''}! 💎\n\nאפשר לפרט קצת? 😊\n\n1️⃣ שירותי שיער\n2️⃣ שירותי AI לעסק\n3️⃣ שאלה אחרת\n\nכתבי מספר ואני כאן 💎`;
       }
+      finalReply = clarifyReply;
       await message.reply(clarifyReply);
     }
 
-    // עדכון ג'ולייט
+    // עדכון ג'ולייט עם הקשר מלא + אפשרויות פעולה
     try {
-      await client.sendMessage(JULIET_NUMBER,
-        `⚠️ *הבוט לא הבין הודעה*\n\n` +
-        `👤 ${name || 'לקוחה'} — ${cleanPhoneFb}\n` +
-        `💬 כתבה: *"${body}"*\n\n` +
-        `_${aiReply ? '🤖 Claude ענה אוטומטית' : 'שלחתי שאלת הבהרה'} — אם לא עונה, כדאי לחזור אליה ישירות 😊_`
-      );
+      await notifyJulietWithContext(from, name, body, finalReply, loadCRM());
     } catch(e) {}
   }
 });
