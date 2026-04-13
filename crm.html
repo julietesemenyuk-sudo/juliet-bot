@@ -537,6 +537,7 @@ let calMonth = new Date().getMonth();
 
 // ── חגים ישראליים 2026–2027 ──────────────────────────────────
 const HOLIDAYS = {
+  '2026-04-01': 'פסח 🕍',
   '2026-04-02': 'פסח (חוה"מ)',
   '2026-04-03': 'פסח (חוה"מ)',
   '2026-04-04': 'פסח (חוה"מ)',
@@ -544,10 +545,10 @@ const HOLIDAYS = {
   '2026-04-06': 'פסח (חוה"מ)',
   '2026-04-07': 'שביעי של פסח',
   '2026-04-08': 'אחרון של פסח',
-  '2026-04-19': 'יום השואה',
-  '2026-04-29': 'יום הזיכרון',
-  '2026-04-30': 'יום העצמאות 🇮🇱',
-  '2026-05-14': 'ל"ג בעומר',
+  '2026-04-13': 'יום השואה 🕯️',
+  '2026-04-20': 'יום הזיכרון',
+  '2026-04-21': 'יום העצמאות 🇮🇱',
+  '2026-05-04': 'ל"ג בעומר 🔥',
   '2026-05-21': 'שבועות',
   '2026-05-22': 'שבועות',
   '2026-09-10': 'ראש השנה תשפ"ז',
@@ -1044,10 +1045,12 @@ function showDay(key, dayNum) {
   let html = '';
   if (holiday) html += `<div class="day-holiday-item">🕎 ${holiday}</div>`;
 
-  // כפתור הוספת תור ליום זה
-  html += `<div style="margin-bottom:12px">
+  // כפתורי פעולה ליום זה
+  html += `<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
     <button class="form-btn" onclick="openApptModalForDay('${key}')"
-      style="width:auto;padding:8px 20px;font-size:13px">➕ הוסף תור ליום זה</button>
+      style="width:auto;padding:8px 20px;font-size:13px">➕ הוסף תור</button>
+    <button onclick="addReminderForDay('${key}')"
+      style="width:auto;padding:8px 20px;font-size:13px;border-radius:8px;border:1px solid #a78bfa;background:rgba(167,139,250,.12);color:#a78bfa;cursor:pointer;font-weight:600;font-family:inherit">🔔 הוסף תזכורת</button>
   </div>`;
 
   // בנה מפת תורים לפי שעה
@@ -1456,6 +1459,21 @@ function toggleReminderForm() {
     document.getElementById('rem-date').value = today.toISOString().slice(0,10);
     document.getElementById('rem-text').focus();
   }
+}
+
+// פתיחת תזכורת מהיומן עם תאריך מולא אוטומטית
+function addReminderForDay(dateKey) {
+  // עוברים לטאב תזכורות
+  const remBtn = document.querySelector('.tab-reminders');
+  switchTab('reminders', remBtn);
+  // פותחים את הטופס עם התאריך הנבחר
+  setTimeout(() => {
+    document.getElementById('rem-date').value = dateKey;
+    const panel = document.getElementById('reminder-form-panel');
+    if (!panel.classList.contains('open')) panel.classList.add('open');
+    document.getElementById('rem-text').focus();
+    panel.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }, 100);
 }
 
 async function loadReminders() {
