@@ -81,7 +81,7 @@ process.on('unhandledRejection', (reason) => {
 
 // ── Tunnel / URL ציבורי ────────────────────────────────────────
 let publicTunnelUrl = '';
-let leeSyncStatus = { running: false, lastRun: null, added: 0, error: null };
+let leeSyncStatus = { running: false, lastRun: null, added: 0, total: 0, error: null };
 
 // האם רץ על Railway?
 const IS_RAILWAY = !!(process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_PUBLIC_DOMAIN);
@@ -550,11 +550,12 @@ http.createServer((req, res) => {
   if (url.pathname === '/sync-lee' && req.method === 'POST') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ success: true, message: 'sync started' }));
-    leeSyncStatus = { running: true, lastRun: null, added: 0, error: null };
+    leeSyncStatus = { running: true, lastRun: null, added: 0, total: 0, error: null };
     syncLeeCalendar().then(r => {
-      leeSyncStatus = { running: false, lastRun: new Date().toISOString(), added: r || 0, error: null };
+      const res = (r && typeof r === 'object') ? r : { added: r || 0, total: r || 0 };
+      leeSyncStatus = { running: false, lastRun: new Date().toISOString(), added: res.added || 0, total: res.total || 0, error: null };
     }).catch(e => {
-      leeSyncStatus = { running: false, lastRun: new Date().toISOString(), added: 0, error: e.message };
+      leeSyncStatus = { running: false, lastRun: new Date().toISOString(), added: 0, total: 0, error: e.message };
       console.log('sync-lee error:', e.message);
     });
     return;
@@ -1433,8 +1434,15 @@ async function handleJulietCommand(message) {
   if (bodyLow === 'סנכרן lee' || bodyLow === 'רענן lee') {
     await message.reply(`🔄 מסנכרן תורים מ-Lee... אחכה כמה שניות ✨`);
     try {
-      const added = await syncLeeCalendar();
-      await message.reply(`✅ סנכרון Lee הסתיים — נוספו *${added || 0}* תורים חדשים.`);
+      const r = await syncLeeCalendar();
+      const res = (r && typeof r === 'object') ? r : { added: r || 0, total: r || 0 };
+      if (res.added > 0) {
+        await message.reply(`✅ סנכרון Lee הסתיים!\n\n➕ נוספו *${res.added}* תורים חדשים\n📋 סה"כ ב-Lee: *${res.total}* תורים`);
+      } else if (res.total > 0) {
+        await message.reply(`✅ הכל מעודכן!\n\n📋 Lee: *${res.total}* תורים (הכל כבר ב-CRM)\n📅 היומן מציג את כולם 💎`);
+      } else {
+        await message.reply(`⚠️ Lee לא החזיר תורים.\nייתכן שה-API Key לא מאפשר גישה לתורים.\n\nתורים בCRM נשארים כפי שהם.`);
+      }
     } catch(e) {
       await message.reply(`⚠️ שגיאה בסנכרון Lee: ${e.message}`);
     }
@@ -2895,11 +2903,11 @@ async function syncLeeViaAPI(apiKey, businessId) {
 
   if (added > 0) {
     saveCRM(crm);
-    console.log(`✅ lee API sync — נוספו ${added} תורים`);
+    console.log(`✅ lee API sync — נוספו ${added} תורים (Lee החזיר סה"כ ${appointments.length})`);
   } else {
-    console.log(`ℹ️ lee API sync — אין תורים חדשים (${appointments.length} קיימים)`);
+    console.log(`ℹ️ lee API sync — הכל מעודכן (Lee: ${appointments.length} תורים, הכל כבר ב-CRM)`);
   }
-  return added;
+  return { added, total: appointments.length };
 }
 
 // ── סנכרון lee אוטומטי (כל 2 שעות) — דרך API Key ────────────

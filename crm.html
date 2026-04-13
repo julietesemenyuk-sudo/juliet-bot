@@ -1311,11 +1311,13 @@ async function syncLee() {
           if (s.error) {
             btn.textContent = '❌ נכשל — בדקי .env';
           } else if (s.added > 0) {
-            btn.textContent = `✅ נוספו ${s.added} תורים!`;
+            btn.textContent = `✅ נוספו ${s.added} תורים חדשים!`;
+          } else if (s.total > 0) {
+            btn.textContent = `✅ מסונכרן — ${s.total} תורים מ-Lee (הכל עדכני)`;
           } else {
-            btn.textContent = '✅ מעודכן — אין תורים חדשים';
+            btn.textContent = '⚠️ Lee לא החזיר תורים — בדקי API';
           }
-          setTimeout(() => { btn.textContent = '🔄 סנכרן מ-lee.co.il'; btn.disabled = false; }, 3000);
+          setTimeout(() => { btn.textContent = '🔄 סנכרן מ-lee.co.il'; btn.disabled = false; }, 4000);
         } else if (attempts > 20) { // timeout 60 sec
           clearInterval(poll);
           btn.textContent = '⏰ לוקח זמן...';
