@@ -171,6 +171,14 @@ function getAvailableSlots() {
   return loadSlots().filter(s => !s.booked && new Date(s.datetime) > now);
 }
 
+// ── תזכורות אישיות ──────────────────────────────────────────
+const REMINDERS_FILE = IS_RAILWAY ? '/data/reminders.json' : path.join(__dirname, 'reminders.json');
+function loadReminders() {
+  if (!fs.existsSync(REMINDERS_FILE)) return [];
+  try { return JSON.parse(fs.readFileSync(REMINDERS_FILE, 'utf8')); } catch(e) { return []; }
+}
+function saveReminders(data) { fs.writeFileSync(REMINDERS_FILE, JSON.stringify(data, null, 2)); }
+
 // ── CRM ─────────────────────────────────────────────────────
 const CRM_FILE = path.join(DATA_DIR, 'customers.json');
 const CRM_FILE_BUNDLED = path.join(__dirname, 'customers.json');
@@ -608,6 +616,55 @@ http.createServer((req, res) => {
     console.log(`🗑️ נוקו ${cleared} תורים שגויים מ-Lee`);
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ success: true, cleared }));
+    return;
+  }
+
+  // ── שמירת תזכורת אישית ──────────────────────────────────────
+  if (url.pathname === '/save-reminder' && req.method === 'POST') {
+    const pass = url.searchParams.get('pass');
+    if (pass !== CRM_PASS) { res.writeHead(401); res.end('{}'); return; }
+    let body = '';
+    req.on('data', c => { body += c; });
+    req.on('end', () => {
+      try {
+        const d = JSON.parse(body);
+        const reminders = loadReminders();
+        const id = Date.now().toString();
+        reminders.push({ id, text: d.text, datetime: d.datetime, phone: d.phone||'', sent: false, created: new Date().toISOString() });
+        saveReminders(reminders);
+        res.writeHead(200, {'Content-Type':'application/json'});
+        res.end(JSON.stringify({ success: true, id }));
+      } catch(e) { res.writeHead(500); res.end('{}'); }
+    });
+    return;
+  }
+
+  // ── קבלת תזכורות ──────────────────────────────────────────
+  if (url.pathname === '/get-reminders') {
+    const pass = url.searchParams.get('pass');
+    if (pass !== CRM_PASS) { res.writeHead(401); res.end('[]'); return; }
+    const reminders = loadReminders();
+    res.writeHead(200, {'Content-Type':'application/json'});
+    res.end(JSON.stringify(reminders));
+    return;
+  }
+
+  // ── מחיקת תזכורת ──────────────────────────────────────────
+  if (url.pathname === '/delete-reminder' && req.method === 'POST') {
+    const pass = url.searchParams.get('pass');
+    if (pass !== CRM_PASS) { res.writeHead(401); res.end('{}'); return; }
+    let body = '';
+    req.on('data', c => { body += c; });
+    req.on('end', () => {
+      try {
+        const d = JSON.parse(body);
+        let reminders = loadReminders();
+        reminders = reminders.filter(r => r.id !== d.id);
+        saveReminders(reminders);
+        res.writeHead(200, {'Content-Type':'application/json'});
+        res.end(JSON.stringify({ success: true }));
+      } catch(e) { res.writeHead(500); res.end('{}'); }
+    });
     return;
   }
 
@@ -3512,6 +3569,31 @@ function startReminderJob() {
           } catch(e) {}
         }
       }
+
+      // ── בדיקת תזכורות אישיות ──────────────────────────────────
+      const personalReminders = loadReminders();
+      let reminderChanged = false;
+      for (const rem of personalReminders) {
+        if (rem.sent) continue;
+        const remTime = new Date(rem.datetime).getTime();
+        if (remTime <= now) {
+          // שלח תזכורת לג'ולייט
+          try {
+            let msg = `🔔 *תזכורת אישית:*\n\n${rem.text}`;
+            if (rem.phone) {
+              const crm = loadCRM();
+              const custName = (crm[rem.phone] && crm[rem.phone].name) || rem.phone;
+              msg += `\n\n👤 לקוחה: *${custName}*`;
+            }
+            await client.sendMessage(JULIET_NUMBER, msg);
+            rem.sent = true;
+            reminderChanged = true;
+            console.log('🔔 תזכורת אישית נשלחה:', rem.text.slice(0,40));
+          } catch(e) { console.log('שגיאת תזכורת אישית:', e.message); }
+        }
+      }
+      if (reminderChanged) saveReminders(personalReminders);
+
     } catch(e) {
       console.log('שגיאה ב-startReminderJob:', e.message);
     }

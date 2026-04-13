@@ -6,23 +6,27 @@
 <title>Juliet Universe — CRM 💎</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
   *{margin:0;padding:0;box-sizing:border-box}
-  body{background:#080808;color:#e0d5c0;font-family:'Segoe UI',Arial,sans-serif;min-height:100vh;padding:20px}
-  h1{text-align:center;font-size:28px;background:linear-gradient(135deg,#e8c96b,#c8a84b,#a07830);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px;letter-spacing:.12em;font-weight:800}
+  body{background:#06060f;color:#e0d5c0;font-family:'Inter',sans-serif;min-height:100vh;padding:20px}
+  body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 40% at 50% -10%,rgba(200,168,75,.07),transparent);pointer-events:none;z-index:0}
+  body > *{position:relative;z-index:1}
+  h1{text-align:center;font-size:32px;background:linear-gradient(135deg,#e8c96b,#c8a84b,#a07830);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px;letter-spacing:.12em;font-weight:800}
   .sub{text-align:center;color:#5e5c58;font-size:13px;margin-bottom:24px}
 
   /* ── טאבים ── */
   .tabs{display:flex;gap:8px;margin-bottom:24px;justify-content:center;flex-wrap:wrap}
-  .tab{padding:9px 22px;border-radius:30px;border:1px solid rgba(200,168,75,.2);background:rgba(255,255,255,.02);color:#5e5c58;font-size:13px;cursor:pointer;transition:all .25s}
+  .tab{padding:9px 22px;border-radius:30px;border:1px solid rgba(200,168,75,.2);background:rgba(255,255,255,.02);color:#5e5c58;font-size:13px;cursor:pointer;transition:all .2s ease;backdrop-filter:blur(8px)}
   .tab:hover{border-color:rgba(200,168,75,.5);color:#c8a84b;background:rgba(200,168,75,.05)}
   .tab.active{background:linear-gradient(135deg,rgba(200,168,75,.2),rgba(200,168,75,.08));border-color:#c8a84b;color:#c8a84b;font-weight:700;box-shadow:0 0 12px rgba(200,168,75,.15)}
   .tab-beauty.active{background:linear-gradient(135deg,rgba(200,168,75,.2),rgba(200,168,75,.08));border-color:#c8a84b;color:#c8a84b}
   .tab-universe.active{background:linear-gradient(135deg,rgba(90,150,255,.18),rgba(90,150,255,.06));border-color:#5a96ff;color:#5a96ff}
   .tab-calendar.active{background:linear-gradient(135deg,rgba(90,220,100,.12),rgba(90,220,100,.04));border-color:#5adf8a;color:#5adf8a}
+  .tab-reminders.active{background:linear-gradient(135deg,rgba(167,139,250,.18),rgba(139,92,246,.06));border-color:#a78bfa;color:#a78bfa}
 
   /* ── סטטס ── */
   .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:24px}
-  .stat{background:linear-gradient(145deg,#141414,#0f0f0f);border:1px solid rgba(200,168,75,.18);border-radius:12px;padding:18px 16px;text-align:center;position:relative;overflow:hidden;transition:border-color .2s}
+  .stat{background:rgba(255,255,255,.03);backdrop-filter:blur(10px);border:1px solid rgba(200,168,75,.18);border-radius:12px;padding:18px 16px;text-align:center;position:relative;overflow:hidden;transition:border-color .2s ease}
   .stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(200,168,75,.4),transparent)}
   .stat:hover{border-color:rgba(200,168,75,.4)}
   .stat-n{font-size:32px;font-weight:800;color:#c8a84b;line-height:1}
@@ -30,12 +34,12 @@
   .stat.universe .stat-n{color:#5a96ff}
   .stat.universe::before{background:linear-gradient(90deg,transparent,rgba(90,150,255,.4),transparent)}
 
-  .search{width:100%;padding:11px 16px;background:#111;border:1px solid rgba(200,168,75,.2);border-radius:8px;color:#e0d5c0;font-size:14px;margin-bottom:14px}
+  .search{width:100%;padding:11px 16px;background:rgba(255,255,255,.04);border:1px solid rgba(200,168,75,.2);border-radius:8px;color:#e0d5c0;font-size:14px;margin-bottom:14px;transition:border-color .2s ease}
   .search:focus{outline:none;border-color:#c8a84b}
-  table{width:100%;border-collapse:collapse;background:#111;border-radius:8px;overflow:hidden}
+  table{width:100%;border-collapse:collapse;background:rgba(255,255,255,.025);backdrop-filter:blur(6px);border-radius:8px;overflow:hidden}
   th{background:rgba(200,168,75,.08);color:#c8a84b;padding:13px 14px;text-align:right;font-size:11px;letter-spacing:.05em;font-weight:600}
   td{padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px;vertical-align:middle}
-  tr.clickable{cursor:pointer}
+  tr.clickable{cursor:pointer;transition:background .2s ease}
   tr.clickable:hover td{background:rgba(200,168,75,.04)}
   .badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700}
   .badge-beauty{background:rgba(200,168,75,.15);color:#c8a84b;border:1px solid rgba(200,168,75,.3)}
@@ -46,7 +50,7 @@
   .date{color:#5e5c58;font-size:11px}
   .visits{background:rgba(200,168,75,.1);color:#c8a84b;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
   .empty{text-align:center;padding:60px;color:#3e3c38}
-  .refresh{background:rgba(200,168,75,.1);border:1px solid rgba(200,168,75,.3);color:#c8a84b;padding:8px 18px;border-radius:6px;cursor:pointer;font-size:13px}
+  .refresh{background:rgba(200,168,75,.1);border:1px solid rgba(200,168,75,.3);color:#c8a84b;padding:8px 18px;border-radius:6px;cursor:pointer;font-size:13px;transition:background .2s ease}
   .refresh:hover{background:rgba(200,168,75,.2)}
   .toolbar{display:flex;align-items:center;gap:10px;margin-bottom:14px}
   .count{font-size:12px;color:#5e5c58;flex:1}
@@ -54,10 +58,10 @@
   /* ── מודאל שיחה ── */
   .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:1000;align-items:center;justify-content:center}
   .modal-bg.open{display:flex}
-  .modal{background:#111;border:1px solid rgba(200,168,75,.3);border-radius:12px;width:90%;max-width:540px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden}
+  .modal{background:rgba(17,17,20,.95);backdrop-filter:blur(16px);border:1px solid rgba(200,168,75,.3);border-radius:12px;width:90%;max-width:540px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden}
   .modal-head{padding:16px 20px;border-bottom:1px solid rgba(200,168,75,.12);display:flex;justify-content:space-between;align-items:center}
   .modal-head h3{color:#c8a84b;font-size:15px}
-  .modal-close{background:none;border:none;color:#5e5c58;font-size:22px;cursor:pointer;line-height:1}
+  .modal-close{background:none;border:none;color:#5e5c58;font-size:22px;cursor:pointer;line-height:1;transition:color .2s ease}
   .modal-close:hover{color:#c8a84b}
   .modal-body{padding:14px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:8px}
   .msg{max-width:82%;padding:9px 12px;border-radius:12px;font-size:13px;line-height:1.5;word-break:break-word}
@@ -70,17 +74,17 @@
   /* ── יומן ── */
   #calendar-view{display:none}
   .cal-nav{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:12px;flex-wrap:wrap}
-  .cal-nav button{background:rgba(200,168,75,.1);border:1px solid rgba(200,168,75,.3);color:#c8a84b;width:36px;height:36px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .cal-nav button{background:rgba(200,168,75,.1);border:1px solid rgba(200,168,75,.3);color:#c8a84b;width:36px;height:36px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s ease}
   .cal-nav button:hover{background:rgba(200,168,75,.25)}
   .cal-title{font-size:20px;font-weight:700;color:#c8a84b;min-width:180px;text-align:center}
   .cal-month-select{background:#111;border:1px solid rgba(200,168,75,.35);color:#c8a84b;border-radius:8px;padding:6px 10px;font-size:14px;cursor:pointer;outline:none}
   .cal-month-select option{background:#111;color:#e0d5c0}
   .cal-quick-btns{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:16px}
-  .cal-quick-btn{background:rgba(200,168,75,.08);border:1px solid rgba(200,168,75,.2);color:#c8a84b;border-radius:20px;padding:5px 14px;font-size:12px;cursor:pointer;transition:all .15s}
+  .cal-quick-btn{background:rgba(200,168,75,.08);border:1px solid rgba(200,168,75,.2);color:#c8a84b;border-radius:20px;padding:5px 14px;font-size:12px;cursor:pointer;transition:all .2s ease}
   .cal-quick-btn:hover,.cal-quick-btn.active-month{background:rgba(200,168,75,.22);border-color:#c8a84b;font-weight:700}
   .upcoming-list{margin-bottom:20px}
   .upcoming-title{font-size:13px;color:#5e5c58;margin-bottom:8px;font-weight:600;letter-spacing:.05em}
-  .upcoming-item{display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#131313,#0f0f0f);border:1px solid rgba(200,168,75,.14);border-radius:10px;padding:11px 14px;margin-bottom:7px;cursor:pointer;transition:all .2s}
+  .upcoming-item{display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#131313,#0f0f0f);border:1px solid rgba(200,168,75,.14);border-radius:10px;padding:11px 14px;margin-bottom:7px;cursor:pointer;transition:all .2s ease}
   .upcoming-item:hover{border-color:rgba(200,168,75,.45);background:linear-gradient(135deg,#181818,#131313);transform:translateX(-2px)}
   .upcoming-date{background:linear-gradient(135deg,rgba(200,168,75,.18),rgba(200,168,75,.08));border:1px solid rgba(200,168,75,.25);border-radius:8px;padding:6px 10px;text-align:center;min-width:52px}
   .upcoming-date .ud-day{font-size:20px;font-weight:800;color:#c8a84b;line-height:1}
@@ -91,12 +95,12 @@
   .upcoming-info .ui-phone{font-size:11px;color:#c8a84b;margin-top:3px;font-weight:600}
   .upcoming-time{color:#c8a84b;font-size:14px;font-weight:800;text-align:left;white-space:nowrap}
   .upcoming-actions{display:flex;flex-direction:column;align-items:flex-end;gap:5px}
-  .wa-btn{background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.3);color:#25d366;border-radius:20px;padding:3px 10px;font-size:11px;text-decoration:none;white-space:nowrap;transition:all .15s}
+  .wa-btn{background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.3);color:#25d366;border-radius:20px;padding:3px 10px;font-size:11px;text-decoration:none;white-space:nowrap;transition:all .2s ease}
   .wa-btn:hover{background:rgba(37,211,102,.28);border-color:#25d366}
   .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
   .cal-dow{text-align:center;font-size:11px;color:#5e5c58;padding:8px 4px;font-weight:600}
-  .cal-day{background:linear-gradient(145deg,#121212,#0e0e0e);border:1px solid rgba(255,255,255,.05);border-radius:9px;min-height:90px;padding:7px;cursor:pointer;transition:all .18s;position:relative;overflow:hidden}
-  .cal-day:hover{border-color:rgba(200,168,75,.4);background:linear-gradient(145deg,#161616,#121212)}
+  .cal-day{background:linear-gradient(145deg,rgba(255,255,255,.03),rgba(255,255,255,.01));backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.05);border-radius:9px;min-height:90px;padding:7px;cursor:pointer;transition:all .2s ease;position:relative;overflow:hidden}
+  .cal-day:hover{border-color:rgba(200,168,75,.4);background:linear-gradient(145deg,rgba(255,255,255,.05),rgba(255,255,255,.02))}
   .cal-day.today{border-color:#c8a84b;background:linear-gradient(145deg,rgba(200,168,75,.08),rgba(200,168,75,.03));box-shadow:0 0 14px rgba(200,168,75,.12)}
   .cal-day.other-month{opacity:.28}
   .cal-day.holiday-day{background:linear-gradient(145deg,rgba(255,80,80,.07),rgba(255,80,80,.03));border-color:rgba(255,80,80,.22)}
@@ -105,7 +109,7 @@
   .cal-day-num{font-size:13px;font-weight:800;color:#c8c0a8;margin-bottom:4px}
   .cal-day.today .cal-day-num{color:#c8a84b}
   .cal-holiday{font-size:9px;color:#ff9090;background:rgba(255,80,80,.1);border-radius:3px;padding:1px 4px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .cal-appt{font-size:10px;background:linear-gradient(135deg,rgba(200,168,75,.18),rgba(200,168,75,.08));color:#c8a84b;border-radius:4px;padding:2px 6px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-right:2px solid rgba(200,168,75,.7);transition:background .12s}
+  .cal-appt{font-size:10px;background:linear-gradient(135deg,rgba(200,168,75,.18),rgba(200,168,75,.08));color:#c8a84b;border-radius:4px;padding:2px 6px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-right:2px solid rgba(200,168,75,.7);transition:background .2s ease}
   .cal-appt:hover{background:linear-gradient(135deg,rgba(200,168,75,.3),rgba(200,168,75,.15))}
   .cal-empty{background:transparent;border-color:transparent;cursor:default;min-height:90px}
 
@@ -115,7 +119,7 @@
   .cal-legend-dot{width:10px;height:10px;border-radius:2px}
 
   /* פאנל יום */
-  .day-panel{background:linear-gradient(145deg,#131313,#0f0f0f);border:1px solid rgba(200,168,75,.25);border-radius:12px;padding:18px;margin-top:16px;display:none;box-shadow:0 4px 24px rgba(0,0,0,.4)}
+  .day-panel{background:rgba(255,255,255,.03);backdrop-filter:blur(10px);border:1px solid rgba(200,168,75,.25);border-radius:12px;padding:18px;margin-top:16px;display:none;box-shadow:0 4px 24px rgba(0,0,0,.4)}
   .day-panel.open{display:block}
   .day-panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid rgba(200,168,75,.12)}
   .day-panel h3{color:#c8a84b;font-size:16px;margin:0;font-weight:800;letter-spacing:.04em}
@@ -123,7 +127,7 @@
   .no-items{color:#3e3c38;text-align:center;padding:24px;font-size:13px}
 
   /* ── חיפוש ביומן ── */
-  .cal-search{width:100%;padding:10px 14px;background:rgba(255,255,255,.03);border:1px solid rgba(200,168,75,.2);border-radius:8px;color:#e0d5c0;font-size:13px;margin-bottom:14px;outline:none;transition:border-color .2s}
+  .cal-search{width:100%;padding:10px 14px;background:rgba(255,255,255,.03);border:1px solid rgba(200,168,75,.2);border-radius:8px;color:#e0d5c0;font-size:13px;margin-bottom:14px;outline:none;transition:border-color .2s ease}
   .cal-search:focus{border-color:#c8a84b}
   .cal-search-wrap{position:relative;margin-bottom:14px}
   .cal-search-wrap::before{content:'🔍';position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;font-size:14px}
@@ -131,7 +135,7 @@
 
   /* ── תצוגת שעות יום ── */
   .time-slots{display:flex;flex-direction:column;gap:2px}
-  .time-slot-row{display:flex;flex-direction:row;align-items:stretch;min-height:44px;border-radius:7px;border:1px solid transparent;transition:all .12s;overflow:hidden}
+  .time-slot-row{display:flex;flex-direction:row;align-items:stretch;min-height:44px;border-radius:7px;border:1px solid transparent;transition:all .2s ease;overflow:hidden}
   .time-slot-row.empty-slot{cursor:pointer}
   .time-slot-row.empty-slot:hover{border-color:rgba(200,168,75,.25);background:rgba(200,168,75,.025)}
   .time-slot-row.has-appt{border-color:rgba(200,168,75,.2);background:rgba(200,168,75,.02)}
@@ -140,16 +144,16 @@
   .slot-content{flex:1;padding:4px 8px;display:flex;flex-direction:column;gap:3px;justify-content:center}
   .slot-empty{display:flex;align-items:center;color:#2e2c28;font-size:12px;height:100%}
   .empty-slot:hover .slot-empty{color:#8a7030}
-  .slot-appt-card{background:linear-gradient(135deg,rgba(200,168,75,.13),rgba(200,168,75,.06));border:1px solid rgba(200,168,75,.28);border-radius:6px;padding:6px 10px;cursor:pointer;transition:all .15s;border-right:3px solid #c8a84b;box-shadow:0 1px 6px rgba(200,168,75,.08)}
+  .slot-appt-card{background:linear-gradient(135deg,rgba(200,168,75,.13),rgba(200,168,75,.06));border:1px solid rgba(200,168,75,.28);border-radius:6px;padding:6px 10px;cursor:pointer;transition:all .2s ease;border-right:3px solid #c8a84b;box-shadow:0 1px 6px rgba(200,168,75,.08)}
   .slot-appt-card:hover{background:linear-gradient(135deg,rgba(200,168,75,.22),rgba(200,168,75,.1));box-shadow:0 2px 10px rgba(200,168,75,.15)}
   .slot-appt-name{font-size:12px;font-weight:700;color:#e8d9b8}
   .slot-appt-meta{display:flex;justify-content:space-between;align-items:center;margin-top:2px}
   .slot-appt-service{font-size:10px;color:#7a7260;background:rgba(200,168,75,.08);padding:1px 6px;border-radius:3px}
-  .slot-appt-edit{font-size:10px;color:#5e5c58;background:rgba(200,168,75,.08);border:1px solid rgba(200,168,75,.18);border-radius:3px;padding:1px 6px;cursor:pointer;transition:all .12s}
+  .slot-appt-edit{font-size:10px;color:#5e5c58;background:rgba(200,168,75,.08);border:1px solid rgba(200,168,75,.18);border-radius:3px;padding:1px 6px;cursor:pointer;transition:all .2s ease}
   .slot-appt-edit:hover{color:#c8a84b;border-color:#c8a84b;background:rgba(200,168,75,.15)}
 
   /* כפתור פלואטינג הוספה */
-  .fab{position:fixed;bottom:26px;left:26px;width:58px;height:58px;background:#c8a84b;border:none;border-radius:50%;font-size:28px;cursor:pointer;box-shadow:0 4px 24px rgba(200,168,75,.45);z-index:900;display:flex;align-items:center;justify-content:center;transition:transform .15s,box-shadow .15s}
+  .fab{position:fixed;bottom:26px;left:26px;width:58px;height:58px;background:#c8a84b;border:none;border-radius:50%;font-size:28px;cursor:pointer;box-shadow:0 4px 24px rgba(200,168,75,.45);z-index:900;display:flex;align-items:center;justify-content:center;transition:transform .2s ease,box-shadow .2s ease}
   .fab:hover{transform:scale(1.1);box-shadow:0 6px 28px rgba(200,168,75,.6)}
 
   /* כפתור מחק */
@@ -205,13 +209,13 @@
   }
 
   /* ── מודאל תור / הערה ── */
-  .modal2{background:#111;border:1px solid rgba(200,168,75,.3);border-radius:12px;width:90%;max-width:480px;max-height:90vh;overflow-y:auto;padding:24px;position:relative}
+  .modal2{background:rgba(17,17,20,.97);backdrop-filter:blur(16px);border:1px solid rgba(200,168,75,.3);border-radius:12px;width:90%;max-width:480px;max-height:90vh;overflow-y:auto;padding:24px;position:relative}
   .form-row{margin-bottom:14px}
   .form-row label{display:block;font-size:11px;color:#5e5c58;margin-bottom:5px;font-weight:600;letter-spacing:.04em}
-  .form-input{width:100%;padding:10px 14px;background:#0a0a0a;border:1px solid rgba(200,168,75,.25);border-radius:7px;color:#e0d5c0;font-size:14px;font-family:inherit}
+  .form-input{width:100%;padding:10px 14px;background:rgba(255,255,255,.04);border:1px solid rgba(200,168,75,.25);border-radius:7px;color:#e0d5c0;font-size:14px;font-family:inherit;transition:border-color .2s ease}
   .form-input:focus{outline:none;border-color:#c8a84b}
   textarea.form-input{resize:vertical;min-height:80px}
-  .form-btn{background:rgba(200,168,75,.15);border:1px solid #c8a84b;color:#c8a84b;padding:10px 24px;border-radius:8px;font-size:14px;cursor:pointer;width:100%;font-weight:600;transition:background .15s}
+  .form-btn{background:rgba(200,168,75,.15);border:1px solid #c8a84b;color:#c8a84b;padding:10px 24px;border-radius:8px;font-size:14px;cursor:pointer;width:100%;font-weight:600;transition:background .2s ease}
   .form-btn:hover{background:rgba(200,168,75,.3)}
   .form-btn-green{background:rgba(37,211,102,.12);border-color:#25d366;color:#25d366}
   .form-btn-green:hover{background:rgba(37,211,102,.25)}
@@ -223,10 +227,33 @@
   .vi-sched{background:rgba(200,168,75,.15);color:#c8a84b;border:1px solid rgba(200,168,75,.3)}
   .vip-badge{background:rgba(255,180,0,.15);color:#ffb400;border:1px solid rgba(255,180,0,.3);border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;margin-right:6px}
   .modal-tabs{display:flex;gap:6px;margin-bottom:16px;border-bottom:1px solid rgba(200,168,75,.1);padding-bottom:10px}
-  .modal-tab{background:none;border:none;color:#5e5c58;font-size:13px;cursor:pointer;padding:5px 12px;border-radius:6px}
+  .modal-tab{background:none;border:none;color:#5e5c58;font-size:13px;cursor:pointer;padding:5px 12px;border-radius:6px;transition:all .2s ease}
   .modal-tab.active{background:rgba(200,168,75,.12);color:#c8a84b;font-weight:600}
-  .sync-btn{background:rgba(90,220,100,.08);border:1px solid rgba(90,220,100,.3);color:#5adf8a;padding:7px 16px;border-radius:8px;font-size:12px;cursor:pointer;transition:all .15s}
+  .sync-btn{background:rgba(90,220,100,.08);border:1px solid rgba(90,220,100,.3);color:#5adf8a;padding:7px 16px;border-radius:8px;font-size:12px;cursor:pointer;transition:all .2s ease}
   .sync-btn:hover{background:rgba(90,220,100,.2)}
+
+  /* ── תזכורות ── */
+  #reminders-view{display:none}
+  .reminders-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid rgba(167,139,250,.12)}
+  .reminders-header h2{font-size:20px;font-weight:700;color:#a78bfa;letter-spacing:.04em}
+  .add-reminder-btn{background:linear-gradient(135deg,rgba(167,139,250,.2),rgba(139,92,246,.1));border:1px solid #a78bfa;color:#a78bfa;padding:8px 18px;border-radius:20px;font-size:13px;cursor:pointer;font-weight:600;transition:all .2s ease}
+  .add-reminder-btn:hover{background:linear-gradient(135deg,rgba(167,139,250,.35),rgba(139,92,246,.2));box-shadow:0 0 12px rgba(167,139,250,.2)}
+  .reminder-form-panel{background:rgba(255,255,255,.03);backdrop-filter:blur(10px);border:1px solid rgba(167,139,250,.2);border-radius:12px;padding:20px;margin-bottom:20px;display:none}
+  .reminder-form-panel.open{display:block}
+  .reminder-form-panel h3{color:#a78bfa;font-size:14px;font-weight:700;margin-bottom:16px}
+  .reminder-item{display:flex;align-items:flex-start;gap:14px;background:rgba(255,255,255,.03);backdrop-filter:blur(6px);border:1px solid rgba(167,139,250,.14);border-radius:10px;padding:14px 16px;margin-bottom:8px;transition:all .2s ease}
+  .reminder-item:hover{border-color:rgba(167,139,250,.35);background:rgba(167,139,250,.04)}
+  .reminder-item.overdue{border-color:rgba(255,80,80,.3);background:rgba(255,80,80,.04)}
+  .reminder-item.overdue .reminder-time{color:#ff6060}
+  .reminder-badge{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,rgba(167,139,250,.2),rgba(139,92,246,.1));border:1px solid rgba(167,139,250,.3);font-size:16px;flex-shrink:0}
+  .reminder-item.overdue .reminder-badge{background:linear-gradient(135deg,rgba(255,80,80,.15),rgba(255,80,80,.08));border-color:rgba(255,80,80,.3)}
+  .reminder-content{flex:1;min-width:0}
+  .reminder-text{font-size:13px;color:#e0d5c0;font-weight:500;line-height:1.4;margin-bottom:4px;word-break:break-word}
+  .reminder-time{font-size:11px;color:#a78bfa;font-weight:600;margin-bottom:3px}
+  .reminder-customer{font-size:11px;color:#5e5c58}
+  .reminder-delete-btn{background:rgba(255,60,60,.08);border:1px solid rgba(255,60,60,.2);color:#ff6060;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;transition:all .2s ease;flex-shrink:0;align-self:flex-start}
+  .reminder-delete-btn:hover{background:rgba(255,60,60,.2);border-color:rgba(255,60,60,.5)}
+  .reminders-empty{text-align:center;padding:60px 20px;color:#3e3c38;font-size:14px}
 </style>
 </head>
 <body>
@@ -240,6 +267,7 @@
   <button class="tab tab-universe" onclick="switchTab('universe',this)">🤖 Juliet Universe AI</button>
   <button class="tab tab-calendar" onclick="switchTab('calendar',this)">📅 יומן</button>
   <button class="tab" onclick="switchTab('dashboard',this)" style="border-color:rgba(90,150,255,.3);color:#5a96ff">📊 גרפים</button>
+  <button class="tab tab-reminders" onclick="switchTab('reminders',this)">🔔 תזכורות</button>
 </div>
 
 <!-- סטטס -->
@@ -272,6 +300,46 @@
       <div style="color:#c8a84b;font-size:13px;font-weight:600;margin-bottom:16px;letter-spacing:.05em">🔥 סטטוס לידים</div>
       <canvas id="chart-leads" height="180"></canvas>
     </div>
+  </div>
+</div>
+
+<!-- תצוגת תזכורות -->
+<div id="reminders-view">
+  <div class="reminders-header">
+    <h2>🔔 תזכורות אישיות</h2>
+    <button class="add-reminder-btn" onclick="toggleReminderForm()">+ הוסף תזכורת</button>
+  </div>
+
+  <!-- טופס הוספה -->
+  <div class="reminder-form-panel" id="reminder-form-panel">
+    <h3>✨ תזכורת חדשה</h3>
+    <div class="form-row">
+      <label>📝 טקסט התזכורת *</label>
+      <textarea class="form-input" id="rem-text" placeholder="מה תרצי לזכור?..." style="min-height:70px"></textarea>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-row" style="margin-bottom:0">
+        <label>📅 תאריך *</label>
+        <input class="form-input" id="rem-date" type="date"/>
+      </div>
+      <div class="form-row" style="margin-bottom:0">
+        <label>⏰ שעה *</label>
+        <input class="form-input" id="rem-time" type="time" value="10:00"/>
+      </div>
+    </div>
+    <div class="form-row" style="margin-top:12px">
+      <label>👤 טלפון לקוחה (אופציונלי)</label>
+      <input class="form-input" id="rem-phone" placeholder="050-0000000 (אם קשור ללקוחה)"/>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:4px">
+      <button class="form-btn" style="background:linear-gradient(135deg,rgba(167,139,250,.2),rgba(139,92,246,.1));border-color:#a78bfa;color:#a78bfa" onclick="addReminder()">🔔 שמור תזכורת</button>
+      <button class="form-btn" style="background:transparent;border-color:rgba(255,255,255,.1);color:#5e5c58;flex:0 0 auto;width:auto;padding:10px 20px" onclick="toggleReminderForm()">ביטול</button>
+    </div>
+  </div>
+
+  <!-- רשימת תזכורות -->
+  <div id="reminders-list">
+    <div class="reminders-empty">⏳ טוען תזכורות...</div>
   </div>
 </div>
 
@@ -540,10 +608,12 @@ function switchTab(tab, el) {
   const cv  = document.getElementById('customers-view');
   const calv = document.getElementById('calendar-view');
   const dv  = document.getElementById('dashboard-view');
+  const rv  = document.getElementById('reminders-view');
 
   cv.style.display   = 'none';
   calv.style.display = 'none';
   dv.style.display   = 'none';
+  rv.style.display   = 'none';
 
   if (tab === 'calendar') {
     calv.style.display = 'block';
@@ -551,6 +621,9 @@ function switchTab(tab, el) {
   } else if (tab === 'dashboard') {
     dv.style.display = 'block';
     renderDashboard(allRows);
+  } else if (tab === 'reminders') {
+    rv.style.display = 'block';
+    loadReminders();
   } else {
     cv.style.display = 'block';
     filterTable();
@@ -1371,6 +1444,113 @@ document.addEventListener('keydown', e => { if(e.key==='Escape') { closeModal(nu
 
 loadData();
 setInterval(loadData, 30000);
+
+// ── תזכורות אישיות ─────────────────────────────────────────────
+
+function toggleReminderForm() {
+  const panel = document.getElementById('reminder-form-panel');
+  panel.classList.toggle('open');
+  if (panel.classList.contains('open')) {
+    // ברירת מחדל — תאריך של היום
+    const today = new Date();
+    document.getElementById('rem-date').value = today.toISOString().slice(0,10);
+    document.getElementById('rem-text').focus();
+  }
+}
+
+async function loadReminders() {
+  const list = document.getElementById('reminders-list');
+  list.innerHTML = '<div class="reminders-empty">⏳ טוען תזכורות...</div>';
+  try {
+    const res = await fetch('/get-reminders?pass=' + getPass());
+    const reminders = await res.json();
+    renderReminders(reminders);
+  } catch(e) {
+    list.innerHTML = '<div class="reminders-empty">❌ שגיאה בטעינת תזכורות</div>';
+  }
+}
+
+function renderReminders(list) {
+  const el = document.getElementById('reminders-list');
+  if (!list || list.length === 0) {
+    el.innerHTML = '<div class="reminders-empty">🔔 אין תזכורות עדיין<br><span style="font-size:12px;margin-top:8px;display:block;color:#3e3c38">לחצי על "+ הוסף תזכורת" כדי ליצור תזכורת חדשה</span></div>';
+    return;
+  }
+  // מיין לפי תאריך (הקרובות ראשון)
+  const sorted = [...list].sort((a,b) => new Date(a.datetime) - new Date(b.datetime));
+  const now = new Date();
+  el.innerHTML = sorted.map(rem => {
+    const dt = new Date(rem.datetime);
+    const isOverdue = dt < now && !rem.sent;
+    const isSent = rem.sent;
+    const dtStr = dt.toLocaleDateString('he-IL') + ' ' + dt.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'});
+    let badgeClass = isOverdue ? 'reminder-item overdue' : 'reminder-item';
+    if (isSent) badgeClass += ' ' + 'sent';
+    const badgeStyle = isSent ? 'opacity:.5;' : '';
+    const icon = isSent ? '✅' : (isOverdue ? '⚠️' : '🔔');
+    const timeLabel = isSent ? `<span style="color:#5adf8a;font-size:11px;font-weight:600">✅ נשלחה</span>` : `<span class="reminder-time">${dtStr}${isOverdue?' — באיחור':''}</span>`;
+    const custHtml = rem.phone ? `<div class="reminder-customer">👤 ${rem.phone}</div>` : '';
+    return `<div class="${badgeClass}" style="${badgeStyle}">
+      <div class="reminder-badge">${icon}</div>
+      <div class="reminder-content">
+        ${timeLabel}
+        <div class="reminder-text">${rem.text}</div>
+        ${custHtml}
+      </div>
+      <button class="reminder-delete-btn" onclick="deleteReminder('${rem.id}')">🗑 מחק</button>
+    </div>`;
+  }).join('');
+}
+
+async function addReminder() {
+  const text = document.getElementById('rem-text').value.trim();
+  const date = document.getElementById('rem-date').value;
+  const time = document.getElementById('rem-time').value || '10:00';
+  const phone = document.getElementById('rem-phone').value.trim();
+
+  if (!text) { alert('נא להזין טקסט לתזכורת'); return; }
+  if (!date) { alert('נא לבחור תאריך'); return; }
+
+  const datetime = date + 'T' + time + ':00';
+
+  try {
+    const res = await fetch('/save-reminder?pass=' + getPass(), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, datetime, phone })
+    });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('rem-text').value = '';
+      document.getElementById('rem-phone').value = '';
+      document.getElementById('reminder-form-panel').classList.remove('open');
+      loadReminders();
+    } else {
+      alert('שגיאה בשמירת התזכורת');
+    }
+  } catch(e) {
+    alert('שגיאה בחיבור לשרת');
+  }
+}
+
+async function deleteReminder(id) {
+  if (!confirm('למחוק את התזכורת?')) return;
+  try {
+    const res = await fetch('/delete-reminder?pass=' + getPass(), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id })
+    });
+    const data = await res.json();
+    if (data.success) {
+      loadReminders();
+    } else {
+      alert('שגיאה במחיקת התזכורת');
+    }
+  } catch(e) {
+    alert('שגיאה בחיבור לשרת');
+  }
+}
 </script>
 </body>
 </html>
