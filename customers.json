@@ -384,7 +384,7 @@
   },
   "0523290942": {
     "phone": "0523290942",
-    "name": "מרים אמא נוהר",
+    "name": "הדר שפירא",
     "firstContact": "2026-04-14T12:30:00.000Z",
     "visits": [
       {
@@ -401,13 +401,6 @@
         "source": "lee",
         "status": "scheduled",
         "notes": ""
-      },
-      {
-        "date": "2026-04-24T06:00:00.000Z",
-        "service": "החלקת שורש",
-        "source": "lee_excel",
-        "status": "scheduled",
-        "price": 850
       }
     ],
     "source": "lee",

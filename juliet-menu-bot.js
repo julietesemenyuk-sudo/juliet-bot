@@ -174,9 +174,22 @@ function getAvailableSlots() {
 // ── CRM ─────────────────────────────────────────────────────
 const CRM_FILE = path.join(DATA_DIR, 'customers.json');
 const CRM_FILE_BUNDLED = path.join(__dirname, 'customers.json');
-// על Railway — העתק את customers.json מהריפו אם /data ריק
-if (IS_RAILWAY && !fs.existsSync(CRM_FILE) && fs.existsSync(CRM_FILE_BUNDLED)) {
-  try { fs.copyFileSync(CRM_FILE_BUNDLED, CRM_FILE); console.log('📋 customers.json הועתק ל-/data'); } catch(e) {}
+// על Railway — העתק customers.json מהריפו אם הגרסה שלנו גדולה יותר
+if (IS_RAILWAY && fs.existsSync(CRM_FILE_BUNDLED)) {
+  try {
+    const bundledData = JSON.parse(fs.readFileSync(CRM_FILE_BUNDLED, 'utf8'));
+    const bundledCount = Object.keys(bundledData).length;
+    let volumeCount = 0;
+    if (fs.existsSync(CRM_FILE)) {
+      try { volumeCount = Object.keys(JSON.parse(fs.readFileSync(CRM_FILE, 'utf8'))).length; } catch(e) {}
+    }
+    if (bundledCount > volumeCount) {
+      fs.copyFileSync(CRM_FILE_BUNDLED, CRM_FILE);
+      console.log(`📋 customers.json עודכן: ${volumeCount} → ${bundledCount} לקוחות`);
+    } else {
+      console.log(`📋 customers.json: volume(${volumeCount}) >= bundled(${bundledCount}) — ללא שינוי`);
+    }
+  } catch(e) { console.log('⚠️ שגיאת sync CRM:', e.message); }
 }
 
 function loadCRM() {
