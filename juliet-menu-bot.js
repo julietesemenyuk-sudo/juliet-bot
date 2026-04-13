@@ -563,7 +563,7 @@ http.createServer((req, res) => {
   // ── סטטוס סנכרון lee ──────────────────────────────────────────
   if (url.pathname === '/sync-lee-status') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    const hasCredentials = !!(process.env.LEE_EMAIL && process.env.LEE_PASS);
+    const hasCredentials = !!(process.env.LEE_API_KEY || (process.env.LEE_EMAIL && process.env.LEE_PASS));
     res.end(JSON.stringify({ ...leeSyncStatus, hasCredentials }));
     return;
   }
@@ -2631,13 +2631,132 @@ function startDailyBackup() {
   }, 60 * 60 * 1000);
 }
 
-// ── סנכרון lee אוטומטי (כל 2 שעות) ─────────────────────────
+// ── סנכרון Lee דרך API Key ────────────────────────────────────
+async function syncLeeViaAPI(apiKey, businessId) {
+  console.log('🔄 lee sync — משתמש ב-API Key...');
+  const now   = new Date();
+  const start = now.toISOString().split('T')[0];
+  const end   = new Date(now.getFullYear(), now.getMonth() + 3, 1).toISOString().split('T')[0];
+
+  // נסה מספר endpoints של Lee API
+  const endpoints = [
+    `https://api.lee.co.il/v1/appointments?from=${start}&to=${end}`,
+    `https://api.lee.co.il/appointments?businessId=${businessId}&from=${start}&to=${end}`,
+    `https://app.lee.co.il/api/appointments?from=${start}&to=${end}`,
+    `https://app.lee.co.il/api/v1/calendar/events?start=${start}&end=${end}`,
+  ];
+
+  let appointments = [];
+  for (const endpoint of endpoints) {
+    try {
+      const result = await new Promise((resolve, reject) => {
+        const url = new URL(endpoint);
+        const options = {
+          hostname: url.hostname,
+          path: url.pathname + url.search,
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'X-API-Key': apiKey,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        };
+        const req = https.request(options, res => {
+          let data = '';
+          res.on('data', chunk => { data += chunk; });
+          res.on('end', () => {
+            try {
+              const json = JSON.parse(data);
+              resolve({ status: res.statusCode, json });
+            } catch(e) {
+              resolve({ status: res.statusCode, raw: data.slice(0, 200) });
+            }
+          });
+        });
+        req.on('error', reject);
+        req.setTimeout(10000, () => { req.destroy(); reject(new Error('timeout')); });
+        req.end();
+      });
+
+      console.log(`📡 Lee API ${endpoint.split('/').slice(3).join('/')}: ${result.status}`);
+
+      if (result.status === 200 && result.json) {
+        const arr = Array.isArray(result.json) ? result.json
+          : (result.json.data || result.json.appointments || result.json.events || result.json.items || []);
+        if (Array.isArray(arr) && arr.length > 0) {
+          appointments = arr;
+          console.log(`✅ Lee API — נמצאו ${arr.length} תורים`);
+          break;
+        }
+      }
+    } catch(e) {
+      console.log(`⚠️ Lee API endpoint נכשל: ${e.message}`);
+    }
+  }
+
+  if (!appointments.length) {
+    console.log('⚠️ lee API sync — לא נמצאו תורים מכל ה-endpoints');
+    return 0;
+  }
+
+  // שמור ב-CRM
+  const crm = loadCRM();
+  let added = 0;
+  appointments.forEach(evt => {
+    const dateStr  = evt.start || evt.startTime || evt.appointmentDate || evt.date || evt.datetime;
+    const rawPhone = ((evt.phone || evt.customerPhone || evt.clientPhone ||
+                       (evt.customer && evt.customer.phone) || evt.mobile || '')).replace(/\D/g, '');
+    if (!dateStr || !rawPhone) return;
+
+    let localPhone = rawPhone;
+    if (localPhone.startsWith('972')) localPhone = '0' + localPhone.slice(3);
+    if (localPhone.length < 9) return;
+
+    const d = new Date(dateStr);
+    if (isNaN(d)) return;
+    const iso = d.toISOString();
+    const custName = evt.customerName || evt.clientName || (evt.customer && evt.customer.name) || evt.name || '';
+    const service  = evt.serviceName || evt.service || evt.treatment || evt.title || 'טיפול';
+    const status   = evt.status === '2' || evt.status === 'done' || evt.status === 'completed' ? 'done' : 'scheduled';
+
+    if (!crm[localPhone]) {
+      crm[localPhone] = { phone: localPhone, name: custName, firstContact: iso, visits: [], source: 'lee', businessType: 'beauty' };
+    }
+    crm[localPhone].visits = crm[localPhone].visits || [];
+    if (!crm[localPhone].visits.some(v => v.date === iso && v.service === service)) {
+      crm[localPhone].visits.push({ date: iso, service, source: 'lee', status });
+      if (custName) crm[localPhone].name = custName;
+      crm[localPhone].lastService = service;
+      crm[localPhone].businessType = 'beauty';
+      added++;
+    }
+  });
+
+  if (added > 0) {
+    saveCRM(crm);
+    console.log(`✅ lee API sync — נוספו ${added} תורים`);
+  } else {
+    console.log(`ℹ️ lee API sync — אין תורים חדשים (${appointments.length} קיימים)`);
+  }
+  return added;
+}
+
+// ── סנכרון lee אוטומטי (כל 2 שעות) — דרך API Key ────────────
 async function syncLeeCalendar() {
+  const LEE_API_KEY     = process.env.LEE_API_KEY;
+  const LEE_BUSINESS_ID = process.env.LEE_BUSINESS_ID || '64c638d114964';
+
+  // אם יש API Key — שתמש בו במקום Puppeteer
+  if (LEE_API_KEY) {
+    return await syncLeeViaAPI(LEE_API_KEY, LEE_BUSINESS_ID);
+  }
+
   const LEE_EMAIL = process.env.LEE_EMAIL;
   const LEE_PASS  = process.env.LEE_PASS;
 
   if (!LEE_EMAIL || !LEE_PASS) {
-    console.log('⚠️ lee sync — הגדר LEE_EMAIL ו-LEE_PASS ב-.env לסנכרון תורים');
+    console.log('⚠️ lee sync — הגדר LEE_API_KEY ב-.env לסנכרון תורים');
     return;
   }
   if (!client.pupBrowser) {
