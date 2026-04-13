@@ -568,6 +568,35 @@ http.createServer((req, res) => {
     return;
   }
 
+  // ── ניקוי תורים שגויים מ-Lee ──────────────────────────────────
+  if (url.pathname === '/clear-lee-data' && req.method === 'POST') {
+    const pass = url.searchParams.get('pass');
+    if (pass !== CRM_PASS) { res.writeHead(401); res.end('{}'); return; }
+    const crm = loadCRM();
+    let cleared = 0;
+    Object.keys(crm).forEach(phone => {
+      const c = crm[phone];
+      const before = (c.visits || []).length;
+      // מחק תורים עתידיים מ-Lee עם סטטוס scheduled
+      c.visits = (c.visits || []).filter(v => {
+        const isFutureLee = v.source === 'lee' && v.status === 'scheduled'
+          && new Date(v.date).getTime() > Date.now() - 24*60*60*1000;
+        if (isFutureLee) cleared++;
+        return !isFutureLee;
+      });
+      // נקה pendingAppointment אם מקורו Lee
+      if (c.pendingAppointmentSource === 'lee') {
+        delete c.pendingAppointment;
+        delete c.pendingAppointmentSource;
+      }
+    });
+    saveCRM(crm);
+    console.log(`🗑️ נוקו ${cleared} תורים שגויים מ-Lee`);
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ success: true, cleared }));
+    return;
+  }
+
   // כתובת טונל נוכחית
   if (url.pathname === '/tunnel') {
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
@@ -1378,6 +1407,96 @@ async function handleJulietCommand(message) {
     return;
   }
 
+  // ── ניקוי תורים שגויים מ-Lee ──────────────────────────────────
+  if (bodyLow === 'נקה lee' || body === 'נקה CRM Lee' || body === 'נקה תורים lee') {
+    const crm = loadCRM();
+    let cleared = 0;
+    Object.keys(crm).forEach(phone => {
+      const c = crm[phone];
+      c.visits = (c.visits || []).filter(v => {
+        const isFutureLee = v.source === 'lee' && v.status === 'scheduled'
+          && new Date(v.date).getTime() > Date.now() - 24*60*60*1000;
+        if (isFutureLee) cleared++;
+        return !isFutureLee;
+      });
+      if (c.pendingAppointmentSource === 'lee') {
+        delete c.pendingAppointment;
+        delete c.pendingAppointmentSource;
+      }
+    });
+    saveCRM(crm);
+    await message.reply(`🗑️ נוקו *${cleared}* תורים שגויים מ-Lee.\n\nהCRM נקי עכשיו 💎\nסנכרון מחדש מ-Lee יתבצע בכ-2 שעות, או שלחי \`סנכרן lee\` עכשיו.`);
+    return;
+  }
+
+  // ── סנכרון ידני של Lee ───────────────────────────────────────
+  if (bodyLow === 'סנכרן lee' || bodyLow === 'רענן lee') {
+    await message.reply(`🔄 מסנכרן תורים מ-Lee... אחכה כמה שניות ✨`);
+    try {
+      const added = await syncLeeCalendar();
+      await message.reply(`✅ סנכרון Lee הסתיים — נוספו *${added || 0}* תורים חדשים.`);
+    } catch(e) {
+      await message.reply(`⚠️ שגיאה בסנכרון Lee: ${e.message}`);
+    }
+    return;
+  }
+
+  // ── הוספת תור ידנית ──────────────────────────────────────────
+  // פורמט: "הוסף תור 0509876543 שרה 15/4 10:00 החלקה אורגנית"
+  //        "הוסף תור 0509876543 שרה 2026-04-15 10:00 החלקה"
+  const addApptMatch = body.match(/^הוסף תור\s+(05\d{8})\s+(\S+)\s+(\d{1,2}[\/\-]\d{1,2}(?:[\/\-]\d{2,4})?)\s+(\d{1,2}:\d{2})\s*(.*)/);
+  if (addApptMatch) {
+    const [, phone, custName, datePart, timePart, service] = addApptMatch;
+    // פרסור תאריך: "15/4" או "15/4/2026" או "15-4-2026"
+    const parts = datePart.split(/[\/\-]/);
+    const day   = parseInt(parts[0]);
+    const month = parseInt(parts[1]) - 1;
+    const year  = parts[2] ? (parts[2].length === 2 ? 2000 + parseInt(parts[2]) : parseInt(parts[2])) : new Date().getFullYear();
+    const [h, m] = timePart.split(':').map(Number);
+    const apptDate = new Date(year, month, day, h, m, 0);
+    if (isNaN(apptDate.getTime())) {
+      await message.reply(`❌ תאריך לא תקין. נסי שוב:\n\`הוסף תור 0509876543 שרה 15/4 10:00 החלקה\``);
+      return;
+    }
+    const iso = apptDate.toISOString();
+    const crm = loadCRM();
+    if (!crm[phone]) {
+      crm[phone] = { phone, name: custName, firstContact: iso, visits: [], source: 'manual' };
+    }
+    if (custName && custName !== 'ללא') crm[phone].name = custName;
+    crm[phone].visits = crm[phone].visits || [];
+    crm[phone].pendingAppointment = iso;
+    crm[phone].pendingAppointmentSource = 'manual';
+    const svcStr = service.trim() || 'טיפול';
+    if (!crm[phone].visits.some(v => v.date === iso)) {
+      crm[phone].visits.push({ date: iso, service: svcStr, source: 'manual', status: 'scheduled' });
+    }
+    crm[phone].lastService = svcStr;
+    saveCRM(crm);
+    const dateStr = apptDate.toLocaleDateString('he-IL', { day:'numeric', month:'numeric', year:'numeric' });
+    await message.reply(
+      `✅ *תור נוסף!* 💎\n\n` +
+      `👤 *${crm[phone].name || phone}*\n` +
+      `📞 ${phone}\n` +
+      `💇 ${svcStr}\n` +
+      `🗓 ${dateStr} בשעה ${timePart}\n\n` +
+      `נשמר ב-CRM ✅`
+    );
+    return;
+  }
+
+  if (body === 'הוסף תור' || body === 'תור חדש') {
+    await message.reply(
+      `📅 *הוספת תור ידנית*\n\n` +
+      `שלחי בפורמט:\n` +
+      `\`הוסף תור [טלפון] [שם] [תאריך] [שעה] [שירות]\`\n\n` +
+      `דוגמה:\n` +
+      `\`הוסף תור 0509876543 שרה 15/4 10:00 החלקה אורגנית\`\n\n` +
+      `📌 תאריך בפורמט: יום/חודש (15/4) או יום/חודש/שנה (15/4/2026)`
+    );
+    return;
+  }
+
   // ── שלחי הודעה ישירות ללקוחה ─────────────────────────────────
   // פורמט: "שלחי 0521234567 הטקסט כאן"
   const sendMatch = body.match(/^שלחי\s+(05\d{8})\s+([\s\S]+)/);
@@ -1551,6 +1670,16 @@ async function handleJulietCommand(message) {
       `📅 *קבעי תור ללקוחה:*\n` +
       `\`תאמי 05XXXXXXXX\`\n\n` +
 
+      `➕ *הוסף תור ידנית ל-CRM:*\n` +
+      `\`הוסף תור 05XXXXXXXX שם 15/4 10:00 שירות\`\n\n` +
+
+      `🔄 *סנכרון Lee:*\n` +
+      `\`סנכרן lee\` — סנכרן עכשיו\n` +
+      `\`נקה lee\` — מחק תורים שגויים מ-Lee\n\n` +
+
+      `💰 *שלחי מחיר ללקוחה:*\n` +
+      `\`מחיר 05XXXXXXXX 1200\`\n\n` +
+
       `📋 *CRM מלא:*\n` +
       `https://juliet-bot-production.up.railway.app/crm?pass=juliet2026`
     );
@@ -1569,7 +1698,7 @@ async function handleJulietCommand(message) {
 }
 
 // ── פקודות ג'ולייט — הודעות שהיא שולחת לעצמה ──────────────
-const ADMIN_KEYWORDS = ['פנויים','תורים','יומן','פנוי','נקה','אישרתי','ביטלתי','לקוחות','crm','סטטיסטיקה','עזרה','help','מחיר','שידור','חפשי','חפש','היעדרות','חזרתי','בדיקה','תפריט לקוחה','תצוגה','השתק','בטל השתק','שלחי','תאמי'];
+const ADMIN_KEYWORDS = ['פנויים','תורים','יומן','פנוי','נקה','אישרתי','ביטלתי','לקוחות','crm','סטטיסטיקה','עזרה','help','מחיר','שידור','חפשי','חפש','היעדרות','חזרתי','בדיקה','תפריט לקוחה','תצוגה','השתק','בטל השתק','שלחי','תאמי','הוסף תור','תור חדש','סנכרן lee','רענן lee','נקה lee'];
 
 client.on('message_create', async (message) => {
   if (!message.fromMe) return;
@@ -2631,6 +2760,40 @@ function startDailyBackup() {
   }, 60 * 60 * 1000);
 }
 
+// ── עזר: קריאת Lee API עם auth headers שונים ────────────────
+async function leeApiRequest(endpoint, apiKey, method = 'GET', body = null) {
+  return new Promise((resolve, reject) => {
+    const u = new URL(endpoint);
+    const postData = body ? JSON.stringify(body) : null;
+    const options = {
+      hostname: u.hostname,
+      path: u.pathname + u.search,
+      method,
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'X-API-Key': apiKey,
+        'x-api-key': apiKey,
+        'token': apiKey,
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        ...(postData ? { 'Content-Length': Buffer.byteLength(postData) } : {})
+      }
+    };
+    const req = https.request(options, res => {
+      let data = '';
+      res.on('data', chunk => { data += chunk; });
+      res.on('end', () => {
+        try { resolve({ status: res.statusCode, json: JSON.parse(data) }); }
+        catch(e) { resolve({ status: res.statusCode, raw: data.slice(0, 300) }); }
+      });
+    });
+    req.on('error', reject);
+    req.setTimeout(12000, () => { req.destroy(); reject(new Error('timeout')); });
+    if (postData) req.write(postData);
+    req.end();
+  });
+}
+
 // ── סנכרון Lee דרך API Key ────────────────────────────────────
 async function syncLeeViaAPI(apiKey, businessId) {
   console.log('🔄 lee sync — משתמש ב-API Key...');
@@ -2638,60 +2801,57 @@ async function syncLeeViaAPI(apiKey, businessId) {
   const start = now.toISOString().split('T')[0];
   const end   = new Date(now.getFullYear(), now.getMonth() + 3, 1).toISOString().split('T')[0];
 
-  // נסה מספר endpoints של Lee API
-  const endpoints = [
-    `https://api.lee.co.il/v1/appointments?from=${start}&to=${end}`,
-    `https://api.lee.co.il/appointments?businessId=${businessId}&from=${start}&to=${end}`,
-    `https://app.lee.co.il/api/appointments?from=${start}&to=${end}`,
-    `https://app.lee.co.il/api/v1/calendar/events?start=${start}&end=${end}`,
+  // שלב 1: נסה קודם לקבל session token ע"י POST /v1/auth עם ה-API Key
+  let sessionToken = null;
+  try {
+    const authRes = await leeApiRequest('https://api.lee.co.il/v1/auth', apiKey, 'POST', { api_key: apiKey });
+    console.log('🔑 Lee auth attempt:', authRes.status, JSON.stringify(authRes.json || authRes.raw).slice(0, 100));
+    if (authRes.json && (authRes.json.token || authRes.json.access_token || authRes.json.jwt)) {
+      sessionToken = authRes.json.token || authRes.json.access_token || authRes.json.jwt;
+      console.log('✅ Lee auth — קיבלנו session token!');
+    }
+  } catch(e) {
+    console.log('⚠️ Lee auth failed:', e.message);
+  }
+
+  const effectiveKey = sessionToken || apiKey;
+
+  // שלב 2: נסה endpoints שונים — API Key כ-query param, כ-header, ו-businessId שונים
+  const endpointVariants = [
+    // query param גישה
+    `https://api.lee.co.il/v1/appointments?api_key=${effectiveKey}&from=${start}&to=${end}`,
+    `https://api.lee.co.il/v1/appointments?key=${effectiveKey}&from=${start}&to=${end}`,
+    // business-specific endpoints
+    `https://api.lee.co.il/v1/business/${businessId}/appointments?from=${start}&to=${end}`,
+    `https://api.lee.co.il/v1/businesses/${businessId}/appointments?from=${start}&to=${end}`,
+    `https://api.lee.co.il/v1/calendar?from=${start}&to=${end}`,
+    `https://api.lee.co.il/v1/events?from=${start}&to=${end}&status=scheduled`,
+    // app subdomain
+    `https://app.lee.co.il/api/v1/appointments?from=${start}&to=${end}`,
+    `https://app.lee.co.il/api/appointments?businessId=${businessId}&from=${start}&to=${end}`,
   ];
 
   let appointments = [];
-  for (const endpoint of endpoints) {
+  for (const endpoint of endpointVariants) {
     try {
-      const result = await new Promise((resolve, reject) => {
-        const url = new URL(endpoint);
-        const options = {
-          hostname: url.hostname,
-          path: url.pathname + url.search,
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${apiKey}`,
-            'X-API-Key': apiKey,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          }
-        };
-        const req = https.request(options, res => {
-          let data = '';
-          res.on('data', chunk => { data += chunk; });
-          res.on('end', () => {
-            try {
-              const json = JSON.parse(data);
-              resolve({ status: res.statusCode, json });
-            } catch(e) {
-              resolve({ status: res.statusCode, raw: data.slice(0, 200) });
-            }
-          });
-        });
-        req.on('error', reject);
-        req.setTimeout(10000, () => { req.destroy(); reject(new Error('timeout')); });
-        req.end();
-      });
-
-      console.log(`📡 Lee API ${endpoint.split('/').slice(3).join('/')}: ${result.status}`);
+      const result = await leeApiRequest(endpoint, effectiveKey);
+      console.log(`📡 Lee ${endpoint.replace(/api_key=[^&]+/,'api_key=***').split('?')[0].split('/').slice(-3).join('/')}: status=${result.status}`);
 
       if (result.status === 200 && result.json) {
         const arr = Array.isArray(result.json) ? result.json
-          : (result.json.data || result.json.appointments || result.json.events || result.json.items || []);
+          : (result.json.data || result.json.appointments || result.json.events
+          || result.json.items || result.json.results || []);
         if (Array.isArray(arr) && arr.length > 0) {
           appointments = arr;
-          console.log(`✅ Lee API — נמצאו ${arr.length} תורים`);
+          console.log(`✅ Lee API — נמצאו ${arr.length} תורים מ: ${endpoint.split('/').slice(-2).join('/')}`);
           break;
+        } else {
+          // לוג מה קיבלנו כדי להבין את מבנה ה-JSON
+          console.log(`📋 Lee JSON (no appts): ${JSON.stringify(result.json).slice(0, 150)}`);
         }
       }
     } catch(e) {
-      console.log(`⚠️ Lee API endpoint נכשל: ${e.message}`);
+      console.log(`⚠️ Lee endpoint נכשל: ${e.message}`);
     }
   }
 

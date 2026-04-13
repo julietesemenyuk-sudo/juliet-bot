@@ -321,8 +321,9 @@
   </div>
   <!-- כפתורי קפיצה מהירה + סנכרון -->
   <div class="cal-quick-btns" id="cal-quick-btns"></div>
-  <div style="text-align:center;margin-bottom:16px">
+  <div style="text-align:center;margin-bottom:16px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
     <button class="sync-btn" id="sync-btn" onclick="syncLee()">🔄 סנכרן מ-lee.co.il</button>
+    <button class="sync-btn" id="clear-lee-btn" onclick="clearLeeData()" style="background:rgba(255,80,80,.1);border-color:rgba(255,80,80,.4);color:#ff8080">🗑️ נקה תורים שגויים</button>
   </div>
 
   <div class="cal-grid-wrap"><div class="cal-grid" id="cal-grid"></div></div>
@@ -1325,6 +1326,24 @@ async function syncLee() {
   } catch(e) {
     btn.textContent = '❌ שגיאה';
     setTimeout(() => { btn.textContent = '🔄 סנכרן מ-lee.co.il'; btn.disabled = false; }, 2000);
+  }
+}
+
+// ── ניקוי תורים שגויים מ-Lee ──────────────────────────────────
+async function clearLeeData() {
+  if (!confirm('למחוק תורים עתידיים שגויים שסונכרנו מ-Lee?\n(תורים שבוצעו לא יימחקו)')) return;
+  const btn = document.getElementById('clear-lee-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ מנקה...';
+  try {
+    const res = await fetch('/clear-lee-data?pass=' + getPass(), { method: 'POST' });
+    const data = await res.json();
+    btn.textContent = `✅ נוקו ${data.cleared} תורים`;
+    setTimeout(() => { btn.textContent = '🗑️ נקה תורים שגויים'; btn.disabled = false; }, 3000);
+    loadCalendar();
+  } catch(e) {
+    btn.textContent = '❌ שגיאה';
+    setTimeout(() => { btn.textContent = '🗑️ נקה תורים שגויים'; btn.disabled = false; }, 2000);
   }
 }
 
