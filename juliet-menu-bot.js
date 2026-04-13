@@ -143,6 +143,17 @@ if (IS_RAILWAY && !fs.existsSync(DATA_DIR)) {
   try { fs.mkdirSync(DATA_DIR, { recursive: true }); } catch(e) {}
 }
 
+// ── אם FORCE_QR=1 — מחק סשן ישן בהפעלה ─────────────────────
+if (process.env.FORCE_QR === '1') {
+  const authPath = IS_RAILWAY ? '/data/.wwebjs_auth' : path.join(__dirname, '.wwebjs_auth');
+  try {
+    fs.rmSync(authPath, { recursive: true, force: true });
+    console.log('🗑️ FORCE_QR: סשן נמחק — ממתין ל-QR חדש');
+  } catch(e) {
+    console.log('⚠️ FORCE_QR: שגיאה במחיקה:', e.message);
+  }
+}
+
 // ── יומן תורים פנויים ───────────────────────────────────────
 const SLOTS_FILE = path.join(DATA_DIR, 'slots.json');
 
