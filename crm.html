@@ -1286,7 +1286,7 @@ async function syncLee() {
     const statusRes = await fetch('/sync-lee-status?pass=' + getPass());
     const status = await statusRes.json();
     if (!status.hasCredentials) {
-      alert('⚠️ פרטי Lee לא הוגדרו!\n\nפתחי את קובץ .env והוסיפי:\nLEE_EMAIL=המייל שלך ב-Lee\nLEE_PASS=הסיסמה שלך ב-Lee\n\nואז הפעילי מחדש את הבוט.');
+      alert('⚠️ פרטי Lee לא הוגדרו!\n\nהוסיפי ב-Railway → Variables:\nLEE_API_KEY=המפתח מ-Lee (הגדרות → API)');
       return;
     }
   } catch(e) {}
