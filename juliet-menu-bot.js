@@ -293,6 +293,7 @@ function scheduleAIFollowup(from, name, service) {
 const CRM_HTML = path.join(__dirname, 'crm.html');
 const CRM_PASS = process.env.CRM_PASSWORD || 'juliet2026';
 let currentQR = null; // שמירת ה-QR הנוכחי
+let clientReady = false; // האם הבוט מחובר באמת
 
 http.createServer((req, res) => {
   const url = new URL(req.url, 'http://localhost');
@@ -328,11 +329,18 @@ http.createServer((req, res) => {
         <p style="color:#888;font-family:Arial;margin-top:16px">הגדרות → מכשירים מקושרים → קשרי מכשיר</p>
         <script>setTimeout(()=>location.reload(),25000)</script>
       </body></html>`);
+    } else if (clientReady) {
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      res.end(`<html><body style="background:#000;color:#c8a84b;font-family:Arial;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:20px">
+        <h2>✅ הבוט מחובר! אין צורך ב-QR</h2>
+        <a href="/reset-session" style="color:#888;font-size:14px;font-family:Arial">לא עובד? לחצי כאן לאיפוס חיבור</a>
+      </body></html>`);
     } else {
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
       res.end(`<html><body style="background:#000;color:#c8a84b;font-family:Arial;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:20px">
-        <h2>✅ הבוט כבר מחובר! אין צורך ב-QR</h2>
-        <a href="/reset-session" style="color:#888;font-size:14px;font-family:Arial">לא עובד? לחצי כאן לאיפוס חיבור</a>
+        <h2>⏳ הבוט מתחיל... מחכה ל-QR</h2>
+        <p style="color:#888;font-family:Arial;font-size:14px">רענני את הדף בעוד 10 שניות</p>
+        <script>setTimeout(()=>location.reload(),10000)</script>
       </body></html>`);
     }
     return;
@@ -3148,6 +3156,8 @@ function startReminderJob() {
 }
 
 client.on('ready', () => {
+  clientReady = true;
+  currentQR = null; // נקה QR ישן
   console.log('\n✅ הבוט של ג\'וליאט פעיל! 💎\n');
   console.log('לקוחות שכותבות "היי" יקבלו תפריט אוטומטי\n');
   try { console.log('📱 מחובר כ:', client.info.wid.user); } catch(e) {}
@@ -3207,6 +3217,7 @@ client.on('auth_failure', () => {
 });
 
 client.on('disconnected', async (reason) => {
+  clientReady = false;
   console.log('❌ הבוט התנתק:', reason);
   const disconnectTime = new Date().toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem' });
   fs.writeFileSync(path.join(__dirname, 'disconnected.txt'), new Date().toISOString() + ': ' + reason);
