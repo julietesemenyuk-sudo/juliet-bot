@@ -1408,6 +1408,69 @@ async function handleJulietCommand(message) {
     return;
   }
 
+  // ── שליחת תזכורות ידנית ──────────────────────────────────────
+  // פקודה: "שלח תזכורות" — שולחת תזכורות לכל מי שיש לו תור מחר
+  if (bodyLow === 'שלח תזכורות' || bodyLow === 'תזכורות מחר' || bodyLow === 'שלחי תזכורות') {
+    const tomorrowKey = getIsraelTomorrowKey();
+    const crm = loadCRM();
+    let sent = 0, skipped = 0, errors = 0;
+    const report = [];
+
+    for (const [phone, customer] of Object.entries(crm)) {
+      if (customer.muted) continue;
+      if (!phone.startsWith('05') && !phone.match(/^[0-9]{10}$/)) continue; // רק מספרים אמיתיים
+
+      const visits = (customer.visits || []).filter(v =>
+        v.date && v.date.slice(0,10) === tomorrowKey && v.status !== 'cancelled' && v.status !== 'done'
+      );
+      if (!visits.length) continue;
+
+      // קח את התור הראשון של מחר
+      const visit = visits[0];
+      const name = customer.name || 'יקרה';
+      const firstName = name.split(' ')[0];
+      const apptStr = new Date(visit.date).toLocaleTimeString('he-IL', { timeZone:'Asia/Jerusalem', hour:'2-digit', minute:'2-digit' });
+      const chatId = '972' + phone.replace(/^0/,'') + '@c.us';
+
+      let msg;
+      if (hasCity(name)) {
+        msg = `היי ${firstName}! 💎\n\n` +
+          `תזכורת לתור מחר ב-*${apptStr}*${visit.service ? ` — *${visit.service}*` : ''} אצל *Juliet Beauty Boutique* 💇‍♀️\n\n` +
+          `📍 *כתובת הסלון:*\n${SALON_ADDRESS}\n\n` +
+          `✨ מכיוון שאת מגיעה מרחוק — תרצי לשלוח לי את הכתובת המדויקת שלך? אדאג שיהיה לך קל להגיע 📍\n\n` +
+          `מחכה לך! 💫`;
+      } else {
+        msg = `היי ${firstName}! 💎\n\n` +
+          `תזכורת לתור מחר ב-*${apptStr}*${visit.service ? ` — *${visit.service}*` : ''} אצל *Juliet Beauty Boutique* 💇‍♀️\n\n` +
+          `📍 *כתובת:*\n${SALON_ADDRESS}\n\n` +
+          `אם צריך לשנות — שלחי הודעה 🙏\nמחכה לך! 💫`;
+      }
+
+      try {
+        await client.sendMessage(chatId, msg);
+        visit.reminderSent = true;
+        sent++;
+        report.push(`✅ ${name} (${phone}) — ${apptStr}`);
+        await new Promise(r => setTimeout(r, 1500)); // השהייה למניעת חסימה
+      } catch(e) {
+        errors++;
+        report.push(`❌ ${name} (${phone}) — ${e.message}`);
+      }
+    }
+
+    saveCRM(crm);
+
+    const tomorrowDate = new Date(tomorrowKey).toLocaleDateString('he-IL', { day:'numeric', month:'numeric' });
+    await message.reply(
+      `📅 *תזכורות נשלחו ל-${tomorrowDate}*\n\n` +
+      `✅ נשלח: *${sent}*\n` +
+      (errors ? `❌ נכשל: *${errors}*\n` : '') +
+      (skipped ? `⏭️ דולג (ללא מספר): *${skipped}*\n` : '') +
+      (report.length ? `\n` + report.join('\n') : '')
+    );
+    return;
+  }
+
   // ── ניקוי תורים שגויים מ-Lee ──────────────────────────────────
   if (bodyLow === 'נקה lee' || body === 'נקה CRM Lee' || body === 'נקה תורים lee') {
     const crm = loadCRM();
@@ -1706,7 +1769,7 @@ async function handleJulietCommand(message) {
 }
 
 // ── פקודות ג'ולייט — הודעות שהיא שולחת לעצמה ──────────────
-const ADMIN_KEYWORDS = ['פנויים','תורים','יומן','פנוי','נקה','אישרתי','ביטלתי','לקוחות','crm','סטטיסטיקה','עזרה','help','מחיר','שידור','חפשי','חפש','היעדרות','חזרתי','בדיקה','תפריט לקוחה','תצוגה','השתק','בטל השתק','שלחי','תאמי','הוסף תור','תור חדש','סנכרן lee','רענן lee','נקה lee'];
+const ADMIN_KEYWORDS = ['פנויים','תורים','יומן','פנוי','נקה','אישרתי','ביטלתי','לקוחות','crm','סטטיסטיקה','עזרה','help','מחיר','שידור','חפשי','חפש','היעדרות','חזרתי','בדיקה','תפריט לקוחה','תצוגה','השתק','בטל השתק','שלחי','תאמי','הוסף תור','תור חדש','סנכרן lee','רענן lee','נקה lee','שלח תזכורות','תזכורות מחר','שלחי תזכורות'];
 
 client.on('message_create', async (message) => {
   if (!message.fromMe) return;
