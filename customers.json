@@ -635,13 +635,20 @@
         "source": "lee_excel",
         "status": "scheduled",
         "price": 850
+      },
+      {
+        "date": "2026-05-01T07:00:00.000Z",
+        "service": "החלקת שורש",
+        "source": "lee_manual",
+        "status": "scheduled",
+        "price": 850
       }
     ],
     "source": "lee",
     "businessType": "beauty",
     "needsPhone": true,
     "lastService": "החלקת שורש",
-    "pendingAppointment": "2026-04-24T09:00:00.000Z",
+    "pendingAppointment": "2026-05-01T07:00:00.000Z",
     "lastPrice": 850
   },
   "lee_לורין_אחות_קארין": {
@@ -730,5 +737,24 @@
     "lastService": "החלקת שורש",
     "pendingAppointment": "2026-04-17T09:30:00.000Z",
     "lastPrice": 850
+  },
+  "lee_דנה_תל_אביב": {
+    "phone": "lee_דנה_תל_אביב",
+    "name": "דנה תל אביב",
+    "firstContact": "2026-05-10T08:00:00.000Z",
+    "visits": [
+      {
+        "date": "2026-05-10T08:00:00.000Z",
+        "service": "החלקת שורש",
+        "source": "lee_manual",
+        "status": "scheduled",
+        "price": 850
+      }
+    ],
+    "source": "lee",
+    "businessType": "beauty",
+    "needsPhone": true,
+    "pendingAppointment": "2026-05-10T08:00:00.000Z",
+    "lastService": "החלקת שורש"
   }
 }
