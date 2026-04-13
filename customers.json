@@ -160,12 +160,29 @@
         "source": "lee",
         "status": "scheduled",
         "notes": "0545382612"
+      },
+      {
+        "date": "2026-04-24T09:00:00.000Z",
+        "service": "החלקת שורש",
+        "source": "lee_excel",
+        "status": "scheduled",
+        "price": 850
+      },
+      {
+        "date": "2026-05-01T07:00:00.000Z",
+        "service": "החלקת שורש",
+        "source": "lee_manual",
+        "status": "scheduled",
+        "price": 850
       }
     ],
     "source": "lee",
     "businessType": "beauty",
     "lastSeen": "2026-04-10T09:47:46.153Z",
-    "lastService": "החלקת שורש"
+    "lastService": "החלקת שורש",
+    "leeStatus": "פעיל",
+    "pendingAppointment": "2026-05-01T07:00:00.000Z",
+    "lastPrice": 850
   },
   "0506344344": {
     "phone": "0506344344",
@@ -200,7 +217,8 @@
     "lastSeen": "2026-04-10T09:47:46.170Z",
     "lastService": "החלקת שורש",
     "pendingAppointment": "2026-04-23T10:00:00.000Z",
-    "lastPrice": 850
+    "lastPrice": 850,
+    "leeStatus": "פעיל"
   },
   "0546536311": {
     "phone": "0546536311",
@@ -226,7 +244,8 @@
     "source": "lee",
     "businessType": "beauty",
     "lastSeen": "2026-04-10T09:47:46.170Z",
-    "lastService": "החלקת שורש"
+    "lastService": "החלקת שורש",
+    "leeStatus": "פעיל"
   },
   "0586316166": {
     "phone": "0586316166",
@@ -244,7 +263,8 @@
     "source": "lee",
     "businessType": "beauty",
     "lastSeen": "2026-04-10T09:47:46.170Z",
-    "lastService": "החלקה מלאה"
+    "lastService": "החלקה מלאה",
+    "leeStatus": "פעיל"
   },
   "0525340099": {
     "phone": "0525340099",
@@ -269,7 +289,8 @@
     "source": "lee",
     "businessType": "beauty",
     "lastSeen": "2026-04-10T09:47:46.170Z",
-    "lastService": "צבע"
+    "lastService": "צבע",
+    "leeStatus": "פעיל"
   },
   "0506860179": {
     "phone": "0506860179",
@@ -287,7 +308,8 @@
     "source": "lee",
     "businessType": "beauty",
     "lastSeen": "2026-04-10T09:47:46.170Z",
-    "lastService": "החלקה מלאה"
+    "lastService": "החלקה מלאה",
+    "leeStatus": "פעיל"
   },
   "0522346866": {
     "phone": "0522346866",
@@ -305,7 +327,8 @@
     "source": "lee",
     "businessType": "beauty",
     "lastSeen": "2026-04-10T09:48:11.974Z",
-    "lastService": "החלקת שורש"
+    "lastService": "החלקת שורש",
+    "leeStatus": "פעיל"
   },
   "0525432107": {
     "phone": "0525432107",
@@ -337,7 +360,8 @@
     "source": "lee",
     "businessType": "beauty",
     "lastSeen": "2026-04-10T10:00:58.093Z",
-    "lastService": "הרמה"
+    "lastService": "הרמה",
+    "leeStatus": "פעיל"
   },
   "0506371528": {
     "phone": "0506371528",
@@ -355,7 +379,8 @@
     "source": "lee",
     "businessType": "beauty",
     "lastSeen": "2026-04-10T10:00:58.105Z",
-    "lastService": "גוונים"
+    "lastService": "גוונים",
+    "leeStatus": "פעיל"
   },
   "0523290942": {
     "phone": "0523290942",
@@ -388,9 +413,10 @@
     "source": "lee",
     "businessType": "beauty",
     "lastSeen": "2026-04-10T10:00:58.105Z",
-    "lastService": "החלקת שורש",
-    "pendingAppointment": "2026-04-24T06:00:00.000Z",
-    "lastPrice": 850
+    "lastService": "החלקה מלאה",
+    "pendingAppointment": "2026-04-14T12:30:00.000Z",
+    "lastPrice": 1000,
+    "leeStatus": "פעיל"
   },
   "0544712163": {
     "phone": "0544712163",
@@ -409,7 +435,10 @@
     "source": "lee",
     "businessType": "beauty",
     "lastSeen": "2026-04-10T10:00:58.105Z",
-    "lastService": "החלקת שורש"
+    "lastService": "החלקת שורש",
+    "leeStatus": "פעיל",
+    "pendingAppointment": "2026-04-15T08:00:00.000Z",
+    "lastPrice": 850
   },
   "0542114546": {
     "phone": "0542114546",
@@ -428,7 +457,8 @@
     "source": "lee",
     "businessType": "beauty",
     "lastSeen": "2026-04-10T10:00:58.105Z",
-    "lastService": "החלקת שורש"
+    "lastService": "החלקת שורש",
+    "leeStatus": "פעיל"
   },
   "0586234560": {
     "phone": "0586234560",
@@ -446,7 +476,10 @@
     "source": "lee",
     "businessType": "beauty",
     "lastSeen": "2026-04-10T10:00:58.105Z",
-    "lastService": "החלקת שורש"
+    "lastService": "החלקת שורש",
+    "leeStatus": "פעיל",
+    "pendingAppointment": "2026-04-17T06:30:00.000Z",
+    "lastPrice": 850
   },
   "93372639359224@lid": {
     "phone": "93372639359224@lid",
@@ -544,100 +577,454 @@
     "name": "אמילי מוכנה ?",
     "lastSeen": "2026-04-10T14:45:00.981Z"
   },
-  "lee_יובל_": {
-    "phone": "lee_יובל_",
-    "name": "יובל .",
-    "firstContact": "2026-04-15T08:00:00.000Z",
-    "visits": [
-      {
-        "date": "2026-04-15T08:00:00.000Z",
-        "service": "החלקת שורש",
-        "source": "lee_excel",
-        "status": "scheduled",
-        "price": 850
-      }
-    ],
+  "0527601257": {
+    "phone": "0527601257",
+    "name": "אביגיל .",
+    "firstContact": "2025-09-28T00:00:00.000Z",
+    "lastSeen": "2026-03-29T00:00:00.000Z",
+    "visits": [],
     "source": "lee",
     "businessType": "beauty",
-    "needsPhone": true,
-    "lastService": "החלקת שורש",
-    "pendingAppointment": "2026-04-15T08:00:00.000Z",
-    "lastPrice": 850
+    "leeStatus": "פעיל"
   },
-  "lee_עינב_וולפגור": {
-    "phone": "lee_עינב_וולפגור",
-    "name": "עינב וולפגור",
-    "firstContact": "2026-04-17T06:30:00.000Z",
-    "visits": [
-      {
-        "date": "2026-04-17T06:30:00.000Z",
-        "service": "החלקת שורש",
-        "source": "lee_excel",
-        "status": "scheduled",
-        "price": 850
-      }
-    ],
+  "0523333504": {
+    "phone": "0523333504",
+    "name": "אביטל חי",
+    "firstContact": "2025-08-17T00:00:00.000Z",
+    "lastSeen": "2025-09-15T00:00:00.000Z",
+    "visits": [],
     "source": "lee",
     "businessType": "beauty",
-    "needsPhone": true,
-    "lastService": "החלקת שורש",
-    "pendingAppointment": "2026-04-17T06:30:00.000Z",
-    "lastPrice": 850
+    "leeStatus": "פעיל"
   },
-  "lee_עדן_ירושלמי": {
-    "phone": "lee_עדן_ירושלמי",
-    "name": "עדן ירושלמי",
-    "firstContact": "2026-04-19T10:00:00.000Z",
-    "visits": [
-      {
-        "date": "2026-04-19T10:00:00.000Z",
-        "service": "החלקת שורש",
-        "source": "lee_excel",
-        "status": "scheduled",
-        "price": 850
-      }
-    ],
+  "0544776884": {
+    "phone": "0544776884",
+    "name": "אביטל לרנר",
+    "firstContact": "2025-10-11T00:00:00.000Z",
+    "lastSeen": "2026-02-26T00:00:00.000Z",
+    "visits": [],
     "source": "lee",
     "businessType": "beauty",
-    "needsPhone": true,
-    "lastService": "החלקת שורש",
-    "pendingAppointment": "2026-04-19T10:00:00.000Z",
-    "lastPrice": 850
+    "leeStatus": "פעיל"
   },
-  "lee_הדר_שפירא": {
-    "phone": "lee_הדר_שפירא",
-    "name": "הדר שפירא",
-    "firstContact": "2026-04-14T12:30:00.000Z",
-    "visits": [
-      {
-        "date": "2026-04-14T12:30:00.000Z",
-        "service": "החלקה מלאה",
-        "source": "lee_excel",
-        "status": "scheduled",
-        "price": 1000
-      }
-    ],
+  "0542429193": {
+    "phone": "0542429193",
+    "name": "אודליה החלקה",
+    "firstContact": "2025-11-30T00:00:00.000Z",
+    "lastSeen": "2025-12-02T00:00:00.000Z",
+    "visits": [],
     "source": "lee",
     "businessType": "beauty",
-    "needsPhone": true,
-    "lastService": "החלקה מלאה",
-    "pendingAppointment": "2026-04-14T12:30:00.000Z",
-    "lastPrice": 1000
+    "leeStatus": "פעיל"
   },
-  "lee_שולי_כהן": {
-    "phone": "lee_שולי_כהן",
-    "name": "שולי כהן",
-    "firstContact": "2026-04-24T09:00:00.000Z",
+  "0503038895": {
+    "phone": "0503038895",
+    "name": "אולינקה סבצנקו",
+    "firstContact": "2025-09-09T00:00:00.000Z",
+    "lastSeen": "2026-03-09T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0545977739": {
+    "phone": "0545977739",
+    "name": "אורית .",
+    "firstContact": "2025-11-04T00:00:00.000Z",
+    "lastSeen": "2025-11-12T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0534290862": {
+    "phone": "0534290862",
+    "name": "איילה החלקה",
+    "firstContact": "2025-09-19T00:00:00.000Z",
+    "lastSeen": "2026-02-03T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0505500428": {
+    "phone": "0505500428",
+    "name": "איילת .",
+    "firstContact": "2025-11-09T00:00:00.000Z",
+    "lastSeen": "2025-12-05T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0586210365": {
+    "phone": "0586210365",
+    "name": "אילנה עמדה",
+    "firstContact": "2026-03-12T00:00:00.000Z",
+    "lastSeen": "2026-03-15T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0549044641": {
+    "phone": "0549044641",
+    "name": "אינה איתן",
+    "firstContact": "2025-12-29T00:00:00.000Z",
+    "lastSeen": "2026-01-08T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0505634682": {
+    "phone": "0505634682",
+    "name": "אירית החלקה לבת",
+    "firstContact": "2025-11-11T00:00:00.000Z",
+    "lastSeen": "2025-12-07T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0502574768": {
+    "phone": "0502574768",
+    "name": "אירית שכנה",
+    "firstContact": "2026-02-26T00:00:00.000Z",
+    "lastSeen": "2026-03-18T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0525732020": {
+    "phone": "0525732020",
+    "name": "אירמה החלקה",
+    "firstContact": "2025-10-01T00:00:00.000Z",
+    "lastSeen": "2025-10-09T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0529521288": {
+    "phone": "0529521288",
+    "name": "אירן רספוטין",
+    "firstContact": "2025-08-17T00:00:00.000Z",
+    "lastSeen": "2025-09-01T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0507515132": {
+    "phone": "0507515132",
+    "name": "אליאנה יאנה",
+    "firstContact": "2026-01-03T00:00:00.000Z",
+    "lastSeen": "2026-01-13T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0586886979": {
+    "phone": "0586886979",
+    "name": "אליה .",
+    "firstContact": "2025-12-29T00:00:00.000Z",
+    "lastSeen": "2026-01-04T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0528869300": {
+    "phone": "0528869300",
+    "name": "אלינה אשקלון",
+    "firstContact": "2025-09-16T00:00:00.000Z",
+    "lastSeen": "2025-10-15T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0545425631": {
+    "phone": "0545425631",
+    "name": "אלינה רזומובסקי",
+    "firstContact": "2025-08-18T00:00:00.000Z",
+    "lastSeen": "2025-11-26T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0542004593": {
+    "phone": "0542004593",
+    "name": "אלכסיי ואקס",
+    "firstContact": "2025-08-17T00:00:00.000Z",
+    "lastSeen": null,
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0544562477": {
+    "phone": "0544562477",
+    "name": "אלמה אברבך",
+    "firstContact": "2025-10-12T00:00:00.000Z",
+    "lastSeen": "2026-04-03T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0502515136": {
+    "phone": "0502515136",
+    "name": "אמא של אליאנה",
+    "firstContact": "2026-02-22T00:00:00.000Z",
+    "lastSeen": "2026-02-23T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0505915665": {
+    "phone": "0505915665",
+    "name": "אמילי החלקה",
+    "firstContact": "2025-09-08T00:00:00.000Z",
+    "lastSeen": "2026-03-03T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0509495592": {
+    "phone": "0509495592",
+    "name": "אמיליה ירין",
+    "firstContact": "2025-11-02T00:00:00.000Z",
+    "lastSeen": "2025-11-07T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0533200822": {
+    "phone": "0533200822",
+    "name": "אנגלינה ראשלצ",
+    "firstContact": "2025-10-17T00:00:00.000Z",
+    "lastSeen": "2025-11-21T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0508104144": {
+    "phone": "0508104144",
+    "name": "אנה קדוש",
+    "firstContact": "2025-08-17T00:00:00.000Z",
+    "lastSeen": "2025-08-18T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0547052994": {
+    "phone": "0547052994",
+    "name": "אנה שביט",
+    "firstContact": "2025-09-14T00:00:00.000Z",
+    "lastSeen": "2026-02-18T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0547964669": {
+    "phone": "0547964669",
+    "name": "אסתר חסיד",
+    "firstContact": "2025-09-08T00:00:00.000Z",
+    "lastSeen": "2026-01-16T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0528229005": {
+    "phone": "0528229005",
+    "name": "אפרת .",
+    "firstContact": "2025-08-31T00:00:00.000Z",
+    "lastSeen": "2025-09-18T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0546490635": {
+    "phone": "0546490635",
+    "name": "אפרת זוהר",
+    "firstContact": "2025-08-17T00:00:00.000Z",
+    "lastSeen": "2025-10-13T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0532257558": {
+    "phone": "0532257558",
+    "name": "אפרת יחזקל",
+    "firstContact": "2025-08-17T00:00:00.000Z",
+    "lastSeen": "2026-01-15T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0542283506": {
+    "phone": "0542283506",
+    "name": "בלה טל",
+    "firstContact": "2025-12-15T00:00:00.000Z",
+    "lastSeen": "2026-02-27T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0527596464": {
+    "phone": "0527596464",
+    "name": "בניהו אבוקסיס",
+    "firstContact": "2026-02-14T00:00:00.000Z",
+    "lastSeen": null,
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0526326257": {
+    "phone": "0526326257",
+    "name": "בת אל .",
+    "firstContact": "2025-08-18T00:00:00.000Z",
+    "lastSeen": "2025-08-21T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0542582224": {
+    "phone": "0542582224",
+    "name": "בת אל יפרח",
+    "firstContact": "2025-10-25T00:00:00.000Z",
+    "lastSeen": "2025-10-27T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0547268630": {
+    "phone": "0547268630",
+    "name": "בת קארין הרצליה",
+    "firstContact": "2025-12-07T00:00:00.000Z",
+    "lastSeen": "2025-12-28T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0528336916": {
+    "phone": "0528336916",
+    "name": "ג'ודי 11",
+    "firstContact": "2025-12-29T00:00:00.000Z",
+    "lastSeen": "2026-01-02T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0546742225": {
+    "phone": "0546742225",
+    "name": "גבריאלה .",
+    "firstContact": "2025-08-17T00:00:00.000Z",
+    "lastSeen": null,
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0546334560": {
+    "phone": "0546334560",
+    "name": "גילי סימון",
+    "firstContact": "2025-11-27T00:00:00.000Z",
+    "lastSeen": "2025-12-14T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0506622766": {
+    "phone": "0506622766",
+    "name": "גל בל",
+    "firstContact": "2025-12-22T00:00:00.000Z",
+    "lastSeen": "2026-02-23T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0548358268": {
+    "phone": "0548358268",
+    "name": "גל שושן",
+    "firstContact": "2026-01-12T00:00:00.000Z",
+    "lastSeen": "2026-02-06T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0504776654": {
+    "phone": "0504776654",
+    "name": "גלי מנצור",
+    "firstContact": "2025-11-09T00:00:00.000Z",
+    "lastSeen": "2026-02-04T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0548106717": {
+    "phone": "0548106717",
+    "name": "גלית בר גת",
+    "firstContact": "2025-11-30T00:00:00.000Z",
+    "lastSeen": null,
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0545219497": {
+    "phone": "0545219497",
+    "name": "דורין .",
+    "firstContact": "2025-11-08T00:00:00.000Z",
+    "lastSeen": "2025-11-09T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0542489244": {
+    "phone": "0542489244",
+    "name": "דיאנה ביקוב",
+    "firstContact": "2025-10-08T00:00:00.000Z",
+    "lastSeen": "2025-12-29T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0508226511": {
+    "phone": "0508226511",
+    "name": "דנה תל אביב",
+    "firstContact": "2025-12-14T00:00:00.000Z",
+    "lastSeen": "2025-12-24T00:00:00.000Z",
     "visits": [
       {
-        "date": "2026-04-24T09:00:00.000Z",
-        "service": "החלקת שורש",
-        "source": "lee_excel",
-        "status": "scheduled",
-        "price": 850
-      },
-      {
-        "date": "2026-05-01T07:00:00.000Z",
+        "date": "2026-05-10T08:00:00.000Z",
         "service": "החלקת שורש",
         "source": "lee_manual",
         "status": "scheduled",
@@ -646,15 +1033,246 @@
     ],
     "source": "lee",
     "businessType": "beauty",
-    "needsPhone": true,
+    "leeStatus": "פעיל",
+    "pendingAppointment": "2026-05-10T08:00:00.000Z",
+    "lastService": "החלקת שורש"
+  },
+  "0503544959": {
+    "phone": "0503544959",
+    "name": "דניאל אינסט",
+    "firstContact": "2025-10-15T00:00:00.000Z",
+    "lastSeen": "2025-10-21T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0502692556": {
+    "phone": "0502692556",
+    "name": "דניאלה אמא מורן",
+    "firstContact": "2025-11-09T00:00:00.000Z",
+    "lastSeen": "2026-01-15T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0506788060": {
+    "phone": "0506788060",
+    "name": "דניאלה באר יעקב",
+    "firstContact": "2025-08-26T00:00:00.000Z",
+    "lastSeen": "2025-12-12T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0542495259": {
+    "phone": "0542495259",
+    "name": "הדס דרך ספיר",
+    "firstContact": "2026-01-07T00:00:00.000Z",
+    "lastSeen": "2026-02-19T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0542621213": {
+    "phone": "0542621213",
+    "name": "היי הרצליה",
+    "firstContact": "2025-10-15T00:00:00.000Z",
+    "lastSeen": "2026-03-20T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0552272424": {
+    "phone": "0552272424",
+    "name": "הילה לוי",
+    "firstContact": "2025-12-29T00:00:00.000Z",
+    "lastSeen": "2026-01-09T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0504286661": {
+    "phone": "0504286661",
+    "name": "ורד אבן צור",
+    "firstContact": "2025-10-03T00:00:00.000Z",
+    "lastSeen": "2025-10-12T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0523379384": {
+    "phone": "0523379384",
+    "name": "ורד באר יעקב",
+    "firstContact": "2025-09-03T00:00:00.000Z",
+    "lastSeen": "2025-11-17T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0544462988": {
+    "phone": "0544462988",
+    "name": "חדווה חימי",
+    "firstContact": "2025-10-21T00:00:00.000Z",
+    "lastSeen": "2025-10-27T00:00:00.000Z",
+    "visits": [
+      {
+        "date": "2026-04-13T11:00:00.000Z",
+        "service": "החלקת שורש",
+        "source": "lee_excel",
+        "status": "scheduled",
+        "price": 850
+      }
+    ],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל",
+    "pendingAppointment": "2026-04-13T11:00:00.000Z",
     "lastService": "החלקת שורש",
-    "pendingAppointment": "2026-05-01T07:00:00.000Z",
     "lastPrice": 850
   },
-  "lee_לורין_אחות_קארין": {
-    "phone": "lee_לורין_אחות_קארין",
+  "0502299668": {
+    "phone": "0502299668",
+    "name": "חן .",
+    "firstContact": "2025-08-17T00:00:00.000Z",
+    "lastSeen": "2025-12-15T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0548031705": {
+    "phone": "0548031705",
+    "name": "חן .",
+    "firstContact": "2026-02-26T00:00:00.000Z",
+    "lastSeen": "2026-03-12T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0526734566": {
+    "phone": "0526734566",
+    "name": "חן גולדנברג",
+    "firstContact": "2025-10-06T00:00:00.000Z",
+    "lastSeen": "2025-10-17T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0547161298": {
+    "phone": "0547161298",
+    "name": "חן שתיוי",
+    "firstContact": "2025-08-18T00:00:00.000Z",
+    "lastSeen": "2026-02-11T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0524309911": {
+    "phone": "0524309911",
+    "name": "טלי .",
+    "firstContact": "2025-09-10T00:00:00.000Z",
+    "lastSeen": "2026-02-08T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0505456503": {
+    "phone": "0505456503",
+    "name": "טלי גנות",
+    "firstContact": "2025-11-14T00:00:00.000Z",
+    "lastSeen": "2025-12-04T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0506823302": {
+    "phone": "0506823302",
+    "name": "טליה פרנקל",
+    "firstContact": "2025-08-26T00:00:00.000Z",
+    "lastSeen": "2026-02-01T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0584897290": {
+    "phone": "0584897290",
+    "name": "יאנה .",
+    "firstContact": "2025-10-25T00:00:00.000Z",
+    "lastSeen": "2025-11-03T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0546491312": {
+    "phone": "0546491312",
+    "name": "יוליה מושינסקי",
+    "firstContact": "2025-08-17T00:00:00.000Z",
+    "lastSeen": "2025-09-08T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0543301923": {
+    "phone": "0543301923",
+    "name": "יערית החלקה",
+    "firstContact": "2025-11-04T00:00:00.000Z",
+    "lastSeen": "2025-11-27T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0556700305": {
+    "phone": "0556700305",
+    "name": "יפה .",
+    "firstContact": "2025-10-21T00:00:00.000Z",
+    "lastSeen": null,
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0523708910": {
+    "phone": "0523708910",
+    "name": "יפית אמא של התאומות",
+    "firstContact": "2025-08-24T00:00:00.000Z",
+    "lastSeen": "2025-08-31T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0509925529": {
+    "phone": "0509925529",
+    "name": "ירדן גרוס",
+    "firstContact": "2025-10-28T00:00:00.000Z",
+    "lastSeen": "2026-03-25T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0528334383": {
+    "phone": "0528334383",
     "name": "לורין אחות קארין",
-    "firstContact": "2026-04-14T08:30:00.000Z",
+    "firstContact": "2025-10-07T00:00:00.000Z",
+    "lastSeen": "2026-03-31T00:00:00.000Z",
     "visits": [
       {
         "date": "2026-04-14T08:30:00.000Z",
@@ -673,35 +1291,206 @@
     ],
     "source": "lee",
     "businessType": "beauty",
-    "needsPhone": true,
-    "lastService": "החלקת שורש",
+    "leeStatus": "פעיל",
     "pendingAppointment": "2026-04-15T12:00:00.000Z",
+    "lastService": "החלקת שורש",
     "lastPrice": 850
   },
-  "lee_חדווה_חימי": {
-    "phone": "lee_חדווה_חימי",
-    "name": "חדווה חימי",
-    "firstContact": "2026-04-13T11:00:00.000Z",
-    "visits": [
-      {
-        "date": "2026-04-13T11:00:00.000Z",
-        "service": "החלקת שורש",
-        "source": "lee_excel",
-        "status": "scheduled",
-        "price": 850
-      }
-    ],
+  "0543455043": {
+    "phone": "0543455043",
+    "name": "לי הרצליה",
+    "firstContact": "2026-02-26T00:00:00.000Z",
+    "lastSeen": "2026-03-01T00:00:00.000Z",
+    "visits": [],
     "source": "lee",
     "businessType": "beauty",
-    "needsPhone": true,
-    "lastService": "החלקת שורש",
-    "pendingAppointment": "2026-04-13T11:00:00.000Z",
-    "lastPrice": 850
+    "leeStatus": "פעיל"
   },
-  "lee_מירב_ראשלצ": {
-    "phone": "lee_מירב_ראשלצ",
+  "0508835909": {
+    "phone": "0508835909",
+    "name": "ליאור ארבל",
+    "firstContact": "2026-01-07T00:00:00.000Z",
+    "lastSeen": "2026-01-19T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0506306399": {
+    "phone": "0506306399",
+    "name": "ליאל .",
+    "firstContact": "2025-09-27T00:00:00.000Z",
+    "lastSeen": "2025-10-10T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0506496459": {
+    "phone": "0506496459",
+    "name": "ליאם לוי",
+    "firstContact": "2025-08-17T00:00:00.000Z",
+    "lastSeen": "2026-02-15T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0506669128": {
+    "phone": "0506669128",
+    "name": "ליאן אחות דניאלה",
+    "firstContact": "2025-11-14T00:00:00.000Z",
+    "lastSeen": "2025-12-12T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0505489464": {
+    "phone": "0505489464",
+    "name": "ליזה .",
+    "firstContact": "2025-10-30T00:00:00.000Z",
+    "lastSeen": "2025-11-06T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0559778522": {
+    "phone": "0559778522",
+    "name": "לירז השואל",
+    "firstContact": "2025-09-14T00:00:00.000Z",
+    "lastSeen": "2025-09-18T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0502209339": {
+    "phone": "0502209339",
+    "name": "לירז טחלוב",
+    "firstContact": "2026-02-07T00:00:00.000Z",
+    "lastSeen": "2026-03-29T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0547771074": {
+    "phone": "0547771074",
+    "name": "מורן .",
+    "firstContact": "2025-08-17T00:00:00.000Z",
+    "lastSeen": null,
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0527282144": {
+    "phone": "0527282144",
+    "name": "מורן אשדוד",
+    "firstContact": "2026-01-11T00:00:00.000Z",
+    "lastSeen": "2026-01-16T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0524814448": {
+    "phone": "0524814448",
+    "name": "מורן ביטון",
+    "firstContact": "2025-11-25T00:00:00.000Z",
+    "lastSeen": "2025-12-23T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0526470724": {
+    "phone": "0526470724",
+    "name": "מזל .",
+    "firstContact": "2025-08-17T00:00:00.000Z",
+    "lastSeen": "2025-12-17T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0534712377": {
+    "phone": "0534712377",
+    "name": "מיאל .",
+    "firstContact": "2026-02-17T00:00:00.000Z",
+    "lastSeen": "2026-03-01T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0547962326": {
+    "phone": "0547962326",
+    "name": "מיטבל פוני",
+    "firstContact": "2025-10-11T00:00:00.000Z",
+    "lastSeen": "2025-10-23T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0542018886": {
+    "phone": "0542018886",
+    "name": "מיטל חולון",
+    "firstContact": "2025-12-29T00:00:00.000Z",
+    "lastSeen": "2026-01-02T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0585203620": {
+    "phone": "0585203620",
+    "name": "מיטל טויק",
+    "firstContact": "2025-11-02T00:00:00.000Z",
+    "lastSeen": "2026-02-11T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0523843290": {
+    "phone": "0523843290",
+    "name": "מיכאלה תג",
+    "firstContact": "2025-10-27T00:00:00.000Z",
+    "lastSeen": "2025-11-10T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0533343047": {
+    "phone": "0533343047",
+    "name": "מיקה בן שושן",
+    "firstContact": "2025-08-17T00:00:00.000Z",
+    "lastSeen": "2025-10-06T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0543970181": {
+    "phone": "0543970181",
+    "name": "מירב כוזהינוף",
+    "firstContact": "2026-02-22T00:00:00.000Z",
+    "lastSeen": "2026-02-24T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0526522086": {
+    "phone": "0526522086",
     "name": "מירב ראשלצ",
-    "firstContact": "2026-04-16T10:00:00.000Z",
+    "firstContact": "2025-12-27T00:00:00.000Z",
+    "lastSeen": "2025-12-31T00:00:00.000Z",
     "visits": [
       {
         "date": "2026-04-16T10:00:00.000Z",
@@ -713,15 +1502,206 @@
     ],
     "source": "lee",
     "businessType": "beauty",
-    "needsPhone": true,
-    "lastService": "תיקון",
+    "leeStatus": "פעיל",
     "pendingAppointment": "2026-04-16T10:00:00.000Z",
+    "lastService": "תיקון",
     "lastPrice": 1
   },
-  "lee_נינה_מילוי": {
-    "phone": "lee_נינה_מילוי",
+  "0546975520": {
+    "phone": "0546975520",
+    "name": "מלי .",
+    "firstContact": "2025-10-03T00:00:00.000Z",
+    "lastSeen": null,
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0587800965": {
+    "phone": "0587800965",
+    "name": "מעיין .",
+    "firstContact": "2025-12-29T00:00:00.000Z",
+    "lastSeen": "2026-01-08T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0542060755": {
+    "phone": "0542060755",
+    "name": "מעיין ולפסון",
+    "firstContact": "2025-12-21T00:00:00.000Z",
+    "lastSeen": "2025-12-30T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0508220477": {
+    "phone": "0508220477",
+    "name": "מעין .",
+    "firstContact": "2025-11-02T00:00:00.000Z",
+    "lastSeen": "2025-11-14T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0522941940": {
+    "phone": "0522941940",
+    "name": "מרים אמא נוהר",
+    "firstContact": "2025-10-28T00:00:00.000Z",
+    "lastSeen": "2026-04-10T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0584504849": {
+    "phone": "0584504849",
+    "name": "מרים מוריוסף",
+    "firstContact": "2026-01-18T00:00:00.000Z",
+    "lastSeen": "2026-02-01T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0544937158": {
+    "phone": "0544937158",
+    "name": "מרינה אנור",
+    "firstContact": "2025-08-17T00:00:00.000Z",
+    "lastSeen": "2025-08-17T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0524808547": {
+    "phone": "0524808547",
+    "name": "נאווה פרץ",
+    "firstContact": "2025-09-29T00:00:00.000Z",
+    "lastSeen": "2025-12-19T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0523623553": {
+    "phone": "0523623553",
+    "name": "נוהר .",
+    "firstContact": "2025-08-17T00:00:00.000Z",
+    "lastSeen": "2026-03-19T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0528735300": {
+    "phone": "0528735300",
+    "name": "נוי אשדוד",
+    "firstContact": "2026-02-26T00:00:00.000Z",
+    "lastSeen": null,
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0506551235": {
+    "phone": "0506551235",
+    "name": "נוי החלקה",
+    "firstContact": "2025-08-26T00:00:00.000Z",
+    "lastSeen": "2026-02-13T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0584170770": {
+    "phone": "0584170770",
+    "name": "נועה .",
+    "firstContact": "2026-02-16T00:00:00.000Z",
+    "lastSeen": "2026-02-17T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0538210051": {
+    "phone": "0538210051",
+    "name": "נועה בכר",
+    "firstContact": "2025-09-28T00:00:00.000Z",
+    "lastSeen": "2025-10-05T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0523064064": {
+    "phone": "0523064064",
+    "name": "נועה ברק ראשלצ",
+    "firstContact": "2026-01-13T00:00:00.000Z",
+    "lastSeen": "2026-01-18T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0543072423": {
+    "phone": "0543072423",
+    "name": "נטלי -",
+    "firstContact": "2025-08-17T00:00:00.000Z",
+    "lastSeen": null,
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0525999251": {
+    "phone": "0525999251",
+    "name": "נטלי הררי",
+    "firstContact": "2025-09-16T00:00:00.000Z",
+    "lastSeen": "2026-03-31T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0547931542": {
+    "phone": "0547931542",
+    "name": "נטליה ר",
+    "firstContact": "2025-09-14T00:00:00.000Z",
+    "lastSeen": "2026-03-23T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0544600439": {
+    "phone": "0544600439",
+    "name": "ניבי .",
+    "firstContact": "2025-11-05T00:00:00.000Z",
+    "lastSeen": "2026-02-03T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0508821406": {
+    "phone": "0508821406",
+    "name": "נילי ראשלצ",
+    "firstContact": "2025-12-21T00:00:00.000Z",
+    "lastSeen": "2025-12-24T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0507749779": {
+    "phone": "0507749779",
     "name": "נינה מילוי",
-    "firstContact": "2026-04-17T09:30:00.000Z",
+    "firstContact": "2026-04-12T00:00:00.000Z",
+    "lastSeen": null,
     "visits": [
       {
         "date": "2026-04-17T09:30:00.000Z",
@@ -733,28 +1713,510 @@
     ],
     "source": "lee",
     "businessType": "beauty",
-    "needsPhone": true,
-    "lastService": "החלקת שורש",
+    "leeStatus": "פעיל",
     "pendingAppointment": "2026-04-17T09:30:00.000Z",
+    "lastService": "החלקת שורש",
     "lastPrice": 850
   },
-  "lee_דנה_תל_אביב": {
-    "phone": "lee_דנה_תל_אביב",
-    "name": "דנה תל אביב",
-    "firstContact": "2026-05-10T08:00:00.000Z",
+  "0507692606": {
+    "phone": "0507692606",
+    "name": "נעמה דרך ספיר",
+    "firstContact": "2025-11-13T00:00:00.000Z",
+    "lastSeen": "2026-02-20T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0546936549": {
+    "phone": "0546936549",
+    "name": "סבינה לוריא",
+    "firstContact": "2025-08-28T00:00:00.000Z",
+    "lastSeen": "2025-12-30T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0524327714": {
+    "phone": "0524327714",
+    "name": "סופי ראשלצ אמא ספיר",
+    "firstContact": "2026-01-21T00:00:00.000Z",
+    "lastSeen": "2026-02-23T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0534220778": {
+    "phone": "0534220778",
+    "name": "סטלה שני",
+    "firstContact": "2026-03-20T00:00:00.000Z",
+    "lastSeen": "2026-03-24T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0505076569": {
+    "phone": "0505076569",
+    "name": "סיגל כהן",
+    "firstContact": "2025-08-17T00:00:00.000Z",
+    "lastSeen": "2025-11-30T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0522315176": {
+    "phone": "0522315176",
+    "name": "סיגל נחום",
+    "firstContact": "2025-11-03T00:00:00.000Z",
+    "lastSeen": "2026-02-15T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0528074909": {
+    "phone": "0528074909",
+    "name": "סיגל ראשלצ",
+    "firstContact": "2025-10-15T00:00:00.000Z",
+    "lastSeen": "2025-11-21T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0506262644": {
+    "phone": "0506262644",
+    "name": "סיון הח",
+    "firstContact": "2025-10-28T00:00:00.000Z",
+    "lastSeen": "2025-11-06T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0545382612": {
+    "phone": "0545382612",
+    "name": "סיון ראשלצ",
+    "firstContact": "2026-04-09T00:00:00.000Z",
+    "lastSeen": null,
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0545491192": {
+    "phone": "0545491192",
+    "name": "ספיר אלבז כהן",
+    "firstContact": "2025-12-04T00:00:00.000Z",
+    "lastSeen": "2025-12-10T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0546838349": {
+    "phone": "0546838349",
+    "name": "עדי ימין",
+    "firstContact": "2025-10-23T00:00:00.000Z",
+    "lastSeen": "2026-01-19T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0584442363": {
+    "phone": "0584442363",
+    "name": "עדיה .",
+    "firstContact": "2025-10-06T00:00:00.000Z",
+    "lastSeen": "2025-10-12T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0532755305": {
+    "phone": "0532755305",
+    "name": "עדן החלקה",
+    "firstContact": "2026-01-25T00:00:00.000Z",
+    "lastSeen": "2026-02-03T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0543455042": {
+    "phone": "0543455042",
+    "name": "עדן ירושלמי",
+    "firstContact": "2025-10-30T00:00:00.000Z",
+    "lastSeen": "2025-11-03T00:00:00.000Z",
     "visits": [
       {
-        "date": "2026-05-10T08:00:00.000Z",
+        "date": "2026-04-19T10:00:00.000Z",
         "service": "החלקת שורש",
-        "source": "lee_manual",
+        "source": "lee_excel",
         "status": "scheduled",
         "price": 850
       }
     ],
     "source": "lee",
     "businessType": "beauty",
-    "needsPhone": true,
-    "pendingAppointment": "2026-05-10T08:00:00.000Z",
-    "lastService": "החלקת שורש"
+    "leeStatus": "פעיל",
+    "pendingAppointment": "2026-04-19T10:00:00.000Z",
+    "lastService": "החלקת שורש",
+    "lastPrice": 850
+  },
+  "0525246593": {
+    "phone": "0525246593",
+    "name": "עופרה רמלה",
+    "firstContact": "2025-09-11T00:00:00.000Z",
+    "lastSeen": "2025-09-19T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0502200770": {
+    "phone": "0502200770",
+    "name": "עינב בכר",
+    "firstContact": "2025-08-21T00:00:00.000Z",
+    "lastSeen": "2025-09-11T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0535305551": {
+    "phone": "0535305551",
+    "name": "עמית סיון",
+    "firstContact": "2025-11-18T00:00:00.000Z",
+    "lastSeen": "2025-11-25T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0544341296": {
+    "phone": "0544341296",
+    "name": "ציווה .",
+    "firstContact": "2025-10-29T00:00:00.000Z",
+    "lastSeen": "2026-03-15T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0509288088": {
+    "phone": "0509288088",
+    "name": "קארין .",
+    "firstContact": "2025-09-01T00:00:00.000Z",
+    "lastSeen": "2025-09-11T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0526082258": {
+    "phone": "0526082258",
+    "name": "רבי קנפו",
+    "firstContact": "2025-11-07T00:00:00.000Z",
+    "lastSeen": "2026-03-06T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0547456860": {
+    "phone": "0547456860",
+    "name": "רוחמה אלבז",
+    "firstContact": "2026-02-16T00:00:00.000Z",
+    "lastSeen": null,
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0523293729": {
+    "phone": "0523293729",
+    "name": "רוני רחובות חן",
+    "firstContact": "2025-12-29T00:00:00.000Z",
+    "lastSeen": "2026-01-14T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0544978902": {
+    "phone": "0544978902",
+    "name": "רונית ישראל",
+    "firstContact": "2026-01-18T00:00:00.000Z",
+    "lastSeen": "2026-01-19T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0508876965": {
+    "phone": "0508876965",
+    "name": "רותם .",
+    "firstContact": "2025-08-17T00:00:00.000Z",
+    "lastSeen": "2025-08-20T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0543200212": {
+    "phone": "0543200212",
+    "name": "רז לינס",
+    "firstContact": "2026-01-12T00:00:00.000Z",
+    "lastSeen": "2026-01-14T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0549819667": {
+    "phone": "0549819667",
+    "name": "רחלי .",
+    "firstContact": "2025-10-01T00:00:00.000Z",
+    "lastSeen": "2026-03-13T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0504047567": {
+    "phone": "0504047567",
+    "name": "רינת ארבל",
+    "firstContact": "2026-01-28T00:00:00.000Z",
+    "lastSeen": "2026-02-12T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0549175176": {
+    "phone": "0549175176",
+    "name": "רעות משיח",
+    "firstContact": "2026-02-01T00:00:00.000Z",
+    "lastSeen": "2026-02-05T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0525361180": {
+    "phone": "0525361180",
+    "name": "רעיה אלכס",
+    "firstContact": "2026-03-23T00:00:00.000Z",
+    "lastSeen": "2026-03-25T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0508835908": {
+    "phone": "0508835908",
+    "name": "שחר ארבל",
+    "firstContact": "2026-02-17T00:00:00.000Z",
+    "lastSeen": "2026-02-27T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0508876968": {
+    "phone": "0508876968",
+    "name": "שחר עולי",
+    "firstContact": "2025-08-17T00:00:00.000Z",
+    "lastSeen": "2026-03-23T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0598888142": {
+    "phone": "0598888142",
+    "name": "שיר קוגן",
+    "firstContact": "2025-09-29T00:00:00.000Z",
+    "lastSeen": "2025-10-19T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0548009804": {
+    "phone": "0548009804",
+    "name": "שירה חן",
+    "firstContact": "2025-09-16T00:00:00.000Z",
+    "lastSeen": "2026-03-18T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0547677028": {
+    "phone": "0547677028",
+    "name": "שירן 1300",
+    "firstContact": "2025-12-14T00:00:00.000Z",
+    "lastSeen": "2025-12-16T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0529431981": {
+    "phone": "0529431981",
+    "name": "שירן גרינדוחה",
+    "firstContact": "2025-11-30T00:00:00.000Z",
+    "lastSeen": "2025-12-03T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0523753004": {
+    "phone": "0523753004",
+    "name": "שירן חכמון",
+    "firstContact": "2025-08-21T00:00:00.000Z",
+    "lastSeen": "2025-09-16T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0507575354": {
+    "phone": "0507575354",
+    "name": "שלי .",
+    "firstContact": "2025-09-25T00:00:00.000Z",
+    "lastSeen": "2026-03-30T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0502224268": {
+    "phone": "0502224268",
+    "name": "שני .",
+    "firstContact": "2025-09-09T00:00:00.000Z",
+    "lastSeen": "2026-03-26T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0542504680": {
+    "phone": "0542504680",
+    "name": "שני .",
+    "firstContact": "2025-10-24T00:00:00.000Z",
+    "lastSeen": "2025-11-12T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0506722716": {
+    "phone": "0506722716",
+    "name": "שני ספיר",
+    "firstContact": "2025-08-27T00:00:00.000Z",
+    "lastSeen": "2026-02-22T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0548685989": {
+    "phone": "0548685989",
+    "name": "שרה .",
+    "firstContact": "2026-02-16T00:00:00.000Z",
+    "lastSeen": "2026-02-25T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0533169973": {
+    "phone": "0533169973",
+    "name": "שרה סולימאני",
+    "firstContact": "2025-10-15T00:00:00.000Z",
+    "lastSeen": "2025-11-07T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0525736060": {
+    "phone": "0525736060",
+    "name": "שרון .",
+    "firstContact": "2025-10-17T00:00:00.000Z",
+    "lastSeen": "2026-02-04T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0524798837": {
+    "phone": "0524798837",
+    "name": "שרי מהתיכון",
+    "firstContact": "2026-01-03T00:00:00.000Z",
+    "lastSeen": "2026-01-19T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0507692863": {
+    "phone": "0507692863",
+    "name": "שרית .",
+    "firstContact": "2025-08-31T00:00:00.000Z",
+    "lastSeen": "2025-09-10T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0522532775": {
+    "phone": "0522532775",
+    "name": "שרית ברק",
+    "firstContact": "2025-11-11T00:00:00.000Z",
+    "lastSeen": "2025-12-15T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0506355274": {
+    "phone": "0506355274",
+    "name": "תמר אסודרי",
+    "firstContact": "2025-10-23T00:00:00.000Z",
+    "lastSeen": "2026-03-22T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0504318574": {
+    "phone": "0504318574",
+    "name": "תרצה כהן",
+    "firstContact": "2025-09-03T00:00:00.000Z",
+    "lastSeen": "2025-09-21T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
+  },
+  "0584787995": {
+    "phone": "0584787995",
+    "name": "- -",
+    "firstContact": "2025-08-27T00:00:00.000Z",
+    "lastSeen": "2025-08-29T00:00:00.000Z",
+    "visits": [],
+    "source": "lee",
+    "businessType": "beauty",
+    "leeStatus": "פעיל"
   }
 }
