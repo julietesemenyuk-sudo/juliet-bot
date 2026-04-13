@@ -239,7 +239,8 @@
   }
 
   /* ── מודאל תור / הערה ── */
-  .modal2{background:linear-gradient(145deg,rgba(10,10,18,.98),rgba(6,6,14,.99));backdrop-filter:blur(24px);border:1px solid rgba(200,168,75,.28);border-radius:16px;width:90%;max-width:480px;max-height:90vh;overflow-y:auto;padding:26px;position:relative;box-shadow:0 24px 80px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.04)}
+  .modal2{background:linear-gradient(145deg,rgba(10,10,18,.98),rgba(6,6,14,.99));backdrop-filter:blur(24px);border:1px solid rgba(200,168,75,.28);border-radius:16px;width:92%;max-width:480px;max-height:92vh;overflow-y:auto;padding:22px;position:relative;box-shadow:0 24px 80px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.04);-webkit-overflow-scrolling:touch}
+  @media(max-width:600px){.modal2{width:96%;padding:18px;border-radius:14px;max-height:96vh}}
   .form-row{margin-bottom:16px}
   .form-row label{display:block;font-size:11px;color:var(--text-dim);margin-bottom:6px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
   .form-input{width:100%;padding:11px 15px;background:rgba(255,255,255,.05);border:1px solid rgba(200,168,75,.22);border-radius:10px;color:var(--text);font-size:14px;font-family:inherit;transition:all .25s ease}
@@ -454,7 +455,8 @@
   <div class="toolbar">
     <input class="search" id="search" placeholder="🔍 חיפוש לפי שם, טלפון או שירות..." oninput="filterTable()"/>
     <button class="refresh" onclick="loadData()">↻</button>
-    <button class="refresh" onclick="exportCSV()" style="background:rgba(90,220,100,.08);border-color:rgba(90,220,100,.3);color:#5adf8a" title="ייצוא CSV">📥</button>
+    <button class="refresh" onclick="exportCSV()" style="background:rgba(90,220,100,.08);border-color:rgba(90,220,100,.3);color:#5adf8a" title="ייצוא לקוחות CSV">👥</button>
+    <button class="refresh" onclick="exportAppointmentsCSV()" style="background:rgba(200,168,75,.1);border-color:rgba(200,168,75,.35);color:#c8a84b" title="ייצוא תורים CSV">📅</button>
     <button class="refresh" onclick="backupNow()" id="backup-btn" style="background:rgba(167,139,250,.1);border-color:rgba(167,139,250,.4);color:#a78bfa" title="גיבוי ל-GitHub עכשיו">☁️</button>
     <button class="refresh" onclick="openApptModal()" style="background:rgba(200,168,75,.15);border-color:#c8a84b;color:#c8a84b">➕ תור</button>
   </div>
@@ -563,24 +565,29 @@
 </div>
 
 <!-- מודאל תור חדש -->
-<div class="modal-bg" id="appt-modal-bg" onclick="closeApptModal(event)">
-  <div class="modal2">
-    <h3 style="color:#c8a84b;margin-bottom:18px">➕ הוספת תור חדש</h3>
+<div class="modal-bg" id="appt-modal-bg">
+  <div class="modal2" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <h3 style="color:var(--gold);margin:0;font-size:17px">➕ הוספת תור חדש</h3>
+      <button class="modal-close" onclick="closeApptModal(null)" style="font-size:20px">✕</button>
+    </div>
     <div class="form-row">
       <label>👤 שם לקוחה *</label>
       <input class="form-input" id="appt-name" placeholder="שם מלא"/>
     </div>
     <div class="form-row">
-      <label>📞 טלפון *</label>
+      <label>📞 טלפון</label>
       <input class="form-input" id="appt-phone" placeholder="050-0000000" type="tel"/>
     </div>
-    <div class="form-row">
-      <label>📅 תאריך *</label>
-      <input class="form-input" id="appt-date" type="date"/>
-    </div>
-    <div class="form-row">
-      <label>⏰ שעה</label>
-      <input class="form-input" id="appt-time" type="time" value="10:00"/>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="form-row">
+        <label>📅 תאריך *</label>
+        <input class="form-input" id="appt-date" type="date"/>
+      </div>
+      <div class="form-row">
+        <label>⏰ שעה</label>
+        <input class="form-input" id="appt-time" type="time" value="10:00"/>
+      </div>
     </div>
     <div class="form-row">
       <label>💇 שירות</label>
@@ -596,8 +603,14 @@
         <option>אחר</option>
       </select>
     </div>
-    <button class="form-btn" style="margin-top:8px" onclick="submitAppointment()">✅ שמור תור</button>
-    <button class="form-btn" style="background:transparent;margin-top:8px" onclick="closeApptModal(null)">ביטול</button>
+    <div class="form-row">
+      <label>📝 הערה (אופציונלי)</label>
+      <input class="form-input" id="appt-notes" placeholder="לדוג': להביא תמונה, לקוחה VIP..."/>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="form-btn" onclick="submitAppointment()">✅ שמור תור</button>
+      <button class="form-btn" style="background:transparent;border-color:rgba(255,255,255,.1);color:#5e5c58;width:auto;padding:12px 20px" onclick="closeApptModal(null)">ביטול</button>
+    </div>
   </div>
 </div>
 
@@ -605,9 +618,12 @@
 <button class="fab" onclick="openApptModal()" title="הוסף תור חדש">+</button>
 
 <!-- מודאל עריכת תור -->
-<div class="modal-bg" id="edit-appt-modal-bg" onclick="closeEditApptModal(event)">
-  <div class="modal2">
-    <h3 style="color:#c8a84b;margin-bottom:18px">✏️ עריכת תור</h3>
+<div class="modal-bg" id="edit-appt-modal-bg">
+  <div class="modal2" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <h3 style="color:var(--gold);margin:0;font-size:17px">✏️ עריכת תור</h3>
+      <button class="modal-close" onclick="closeEditApptModal(null)" style="font-size:20px">✕</button>
+    </div>
     <input type="hidden" id="edit-appt-phone-hidden"/>
     <input type="hidden" id="edit-appt-idx-hidden"/>
     <div class="form-row">
@@ -1669,7 +1685,7 @@ async function backupNow() {
   }
 }
 
-// ── ייצוא CSV ───────────────────────────────────────────────
+// ── ייצוא CSV לקוחות ────────────────────────────────────────
 function exportCSV() {
   const rows = [['שם','טלפון','שירות אחרון','תורים','מקור','פעילות אחרונה','הערות']];
   allRows.forEach(c => {
@@ -1685,11 +1701,38 @@ function exportCSV() {
       notes
     ]);
   });
+  downloadCSV(rows, `juliet-customers-${new Date().toISOString().split('T')[0]}.csv`);
+}
+
+// ── ייצוא CSV תורים ─────────────────────────────────────────
+function exportAppointmentsCSV() {
+  const rows = [['שם','טלפון','שירות','תאריך','שעה','סטטוס','הערה','מקור']];
+  allRows.forEach(c => {
+    (c.visits || []).forEach(v => {
+      const d = new Date(v.date);
+      rows.push([
+        c.name || '',
+        c.phone || '',
+        v.service || '',
+        d.toLocaleDateString('he-IL'),
+        d.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'}),
+        v.status === 'done' ? 'בוצע' : 'מתוכנן',
+        v.notes || '',
+        v.source || ''
+      ]);
+    });
+  });
+  // מיין לפי תאריך
+  rows.slice(1).sort((a,b) => new Date(a[3]) - new Date(b[3]));
+  downloadCSV(rows, `juliet-appointments-${new Date().toISOString().split('T')[0]}.csv`);
+}
+
+function downloadCSV(rows, filename) {
   const csv = '\uFEFF' + rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
   const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url; a.download = `juliet-crm-${new Date().toISOString().split('T')[0]}.csv`;
+  a.href = url; a.download = filename;
   a.click(); URL.revokeObjectURL(url);
 }
 
