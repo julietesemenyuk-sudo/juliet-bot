@@ -3782,6 +3782,7 @@ function startReminderJob() {
       const tomorrowKey = getIsraelTomorrowKey();
       const todayKey    = getIsraelTodayKey();
       const crm = loadCRM();
+      const remindersSentThisRound = []; // מעקב מי קיבל תזכורת ברצות הזאת
 
       for (const [phone, customer] of Object.entries(crm)) {
         if (customer.muted) continue;
@@ -3824,6 +3825,7 @@ function startReminderJob() {
                 visit.reminderSent = true;
                 visit.reminderSentDate = getIsraelTodayKey();
                 changed = true;
+                remindersSentThisRound.push({ name: customer.name || phone, time: new Date(visit.date).toLocaleTimeString('he-IL',{timeZone:'Asia/Jerusalem',hour:'2-digit',minute:'2-digit'}), service: visit.service || '' });
                 console.log(`📅 תזכורת נשלחה ל-${customer.name || phone} לתור ${visitIsraelKey}`);
                 await new Promise(r => setTimeout(r, 1500));
               } catch(e) { console.log('שגיאת תזכורת:', e.message); }
@@ -3963,6 +3965,23 @@ function startReminderJob() {
         }
       }
       if (reminderChanged) saveReminders(personalReminders);
+
+      // ── שלח לג'ולייט דוח תזכורות שנשלחו ─────────────────────
+      if (remindersSentThisRound.length > 0) {
+        try {
+          let report = `📅 *תזכורות נשלחו למחר!*\n\n`;
+          report += `נשלחו *${remindersSentThisRound.length}* תזכורות:\n\n`;
+          remindersSentThisRound.forEach((r, i) => {
+            report += `${i+1}. 💎 *${r.name}*`;
+            if (r.time) report += ` — ${r.time}`;
+            if (r.service) report += ` (${r.service})`;
+            report += `\n`;
+          });
+          report += `\n✅ כל הלקוחות קיבלו תזכורת!`;
+          await client.sendMessage(JULIET_NUMBER, report);
+          console.log(`📊 דוח תזכורות נשלח לג'ולייט: ${remindersSentThisRound.length} תזכורות`);
+        } catch(e) { console.log('שגיאה בשליחת דוח תזכורות:', e.message); }
+      }
 
     } catch(e) {
       console.log('שגיאה ב-startReminderJob:', e.message);
