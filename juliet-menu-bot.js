@@ -359,9 +359,9 @@ http.createServer((req, res) => {
     } else {
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
       res.end(`<html><body style="background:#000;color:#c8a84b;font-family:Arial;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:20px">
-        <h2>⏳ מתחבר לוואטסאפ...</h2>
-        <p style="color:#888;font-family:Arial;font-size:14px">הדף יתרענן אוטומטית</p>
-        <script>setTimeout(()=>location.reload(),8000)</script>
+        <h2>⏳ הבוט מתחיל... מחכה ל-QR</h2>
+        <p style="color:#888;font-family:Arial;font-size:14px">רענני את הדף בעוד 10 שניות</p>
+        <script>setTimeout(()=>location.reload(),10000)</script>
       </body></html>`);
     }
     return;
@@ -1120,48 +1120,72 @@ http.createServer((req, res) => {
     return;
   }
 
-  // ── סטטוס מפורט ──────────────────────────────────────────────
+  // ── סטטוס ──────────────────────────────────────────────────
   if (url.pathname === '/status') {
     const crm = loadCRM();
     const info = clientReady ? (client.info || {}) : {};
-    // בדוק אם קיים תיקיית session
-    const sessionPath = IS_RAILWAY ? '/data/.wwebjs_auth' : path.join(__dirname, '.wwebjs_auth');
-    let sessionExists = false;
-    try { sessionExists = fs.existsSync(sessionPath) && fs.readdirSync(sessionPath).length > 0; } catch(e) {}
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
     res.end(JSON.stringify({
       botRunning: true,
       clientReady,
       waUser: info.wid ? info.wid.user : null,
-      waName: info.pushname || null,
-      sessionSaved: sessionExists,
-      sessionPath,
       totalCustomers: Object.keys(crm).length,
       time: new Date().toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem' })
     }));
     return;
   }
 
-  // ── כפה reconnect ──────────────────────────────────────────
-  if (url.pathname === '/reconnect' && req.method === 'POST') {
+  // ── שליחת תזכורות HTTP ─────────────────────────────────────
+  if (url.pathname === '/send-reminders-now' && req.method === 'POST') {
     const pass = url.searchParams.get('pass');
     if (pass !== CRM_PASS) { res.writeHead(401); res.end('{}'); return; }
+    if (!clientReady) {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, clientReady: false, error: 'WhatsApp לא מחובר' }));
+      return;
+    }
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ ok: true, message: 'מנסה להתחבר מחדש...' }));
-    setTimeout(async () => {
-      try {
-        console.log('🔄 /reconnect — מנסה initialize מחדש...');
-        await client.initialize();
-      } catch(e) {
-        console.log('⚠️ reconnect error:', e.message);
+    res.end(JSON.stringify({ success: true }));
+    // שלח בברקע
+    (async () => {
+      const crm = loadCRM();
+      const tomorrowKey = getIsraelTomorrowKey();
+      let sent = 0;
+      for (const [phone, customer] of Object.entries(crm)) {
+        if (customer.muted) continue;
+        if (!phone.startsWith('05') && !phone.match(/^[0-9]{10}$/)) continue;
+        const visits = (customer.visits || []).filter(v => {
+          if (!v.date || v.status === 'cancelled' || v.reminderSent) return false;
+          const d = new Date(new Date(v.date).toLocaleString('en-US', { timeZone: 'Asia/Jerusalem' }));
+          const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+          return k === tomorrowKey;
+        });
+        if (!visits.length) continue;
+        const visit = visits[0];
+        const name = customer.name || 'יקרה';
+        const firstName = name.split(' ')[0];
+        const apptStr = new Date(visit.date).toLocaleTimeString('he-IL', { timeZone: 'Asia/Jerusalem', hour: '2-digit', minute: '2-digit' });
+        const chatId = '972' + phone.replace(/^0/, '') + '@c.us';
+        const msg = `היי ${firstName}! 💎\n\nתזכורת לתור מחר ב-*${apptStr}*${visit.service ? ` — *${visit.service}*` : ''} אצל *Juliet Beauty Boutique* 💇‍♀️\n\n📍 *כתובת:*\n${SALON_ADDRESS}\n\n🚿 *הכנה לטיפול — חשוב!*\nלפני הגעתך *תחפפי* את השיער בשמפו *ללא מסכה*\nהשיער חייב להגיע *נקי ויבש* לטיפול 💆‍♀️\n\nאם יש שינוי בתור שלחי הודעה 🙏\n\n✅ לאישור תור | ❌ לביטול\nמחכה לך! 💫`;
+        try {
+          await client.sendMessage(chatId, msg);
+          visit.reminderSent = true;
+          sent++;
+          await new Promise(r => setTimeout(r, 1500));
+        } catch(e) { console.log('reminder error:', e.message); }
       }
-    }, 500);
+      saveCRM(crm);
+      if (sent > 0) {
+        try { await client.sendMessage(JULIET_NUMBER, `📅 *תזכורות נשלחו!*\n✅ *${sent}* לקוחות קיבלו תזכורת למחר 💎`); } catch(e) {}
+      }
+      console.log(`/send-reminders-now: ${sent} נשלחו`);
+    })();
     return;
   }
 
   // בדיקת חיים
   res.writeHead(200);
-  res.end(clientReady ? 'Juliet Bot is running 💎 | WhatsApp: CONNECTED' : 'Juliet Bot is running 💎 | WhatsApp: DISCONNECTED');
+  res.end('Juliet Bot is running 💎');
 }).listen(process.env.PORT || 3000);
 
 const client = new Client({
@@ -4325,16 +4349,8 @@ try {
 try { client.on('message_revoke_for_everyone', () => {}); } catch(e) {}
 try { client.on('message_revoke_for_me', () => {}); } catch(e) {}
 
-client.on('auth_failure', async (msg) => {
-  clientReady = false;
-  console.log('❌ auth_failure:', msg);
-  // נקה סשן ישן כדי לקבל QR חדש
-  const authPath = IS_RAILWAY ? '/data/.wwebjs_auth' : path.join(__dirname, '.wwebjs_auth');
-  try { fs.rmSync(authPath, { recursive: true, force: true }); console.log('🗑️ סשן ישן נמחק'); } catch(e) {}
-  setTimeout(() => {
-    console.log('🔄 מנסה initialize מחדש אחרי auth_failure...');
-    try { client.initialize(); } catch(e) { console.log('שגיאה:', e.message); }
-  }, 3000);
+client.on('auth_failure', () => {
+  console.log('❌ שגיאת חיבור — נסי שוב');
 });
 
 client.on('disconnected', async (reason) => {
