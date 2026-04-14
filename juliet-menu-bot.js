@@ -357,11 +357,13 @@ http.createServer((req, res) => {
         <a href="/reset-session" style="color:#888;font-size:14px;font-family:Arial">לא עובד? לחצי כאן לאיפוס חיבור</a>
       </body></html>`);
     } else {
+      // clientReady=false ואין QR — מנסה reconnect אוטומטי
+      try { client.initialize().catch(()=>{}); } catch(e) {}
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
       res.end(`<html><body style="background:#000;color:#c8a84b;font-family:Arial;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:20px">
-        <h2>⏳ הבוט מתחיל... מחכה ל-QR</h2>
-        <p style="color:#888;font-family:Arial;font-size:14px">רענני את הדף בעוד 10 שניות</p>
-        <script>setTimeout(()=>location.reload(),10000)</script>
+        <h2>⏳ מתחבר לוואטסאפ...</h2>
+        <p style="color:#888;font-family:Arial;font-size:14px">הדף יתרענן אוטומטית</p>
+        <script>setTimeout(()=>location.reload(),8000)</script>
       </body></html>`);
     }
     return;
@@ -1124,15 +1126,38 @@ http.createServer((req, res) => {
   if (url.pathname === '/status') {
     const crm = loadCRM();
     const info = clientReady ? (client.info || {}) : {};
+    // בדוק אם קיים תיקיית session
+    const sessionPath = IS_RAILWAY ? '/data/.wwebjs_auth' : path.join(__dirname, '.wwebjs_auth');
+    let sessionExists = false;
+    try { sessionExists = fs.existsSync(sessionPath) && fs.readdirSync(sessionPath).length > 0; } catch(e) {}
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
     res.end(JSON.stringify({
       botRunning: true,
       clientReady,
       waUser: info.wid ? info.wid.user : null,
       waName: info.pushname || null,
+      sessionSaved: sessionExists,
+      sessionPath,
       totalCustomers: Object.keys(crm).length,
       time: new Date().toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem' })
     }));
+    return;
+  }
+
+  // ── כפה reconnect ──────────────────────────────────────────
+  if (url.pathname === '/reconnect' && req.method === 'POST') {
+    const pass = url.searchParams.get('pass');
+    if (pass !== CRM_PASS) { res.writeHead(401); res.end('{}'); return; }
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true, message: 'מנסה להתחבר מחדש...' }));
+    setTimeout(async () => {
+      try {
+        console.log('🔄 /reconnect — מנסה initialize מחדש...');
+        await client.initialize();
+      } catch(e) {
+        console.log('⚠️ reconnect error:', e.message);
+      }
+    }, 500);
     return;
   }
 
@@ -4302,8 +4327,16 @@ try {
 try { client.on('message_revoke_for_everyone', () => {}); } catch(e) {}
 try { client.on('message_revoke_for_me', () => {}); } catch(e) {}
 
-client.on('auth_failure', () => {
-  console.log('❌ שגיאת חיבור — נסי שוב');
+client.on('auth_failure', async (msg) => {
+  clientReady = false;
+  console.log('❌ auth_failure:', msg);
+  // נקה סשן ישן כדי לקבל QR חדש
+  const authPath = IS_RAILWAY ? '/data/.wwebjs_auth' : path.join(__dirname, '.wwebjs_auth');
+  try { fs.rmSync(authPath, { recursive: true, force: true }); console.log('🗑️ סשן ישן נמחק'); } catch(e) {}
+  setTimeout(() => {
+    console.log('🔄 מנסה initialize מחדש אחרי auth_failure...');
+    try { client.initialize(); } catch(e) { console.log('שגיאה:', e.message); }
+  }, 3000);
 });
 
 client.on('disconnected', async (reason) => {
