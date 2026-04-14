@@ -46,6 +46,7 @@
   .tab-universe.active{background:linear-gradient(135deg,rgba(90,150,255,.2),rgba(90,150,255,.08));border-color:rgba(90,150,255,.5);color:var(--blue);box-shadow:0 2px 16px rgba(90,150,255,.18)}
   .tab-calendar.active{background:linear-gradient(135deg,rgba(90,220,100,.15),rgba(90,220,100,.05));border-color:rgba(90,220,100,.45);color:var(--green);box-shadow:0 2px 16px rgba(90,220,100,.15)}
   .tab-reminders.active{background:linear-gradient(135deg,rgba(167,139,250,.2),rgba(167,139,250,.08));border-color:rgba(167,139,250,.5);color:var(--purple);box-shadow:0 2px 16px rgba(167,139,250,.18)}
+  .tab-waitlist.active{background:linear-gradient(135deg,rgba(245,158,11,.2),rgba(245,158,11,.08));border-color:rgba(245,158,11,.5);color:#f59e0b;box-shadow:0 2px 16px rgba(245,158,11,.18)}
 
   /* ── סטטס ── */
   .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:28px}
@@ -344,6 +345,48 @@
   .wa-big-btn:hover{background:linear-gradient(135deg,rgba(37,211,102,.28),rgba(37,211,102,.14));box-shadow:0 4px 16px rgba(37,211,102,.15)}
   .p-save-btn{width:100%;padding:11px;background:linear-gradient(135deg,rgba(167,139,250,.2),rgba(167,139,250,.08));border:1px solid rgba(167,139,250,.4);color:var(--purple);border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s ease;margin-top:6px}
   .p-save-btn:hover{background:linear-gradient(135deg,rgba(167,139,250,.35),rgba(167,139,250,.15));box-shadow:0 4px 16px rgba(167,139,250,.15)}
+
+  /* ── תמונות לפני/אחרי ── */
+  .photo-upload-wrap{display:flex;gap:10px;margin-bottom:12px}
+  .photo-upload-btn{flex:1;padding:10px;background:rgba(255,255,255,.04);border:1px dashed rgba(200,168,75,.3);border-radius:10px;color:var(--text-dim);font-size:13px;cursor:pointer;text-align:center;transition:all .2s ease;font-family:inherit}
+  .photo-upload-btn:hover{border-color:var(--gold);color:var(--gold);background:rgba(200,168,75,.06)}
+  .photo-thumb{width:100%;height:120px;object-fit:cover;border-radius:8px;border:1px solid rgba(200,168,75,.2);margin-bottom:6px;cursor:pointer}
+  .photo-label{font-size:10px;color:var(--text-dim);text-align:center;letter-spacing:.04em;text-transform:uppercase}
+
+  /* ── הודעה קבוצתית ── */
+  .select-mode tr.clickable td:first-child{padding-right:8px}
+  .row-checkbox{width:16px;height:16px;accent-color:var(--gold);cursor:pointer;margin-left:6px}
+  .bulk-bar{position:fixed;bottom:0;right:0;left:0;background:rgba(10,10,20,.97);backdrop-filter:blur(16px);border-top:1px solid rgba(200,168,75,.25);padding:14px 20px;z-index:1200;display:none;gap:10px;flex-direction:column}
+  .bulk-bar.open{display:flex}
+  .bulk-bar-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .bulk-count{font-size:13px;color:var(--gold);font-weight:700;flex:1}
+  .bulk-textarea{width:100%;padding:10px 14px;background:rgba(255,255,255,.05);border:1px solid rgba(200,168,75,.25);border-radius:10px;color:var(--text);font-family:inherit;font-size:13px;resize:none;outline:none;min-height:60px}
+  .bulk-textarea:focus{border-color:var(--gold)}
+
+  /* ── רשימת המתנה ── */
+  #waitlist-view{display:none}
+  .waitlist-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid rgba(245,158,11,.12)}
+  .waitlist-header h2{font-size:20px;font-weight:700;color:#f59e0b;letter-spacing:.04em}
+  .add-waitlist-btn{background:linear-gradient(135deg,rgba(245,158,11,.2),rgba(245,158,11,.1));border:1px solid #f59e0b;color:#f59e0b;padding:8px 18px;border-radius:20px;font-size:13px;cursor:pointer;font-weight:600;transition:all .2s ease}
+  .add-waitlist-btn:hover{background:linear-gradient(135deg,rgba(245,158,11,.35),rgba(245,158,11,.18));box-shadow:0 0 12px rgba(245,158,11,.2)}
+  .waitlist-form-panel{background:rgba(255,255,255,.03);backdrop-filter:blur(10px);border:1px solid rgba(245,158,11,.2);border-radius:12px;padding:20px;margin-bottom:20px;display:none}
+  .waitlist-form-panel.open{display:block}
+  .waitlist-form-panel h3{color:#f59e0b;font-size:14px;font-weight:700;margin-bottom:16px}
+  .waitlist-item{display:flex;align-items:flex-start;gap:14px;background:rgba(255,255,255,.03);backdrop-filter:blur(6px);border:1px solid rgba(245,158,11,.14);border-radius:10px;padding:14px 16px;margin-bottom:8px;transition:all .2s ease}
+  .waitlist-item:hover{border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.04)}
+  .waitlist-badge{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,rgba(245,158,11,.2),rgba(245,158,11,.1));border:1px solid rgba(245,158,11,.3);font-size:16px;flex-shrink:0}
+  .waitlist-content{flex:1;min-width:0}
+  .waitlist-name{font-size:14px;font-weight:700;color:var(--text);margin-bottom:2px}
+  .waitlist-meta{font-size:11px;color:var(--text-dim);margin-bottom:4px}
+  .waitlist-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .waitlist-action-btn{padding:4px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-weight:600;font-family:inherit;transition:all .2s ease}
+  .waitlist-appt-btn{background:rgba(200,168,75,.1);border:1px solid rgba(200,168,75,.3);color:var(--gold)}
+  .waitlist-appt-btn:hover{background:rgba(200,168,75,.22)}
+  .waitlist-notify-btn{background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.3);color:#25d366}
+  .waitlist-notify-btn:hover{background:rgba(37,211,102,.2)}
+  .waitlist-del-btn{background:rgba(255,60,60,.08);border:1px solid rgba(255,60,60,.2);color:#ff6060}
+  .waitlist-del-btn:hover{background:rgba(255,60,60,.2)}
+  .waitlist-empty{text-align:center;padding:60px 20px;color:#3e3c38;font-size:14px}
 </style>
 </head>
 <body>
@@ -359,6 +402,7 @@
   <button class="tab tab-calendar" onclick="switchTab('calendar',this)">📅 יומן</button>
   <button class="tab" onclick="switchTab('dashboard',this)" style="border-color:rgba(90,150,255,.3);color:#5a96ff">📊 גרפים</button>
   <button class="tab tab-reminders" onclick="switchTab('reminders',this)">🔔 תזכורות</button>
+  <button class="tab tab-waitlist" onclick="switchTab('waitlist',this)">⏳ רשימת המתנה</button>
 </div>
 
 <!-- סטטס -->
@@ -434,6 +478,55 @@
   </div>
 </div>
 
+<!-- תצוגת רשימת המתנה -->
+<div id="waitlist-view">
+  <div class="waitlist-header">
+    <h2>⏳ רשימת המתנה</h2>
+    <button class="add-waitlist-btn" onclick="toggleWaitlistForm()">+ הוסיפי ללשימה</button>
+  </div>
+
+  <!-- טופס הוספה -->
+  <div class="waitlist-form-panel" id="waitlist-form-panel">
+    <h3>✨ הוספה לרשימת המתנה</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-row">
+        <label>👤 שם *</label>
+        <input class="form-input" id="wl-name" placeholder="שם מלא..."/>
+      </div>
+      <div class="form-row">
+        <label>📞 טלפון *</label>
+        <input class="form-input" id="wl-phone" placeholder="050-0000000" type="tel"/>
+      </div>
+    </div>
+    <div class="form-row">
+      <label>💇 שירות</label>
+      <select class="form-input" id="wl-service">
+        <option value="">בחרי שירות...</option>
+        <option>החלקת שורש</option><option>החלקה מלאה</option>
+        <option>גוונים</option><option>צבע</option><option>מסגרת</option>
+        <option>תוספות שיער</option><option>ייעוץ</option><option>אחר</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label>📅 יום מועדף</label>
+      <input class="form-input" id="wl-preferred-day" placeholder="לדוג': ימי ראשון, אחר הצהריים..."/>
+    </div>
+    <div class="form-row">
+      <label>📝 הערות</label>
+      <textarea class="form-input" id="wl-notes" placeholder="כל מידע רלוונטי..." style="min-height:60px"></textarea>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:4px">
+      <button class="form-btn" style="background:linear-gradient(135deg,rgba(245,158,11,.2),rgba(245,158,11,.1));border-color:#f59e0b;color:#f59e0b" onclick="addWaitlistEntry()">⏳ הוסף לרשימה</button>
+      <button class="form-btn" style="background:transparent;border-color:rgba(255,255,255,.1);color:#5e5c58;flex:0 0 auto;width:auto;padding:10px 20px" onclick="toggleWaitlistForm()">ביטול</button>
+    </div>
+  </div>
+
+  <!-- רשימת המתנה -->
+  <div id="waitlist-list">
+    <div class="waitlist-empty">⏳ טוען רשימת המתנה...</div>
+  </div>
+</div>
+
 <!-- ── פאנל פרופיל לקוחה ── -->
 <div class="profile-overlay" id="profile-overlay" onclick="closeProfile(event)"></div>
 <div class="profile-panel" id="profile-panel">
@@ -464,6 +557,7 @@
     <button class="refresh" onclick="exportAppointmentsCSV()" style="background:rgba(200,168,75,.1);border-color:rgba(200,168,75,.35);color:#c8a84b" title="ייצוא תורים CSV">📅</button>
     <button class="refresh" onclick="backupNow()" id="backup-btn" style="background:rgba(167,139,250,.1);border-color:rgba(167,139,250,.4);color:#a78bfa" title="גיבוי ל-GitHub עכשיו">☁️</button>
     <button class="refresh" onclick="openApptModal()" style="background:rgba(200,168,75,.15);border-color:#c8a84b;color:#c8a84b">➕ תור</button>
+    <button class="refresh" id="bulk-toggle-btn" onclick="toggleSelectMode()" style="background:rgba(37,211,102,.08);border-color:rgba(37,211,102,.3);color:#25d366">📲 שלח הודעה קבוצתית</button>
   </div>
   <!-- פילטר מתקדם -->
   <div class="filter-bar" id="filter-bar">
@@ -614,11 +708,13 @@ function switchTab(tab, el) {
   const calv = document.getElementById('calendar-view');
   const dv  = document.getElementById('dashboard-view');
   const rv  = document.getElementById('reminders-view');
+  const wv  = document.getElementById('waitlist-view');
 
   cv.style.display   = 'none';
   calv.style.display = 'none';
   dv.style.display   = 'none';
   rv.style.display   = 'none';
+  wv.style.display   = 'none';
 
   if (tab === 'calendar') {
     calv.style.display = 'block';
@@ -629,6 +725,9 @@ function switchTab(tab, el) {
   } else if (tab === 'reminders') {
     rv.style.display = 'block';
     loadReminders();
+  } else if (tab === 'waitlist') {
+    wv.style.display = 'block';
+    loadWaitlist();
   } else {
     cv.style.display = 'block';
     filterTable();
@@ -795,6 +894,7 @@ function renderRows(rows) {
     if (isUniverse && isBeauty) typeBadge = `<span class="badge badge-beauty">💇</span> <span class="badge badge-universe">🤖</span>`;
     else if (isUniverse) typeBadge = `<span class="badge badge-universe">🤖 Universe</span>`;
     else typeBadge = `<span class="badge badge-beauty">💇 Beauty</span>`;
+    const checkboxHtml = selectMode ? `<input type="checkbox" class="row-checkbox" onclick="event.stopPropagation();toggleRowSelect(this,'${c.phone}')" ${selectedPhones.has(c.phone)?'checked':''}>` : '';
 
     let serviceCell = '';
     if (isUniverse && c.interestedIn) {
@@ -813,8 +913,8 @@ function renderRows(rows) {
 
     const isNew = daysDiff(c.firstContact) < 7;
     const vipBadge = c.vip ? '<span class="vip-badge">👑</span>' : '';
-    return `<tr class="clickable" onclick="openProfile('${c.phone}')">
-      <td><strong>${vipBadge}${c.name||'—'}</strong>${isNew?' <span class="badge badge-new">חדשה</span>':''}</td>
+    return `<tr class="clickable" onclick="${selectMode?`toggleRowSelectByPhone('${c.phone}')`:`openProfile('${c.phone}')`}">
+      <td>${checkboxHtml}<strong>${vipBadge}${c.name||'—'}</strong>${isNew?' <span class="badge badge-new">חדשה</span>':''}</td>
       <td><span class="phone">${c.phone||'—'}</span></td>
       <td class="col-hide-mobile">${typeBadge}</td>
       <td class="col-hide-mobile">${serviceCell}</td>
@@ -1250,6 +1350,7 @@ function switchProfileTab(tab, el) {
         <div style="font-size:10px;color:var(--red);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">⚠️ אלרגיות</div>
         <div style="font-size:13px;color:var(--text)">${c.notes.allergy}</div>
       </div>` : ''}
+      ${(c.photos?.before || c.photos?.after) ? `<div style="margin-bottom:14px"><div style="font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">📷 תמונות לפני/אחרי</div><div style="display:flex;gap:10px">${c.photos?.before?`<div style="flex:1"><img class="photo-thumb" src="${c.photos.before}" onclick="window.open('${c.photos.before}','_blank')" title="לפני"/><div class="photo-label">לפני</div></div>`:''} ${c.photos?.after?`<div style="flex:1"><img class="photo-thumb" src="${c.photos.after}" onclick="window.open('${c.photos.after}','_blank')" title="אחרי"/><div class="photo-label">אחרי</div></div>`:''}</div></div>` : ''}
       ${waPhone ? `<a class="wa-big-btn" href="https://wa.me/${waPhone}" target="_blank">💬 שלח WhatsApp</a>` : ''}
       <button class="form-btn" onclick="switchProfileTab('notes', document.querySelectorAll('.profile-tab')[2])" style="margin-top:4px">📝 ערוך הערות</button>`;
   }
@@ -1275,6 +1376,8 @@ function switchProfileTab(tab, el) {
 
   else if (tab === 'notes') {
     const notes = c.notes || {};
+    const photosBefore = c.photos?.before;
+    const photosAfter  = c.photos?.after;
     body.innerHTML = `
       <div class="pnotes-field"><label>⭐ סטטוס VIP</label>
         <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
@@ -1288,7 +1391,15 @@ function switchProfileTab(tab, el) {
         <input id="pn-allergy" value="${notes.allergy||''}" placeholder="לדוג': אלרגית לאמוניה..."/></div>
       <div class="pnotes-field"><label>📝 הערות כלליות</label>
         <textarea id="pn-text">${notes.general||''}</textarea></div>
-      <button class="p-save-btn" onclick="saveProfileNotes()">💾 שמור הערות</button>`;
+      <button class="p-save-btn" onclick="saveProfileNotes()">💾 שמור הערות</button>
+      <div style="margin-top:14px;border-top:1px solid rgba(255,255,255,.06);padding-top:14px">
+        <div style="font-size:10px;color:var(--text-dim);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px">📷 תמונות לפני/אחרי</div>
+        <div class="photo-upload-wrap">
+          <button class="photo-upload-btn" onclick="uploadPhoto('before')">לפני 📷</button>
+          <button class="photo-upload-btn" onclick="uploadPhoto('after')">אחרי 📷</button>
+        </div>
+        <div id="p-photo-previews">${photosBefore||photosAfter?`<div style="display:flex;gap:10px">${photosBefore?`<div style="flex:1"><img class="photo-thumb" src="${photosBefore}"/><div class="photo-label">לפני</div></div>`:''} ${photosAfter?`<div style="flex:1"><img class="photo-thumb" src="${photosAfter}"/><div class="photo-label">אחרי</div></div>`:''}</div>`:''}</div>
+      </div>`;
   }
 
   else if (tab === 'chat') {
@@ -1752,10 +1863,243 @@ function updateStats(rows) {
   document.getElementById('hotleads').textContent = rows.filter(r => r.leadStatus === 'hot').length;
 }
 
-document.addEventListener('keydown', e => { if(e.key==='Escape') { closeModal(null); closeApptModal(null); closeEditApptModal(null); } });
+document.addEventListener('keydown', e => { if(e.key==='Escape') { closeModal(null); closeApptModal(null); closeEditApptModal(null); exitSelectMode(); } });
 
 loadData();
 setInterval(loadData, 30000);
+
+// ════════════════════════════════════════════════
+//  Feature 1: תמונות לפני/אחרי
+// ════════════════════════════════════════════════
+async function uploadPhoto(type) {
+  if (!currentProfilePhone) return;
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.onchange = async () => {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const base64 = e.target.result; // full data URL
+      try {
+        const res = await fetch('/save-photo?pass=' + getPass(), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone: currentProfilePhone, type, data: base64 })
+        });
+        const data = await res.json();
+        if (data.success) {
+          // update local data
+          const c = allRows.find(r => r.phone === currentProfilePhone);
+          if (c) {
+            if (!c.photos) c.photos = {};
+            c.photos[type] = data.url;
+          }
+          // refresh previews
+          const prev = document.getElementById('p-photo-previews');
+          if (prev) {
+            const cFresh = allRows.find(r => r.phone === currentProfilePhone);
+            const pb = cFresh?.photos?.before, pa = cFresh?.photos?.after;
+            prev.innerHTML = pb||pa ? `<div style="display:flex;gap:10px">${pb?`<div style="flex:1"><img class="photo-thumb" src="${pb}"/><div class="photo-label">לפני</div></div>`:''} ${pa?`<div style="flex:1"><img class="photo-thumb" src="${pa}"/><div class="photo-label">אחרי</div></div>`:''}</div>` : '';
+          }
+          alert(`✅ תמונה "${type === 'before' ? 'לפני' : 'אחרי'}" נשמרה!`);
+        } else {
+          alert('שגיאה בשמירת התמונה');
+        }
+      } catch(err) { alert('שגיאה בחיבור לשרת'); }
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
+
+// ════════════════════════════════════════════════
+//  Feature 2: הודעה קבוצתית
+// ════════════════════════════════════════════════
+let selectMode = false;
+let selectedPhones = new Set();
+
+function toggleSelectMode() {
+  if (selectMode) {
+    exitSelectMode();
+  } else {
+    selectMode = true;
+    selectedPhones = new Set();
+    document.getElementById('crm-table').classList.add('select-mode');
+    document.getElementById('bulk-bar').classList.add('open');
+    document.getElementById('bulk-toggle-btn').textContent = '✕ יציאה';
+    document.getElementById('bulk-count-label').textContent = '0 נבחרו';
+    filterTable();
+  }
+}
+
+function exitSelectMode() {
+  selectMode = false;
+  selectedPhones = new Set();
+  document.getElementById('crm-table').classList.remove('select-mode');
+  document.getElementById('bulk-bar').classList.remove('open');
+  const btn = document.getElementById('bulk-toggle-btn');
+  if (btn) btn.textContent = '📲 שלח הודעה קבוצתית';
+  filterTable();
+}
+
+function toggleRowSelect(checkbox, phone) {
+  if (checkbox.checked) selectedPhones.add(phone);
+  else selectedPhones.delete(phone);
+  document.getElementById('bulk-count-label').textContent = `${selectedPhones.size} נבחרו`;
+}
+
+function toggleRowSelectByPhone(phone) {
+  if (selectedPhones.has(phone)) selectedPhones.delete(phone);
+  else selectedPhones.add(phone);
+  document.getElementById('bulk-count-label').textContent = `${selectedPhones.size} נבחרו`;
+  filterTable();
+}
+
+async function sendBulkMessage() {
+  const message = document.getElementById('bulk-message').value.trim();
+  if (!message) { alert('נא לכתוב הודעה'); return; }
+  if (selectedPhones.size === 0) { alert('נא לבחור לקוחות'); return; }
+  if (!confirm(`לשלוח הודעה ל-${selectedPhones.size} לקוחות?`)) return;
+
+  try {
+    const res = await fetch('/send-bulk?pass=' + getPass(), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phones: [...selectedPhones], message })
+    });
+    const data = await res.json();
+    alert(`✅ נשלח!\n✔️ הצליח: ${data.sent}\n❌ נכשל: ${data.failed}`);
+    exitSelectMode();
+    document.getElementById('bulk-message').value = '';
+  } catch(e) { alert('שגיאה בשליחה'); }
+}
+
+// ════════════════════════════════════════════════
+//  Feature 3: רשימת המתנה
+// ════════════════════════════════════════════════
+function toggleWaitlistForm() {
+  const panel = document.getElementById('waitlist-form-panel');
+  panel.classList.toggle('open');
+  if (panel.classList.contains('open')) {
+    document.getElementById('wl-name').focus();
+  }
+}
+
+async function loadWaitlist() {
+  const list = document.getElementById('waitlist-list');
+  list.innerHTML = '<div class="waitlist-empty">⏳ טוען...</div>';
+  try {
+    const res = await fetch('/waitlist?pass=' + getPass());
+    const data = await res.json();
+    renderWaitlist(data);
+  } catch(e) {
+    list.innerHTML = '<div class="waitlist-empty">❌ שגיאה בטעינה</div>';
+  }
+}
+
+function renderWaitlist(items) {
+  const el = document.getElementById('waitlist-list');
+  if (!items || items.length === 0) {
+    el.innerHTML = '<div class="waitlist-empty">⏳ רשימת ההמתנה ריקה כרגע<br><span style="font-size:12px;color:#3e3c38;display:block;margin-top:8px">הוסיפי לקוחות שממתינות לתור פנוי</span></div>';
+    return;
+  }
+  el.innerHTML = items.map(item => {
+    const added = new Date(item.createdAt).toLocaleDateString('he-IL');
+    return `<div class="waitlist-item">
+      <div class="waitlist-badge">⏳</div>
+      <div class="waitlist-content">
+        <div class="waitlist-name">${item.name}</div>
+        <div class="waitlist-meta">📞 ${item.phone}${item.service?' · 💇 '+item.service:''}${item.preferredDay?' · 📅 '+item.preferredDay:''}</div>
+        <div class="waitlist-meta" style="color:#3e3c58">📆 נוסף: ${added}</div>
+        ${item.notes ? `<div class="waitlist-meta" style="color:#5e5c58">📝 ${item.notes}</div>` : ''}
+        <div class="waitlist-actions">
+          <button class="waitlist-action-btn waitlist-appt-btn" onclick="openApptFromWaitlist('${item.id}')">📅 תאם תור</button>
+          <button class="waitlist-action-btn waitlist-notify-btn" onclick="notifyWaitlist('${item.id}','${item.name}')">📲 הודע</button>
+          <button class="waitlist-action-btn waitlist-del-btn" onclick="removeWaitlist('${item.id}')">🗑 הסר</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function addWaitlistEntry() {
+  const name = document.getElementById('wl-name').value.trim();
+  const phone = document.getElementById('wl-phone').value.trim();
+  const service = document.getElementById('wl-service').value;
+  const preferredDay = document.getElementById('wl-preferred-day').value.trim();
+  const notes = document.getElementById('wl-notes').value.trim();
+  if (!name || !phone) { alert('נא למלא שם וטלפון'); return; }
+  try {
+    const res = await fetch('/add-waitlist?pass=' + getPass(), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, phone, service, preferredDay, notes })
+    });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('wl-name').value = '';
+      document.getElementById('wl-phone').value = '';
+      document.getElementById('wl-service').value = '';
+      document.getElementById('wl-preferred-day').value = '';
+      document.getElementById('wl-notes').value = '';
+      document.getElementById('waitlist-form-panel').classList.remove('open');
+      loadWaitlist();
+    } else { alert('שגיאה בהוספה'); }
+  } catch(e) { alert('שגיאה בחיבור לשרת'); }
+}
+
+async function removeWaitlist(id) {
+  if (!confirm('להסיר מרשימת ההמתנה?')) return;
+  try {
+    const res = await fetch('/remove-waitlist?pass=' + getPass(), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id })
+    });
+    const data = await res.json();
+    if (data.success) loadWaitlist();
+    else alert('שגיאה בהסרה');
+  } catch(e) { alert('שגיאה בחיבור לשרת'); }
+}
+
+async function notifyWaitlist(id, name) {
+  const message = `היי ${name}! פנה מקום ב-Juliet Beauty Boutique 💎 רוצה לתאם תור? כתבי לי 🙏`;
+  if (!confirm(`לשלוח הודעה ל-${name}?\n\n"${message}"`)) return;
+  try {
+    const res = await fetch('/notify-waitlist?pass=' + getPass(), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, message })
+    });
+    const data = await res.json();
+    if (data.success) alert('✅ הודעה נשלחה!');
+    else alert('שגיאה בשליחה');
+  } catch(e) { alert('שגיאה בחיבור לשרת'); }
+}
+
+function openApptFromWaitlist(id) {
+  // load waitlist item and prefill appt modal
+  fetch('/waitlist?pass=' + getPass())
+    .then(r => r.json())
+    .then(items => {
+      const item = items.find(i => i.id === id);
+      if (!item) return;
+      openApptModal();
+      document.getElementById('appt-name').value = item.name;
+      document.getElementById('appt-phone').value = item.phone;
+      if (item.service) {
+        const sel = document.getElementById('appt-service');
+        for (let i = 0; i < sel.options.length; i++) {
+          if (sel.options[i].text === item.service || sel.options[i].value === item.service) {
+            sel.selectedIndex = i; break;
+          }
+        }
+      }
+    })
+    .catch(() => openApptModal());
+}
 
 // ── תזכורות אישיות ─────────────────────────────────────────────
 
@@ -1879,6 +2223,16 @@ async function deleteReminder(id) {
   }
 }
 </script>
+
+<!-- ── בר הודעה קבוצתית ── -->
+<div class="bulk-bar" id="bulk-bar">
+  <div class="bulk-bar-top">
+    <span class="bulk-count" id="bulk-count-label">0 נבחרו</span>
+    <button class="refresh" onclick="sendBulkMessage()" style="background:rgba(37,211,102,.15);border-color:rgba(37,211,102,.5);color:#25d366;white-space:nowrap">📤 שלח לנבחרות</button>
+    <button class="refresh" onclick="exitSelectMode()" style="background:rgba(255,60,60,.08);border-color:rgba(255,60,60,.3);color:#ff6060;white-space:nowrap">✕ ביטול</button>
+  </div>
+  <textarea class="bulk-textarea" id="bulk-message" placeholder="כתבי את ההודעה כאן..."></textarea>
+</div>
 
 <!-- ═══ מודאלים — מחוץ לכל stacking context ═══ -->
 

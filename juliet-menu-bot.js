@@ -761,6 +761,202 @@ http.createServer((req, res) => {
     return;
   }
 
+  // ── שמירת תמונה לפני/אחרי ──────────────────────────────────
+  if (url.pathname === '/save-photo' && req.method === 'POST') {
+    const pass = url.searchParams.get('pass');
+    if (pass !== CRM_PASS) { res.writeHead(401); res.end('{}'); return; }
+    let body = '';
+    req.on('data', c => { body += c; });
+    req.on('end', () => {
+      try {
+        const d = JSON.parse(body);
+        const phone = (d.phone || '').replace(/\D/g,'').replace(/^972/,'0');
+        const type = d.type === 'after' ? 'after' : 'before';
+        const dataUrl = d.data || '';
+        if (!phone || !dataUrl) { res.writeHead(400); res.end('{}'); return; }
+
+        // Extract base64 data
+        const matches = dataUrl.match(/^data:(image\/\w+);base64,(.+)$/);
+        if (!matches) { res.writeHead(400); res.end('{}'); return; }
+        const ext = matches[1].split('/')[1] || 'jpg';
+        const base64Data = matches[2];
+
+        // Create photos directory
+        const photosDir = IS_RAILWAY ? '/data/photos' : path.join(__dirname, 'data', 'photos');
+        if (!fs.existsSync(photosDir)) fs.mkdirSync(photosDir, { recursive: true });
+
+        const filename = `${phone}_${type}.${ext}`;
+        const filepath = path.join(photosDir, filename);
+        fs.writeFileSync(filepath, Buffer.from(base64Data, 'base64'));
+
+        // Save URL reference in CRM
+        const crm = loadCRM();
+        if (!crm[phone]) crm[phone] = { phone, firstContact: new Date().toISOString(), visits: [] };
+        if (!crm[phone].photos) crm[phone].photos = {};
+        const photoUrl = `/get-photo?phone=${phone}&type=${type}&pass=${pass}`;
+        crm[phone].photos[type] = photoUrl;
+        saveCRM(crm);
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, url: photoUrl }));
+      } catch(e) {
+        console.log('save-photo error:', e.message);
+        res.writeHead(500); res.end(JSON.stringify({ success: false, error: e.message }));
+      }
+    });
+    return;
+  }
+
+  // ── קבלת תמונה לפני/אחרי ──────────────────────────────────
+  if (url.pathname === '/get-photo') {
+    const pass = url.searchParams.get('pass');
+    if (pass !== CRM_PASS) { res.writeHead(401); res.end('Unauthorized'); return; }
+    const phone = (url.searchParams.get('phone') || '').replace(/\D/g,'').replace(/^972/,'0');
+    const type = url.searchParams.get('type') === 'after' ? 'after' : 'before';
+    if (!phone) { res.writeHead(400); res.end(''); return; }
+
+    const photosDir = IS_RAILWAY ? '/data/photos' : path.join(__dirname, 'data', 'photos');
+    // Try common extensions
+    for (const ext of ['jpg', 'jpeg', 'png', 'webp', 'gif']) {
+      const filepath = path.join(photosDir, `${phone}_${type}.${ext}`);
+      if (fs.existsSync(filepath)) {
+        const contentTypes = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', gif: 'image/gif' };
+        res.writeHead(200, { 'Content-Type': contentTypes[ext] || 'image/jpeg' });
+        res.end(fs.readFileSync(filepath));
+        return;
+      }
+    }
+    res.writeHead(404); res.end('Not found');
+    return;
+  }
+
+  // ── שליחת הודעה קבוצתית ─────────────────────────────────────
+  if (url.pathname === '/send-bulk' && req.method === 'POST') {
+    const pass = url.searchParams.get('pass');
+    if (pass !== CRM_PASS) { res.writeHead(401); res.end('{}'); return; }
+    let body = '';
+    req.on('data', c => { body += c; });
+    req.on('end', async () => {
+      try {
+        const d = JSON.parse(body);
+        const phones = Array.isArray(d.phones) ? d.phones : [];
+        const message = d.message || '';
+        if (!message || phones.length === 0) {
+          res.writeHead(400); res.end(JSON.stringify({ sent: 0, failed: 0 })); return;
+        }
+        let sent = 0, failed = 0;
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        // Send in background after responding
+        const doSend = async () => {
+          for (const phone of phones) {
+            try {
+              const waId = '972' + phone.replace(/^0/, '') + '@c.us';
+              await client.sendMessage(waId, message);
+              sent++;
+            } catch(e) {
+              console.log(`bulk send failed for ${phone}:`, e.message);
+              failed++;
+            }
+            await new Promise(r => setTimeout(r, 1500));
+          }
+          console.log(`✅ bulk send done — sent:${sent} failed:${failed}`);
+        };
+        res.end(JSON.stringify({ sent: phones.length, failed: 0, queued: true }));
+        doSend();
+      } catch(e) {
+        res.writeHead(500); res.end(JSON.stringify({ sent: 0, failed: 0, error: e.message }));
+      }
+    });
+    return;
+  }
+
+  // ── רשימת המתנה ──────────────────────────────────────────────
+  const WAITLIST_FILE = IS_RAILWAY ? '/data/waitlist.json' : path.join(__dirname, 'waitlist.json');
+  function loadWaitlist() {
+    if (!fs.existsSync(WAITLIST_FILE)) return [];
+    try { return JSON.parse(fs.readFileSync(WAITLIST_FILE, 'utf8')); } catch(e) { return []; }
+  }
+  function saveWaitlist(data) { fs.writeFileSync(WAITLIST_FILE, JSON.stringify(data, null, 2)); }
+
+  if (url.pathname === '/waitlist') {
+    const pass = url.searchParams.get('pass');
+    if (pass !== CRM_PASS) { res.writeHead(401); res.end('[]'); return; }
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(loadWaitlist()));
+    return;
+  }
+
+  if (url.pathname === '/add-waitlist' && req.method === 'POST') {
+    const pass = url.searchParams.get('pass');
+    if (pass !== CRM_PASS) { res.writeHead(401); res.end('{}'); return; }
+    let body = '';
+    req.on('data', c => { body += c; });
+    req.on('end', () => {
+      try {
+        const d = JSON.parse(body);
+        const list = loadWaitlist();
+        const id = Date.now().toString();
+        list.push({
+          id,
+          name: d.name || '',
+          phone: (d.phone || '').replace(/\D/g,'').replace(/^972/,'0'),
+          service: d.service || '',
+          preferredDay: d.preferredDay || '',
+          notes: d.notes || '',
+          createdAt: new Date().toISOString()
+        });
+        saveWaitlist(list);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, id }));
+      } catch(e) { res.writeHead(500); res.end('{}'); }
+    });
+    return;
+  }
+
+  if (url.pathname === '/remove-waitlist' && req.method === 'POST') {
+    const pass = url.searchParams.get('pass');
+    if (pass !== CRM_PASS) { res.writeHead(401); res.end('{}'); return; }
+    let body = '';
+    req.on('data', c => { body += c; });
+    req.on('end', () => {
+      try {
+        const d = JSON.parse(body);
+        let list = loadWaitlist();
+        list = list.filter(i => i.id !== d.id);
+        saveWaitlist(list);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true }));
+      } catch(e) { res.writeHead(500); res.end('{}'); }
+    });
+    return;
+  }
+
+  if (url.pathname === '/notify-waitlist' && req.method === 'POST') {
+    const pass = url.searchParams.get('pass');
+    if (pass !== CRM_PASS) { res.writeHead(401); res.end('{}'); return; }
+    let body = '';
+    req.on('data', c => { body += c; });
+    req.on('end', async () => {
+      try {
+        const d = JSON.parse(body);
+        const list = loadWaitlist();
+        const item = list.find(i => i.id === d.id);
+        if (!item) { res.writeHead(404); res.end('{}'); return; }
+        const message = d.message || `היי ${item.name}! פנה מקום ב-Juliet Beauty Boutique 💎 רוצה לתאם תור? כתבי לי 🙏`;
+        const waId = '972' + item.phone.replace(/^0/, '') + '@c.us';
+        try {
+          await client.sendMessage(waId, message);
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: true }));
+        } catch(e) {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: e.message }));
+        }
+      } catch(e) { res.writeHead(500); res.end('{}'); }
+    });
+    return;
+  }
+
   // בדיקת חיים
   res.writeHead(200);
   res.end('Juliet Bot is running 💎');
