@@ -1120,9 +1120,25 @@ http.createServer((req, res) => {
     return;
   }
 
+  // ── סטטוס מפורט ──────────────────────────────────────────────
+  if (url.pathname === '/status') {
+    const crm = loadCRM();
+    const info = clientReady ? (client.info || {}) : {};
+    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({
+      botRunning: true,
+      clientReady,
+      waUser: info.wid ? info.wid.user : null,
+      waName: info.pushname || null,
+      totalCustomers: Object.keys(crm).length,
+      time: new Date().toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem' })
+    }));
+    return;
+  }
+
   // בדיקת חיים
   res.writeHead(200);
-  res.end('Juliet Bot is running 💎');
+  res.end(clientReady ? 'Juliet Bot is running 💎 | WhatsApp: CONNECTED' : 'Juliet Bot is running 💎 | WhatsApp: DISCONNECTED');
 }).listen(process.env.PORT || 3000);
 
 const client = new Client({
