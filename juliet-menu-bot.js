@@ -3801,7 +3801,7 @@ function startReminderJob() {
             const visitIsraelKey = `${visitIsraelDate.getFullYear()}-${String(visitIsraelDate.getMonth()+1).padStart(2,'0')}-${String(visitIsraelDate.getDate()).padStart(2,'0')}`;
             // דלג על lee_ כי אין להן מספר WhatsApp
             const isLeePhone = phone.startsWith('lee_');
-            if (!visit.reminderSent && israelHour >= 10 && israelHour < 12 && visitIsraelKey === tomorrowKey && !isLeePhone) {
+            if (!visit.reminderSent && israelHour >= 10 && israelHour < 20 && visitIsraelKey === tomorrowKey && !isLeePhone) {
               const name = customer.name || 'יקרה';
               const firstName = name.split(' ')[0];
               const apptStr = new Date(visit.date).toLocaleTimeString('he-IL', { timeZone: 'Asia/Jerusalem', hour: '2-digit', minute: '2-digit' });
