@@ -1192,12 +1192,22 @@ function showDay(key, dayNum) {
   let html = '';
   if (holiday) html += `<div class="day-holiday-item">🕎 ${holiday}</div>`;
 
+  // בדוק אם היום הזה הוא מחר (לכפתור תזכורות)
+  const todayForReminder = new Date();
+  const tomorrowForReminder = new Date(todayForReminder);
+  tomorrowForReminder.setDate(tomorrowForReminder.getDate() + 1);
+  const tomorrowReminderKey = toKey(tomorrowForReminder.getFullYear(), tomorrowForReminder.getMonth(), tomorrowForReminder.getDate());
+  const isTomorrowDay = key === tomorrowReminderKey;
+  const hasPendingAppts = appts.filter(a => a.status !== 'cancelled').length > 0;
+
   // כפתורי פעולה ליום זה
   html += `<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
     <button class="form-btn" onclick="openApptModalForDay('${key}')"
       style="width:auto;padding:8px 20px;font-size:13px">➕ הוסף תור</button>
     <button onclick="addReminderForDay('${key}')"
       style="width:auto;padding:8px 20px;font-size:13px;border-radius:8px;border:1px solid #a78bfa;background:rgba(167,139,250,.12);color:#a78bfa;cursor:pointer;font-weight:600;font-family:inherit">🔔 הוסף תזכורת</button>
+    ${isTomorrowDay && hasPendingAppts ? `<button id="day-reminder-btn" onclick="sendRemindersFromDay('${key}', this)"
+      style="width:auto;padding:8px 20px;font-size:13px;border-radius:8px;border:1px solid #fbbf24;background:rgba(251,191,36,.15);color:#fbbf24;cursor:pointer;font-weight:700;font-family:inherit">📲 שלח תזכורות ללקוחות</button>` : ''}
   </div>`;
 
   // בנה מפת תורים לפי שעה
@@ -1726,6 +1736,39 @@ async function backupNow() {
   } catch(e) {
     btn.textContent = '☁️';
     btn.disabled = false;
+  }
+}
+
+// ── שליחת תזכורות מתוך פאנל יום ביומן ─────────────────────
+async function sendRemindersFromDay(key, btn) {
+  const original = btn.innerHTML;
+  btn.innerHTML = '⏳ שולח...';
+  btn.disabled = true;
+  try {
+    const res = await fetch('/send-reminders-now?pass=' + getPass(), { method: 'POST' });
+    const data = await res.json();
+    if (!data.success) {
+      btn.innerHTML = original;
+      btn.disabled = false;
+      if (data.clientReady === false) {
+        alert('❌ וואטסאפ לא מחובר!\n\nפתחי: ' + window.location.origin + '/qr\nוסרקי QR עם הטלפון 📱');
+      } else {
+        alert('❌ שגיאה: ' + (data.error || 'לא ידוע'));
+      }
+      return;
+    }
+    btn.innerHTML = '✅ תזכורות נשלחו!';
+    btn.style.background = 'rgba(90,220,100,.15)';
+    btn.style.borderColor = 'rgba(90,220,100,.5)';
+    btn.style.color = '#5adf8a';
+    setTimeout(() => {
+      btn.innerHTML = '📲 נשלח ✓';
+      btn.disabled = true;
+    }, 3000);
+  } catch(e) {
+    btn.innerHTML = original;
+    btn.disabled = false;
+    alert('שגיאה: ' + e.message);
   }
 }
 
