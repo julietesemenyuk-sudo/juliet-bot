@@ -830,6 +830,70 @@ http.createServer((req, res) => {
     return;
   }
 
+  // ── שליחת תזכורות מה-CRM (HTTP trigger) ─────────────────────
+  if (url.pathname === '/send-reminders-now' && req.method === 'POST') {
+    const pass = url.searchParams.get('pass');
+    if (pass !== CRM_PASS) { res.writeHead(401); res.end('{}'); return; }
+    if (!clientReady) {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: 'WhatsApp לא מחובר — סרקי QR תחילה', clientReady: false }));
+      return;
+    }
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    // הרץ בברקע
+    (async () => {
+      const crm = loadCRM();
+      const tomorrowKey = getIsraelTomorrowKey();
+      let sent = 0, errors = 0, skipped = 0;
+      const report = [];
+      for (const [phone, customer] of Object.entries(crm)) {
+        if (customer.muted) continue;
+        if (!phone.startsWith('05') && !phone.match(/^[0-9]{10}$/)) continue;
+        const visits = (customer.visits || []).filter(v => {
+          if (!v.date || v.status === 'cancelled' || v.reminderSent) return false;
+          const d = new Date(new Date(v.date).toLocaleString('en-US', { timeZone: 'Asia/Jerusalem' }));
+          const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+          return k === tomorrowKey;
+        });
+        if (!visits.length) continue;
+        const visit = visits[0];
+        const name = customer.name || 'יקרה';
+        const firstName = name.split(' ')[0];
+        const apptStr = new Date(visit.date).toLocaleTimeString('he-IL', { timeZone: 'Asia/Jerusalem', hour: '2-digit', minute: '2-digit' });
+        const chatId = '972' + phone.replace(/^0/, '') + '@c.us';
+        let msg;
+        if (hasCity(name)) {
+          msg = `היי ${firstName}! 💎\n\nתזכורת לתור מחר ב-*${apptStr}*${visit.service ? ` — *${visit.service}*` : ''} אצל *Juliet Beauty Boutique* 💇‍♀️\n\n📍 *כתובת הסלון:*\n${SALON_ADDRESS}\n\n✨ מכיוון שאת מגיעה מרחוק — תרצי לשלוח לי את הכתובת המדויקת שלך?\n\n🚿 *הכנה לטיפול — חשוב!*\nלפני הגעתך *תחפפי* את השיער בשמפו *ללא מסכה*\nהשיער חייב להגיע *נקי ויבש* לטיפול 💆‍♀️\n\nאם יש שינוי בתור שלחי הודעה 🙏\n\n✅ לאישור תור | ❌ לביטול\nמחכה לך! 💫`;
+        } else {
+          msg = `היי ${firstName}! 💎\n\nתזכורת לתור מחר ב-*${apptStr}*${visit.service ? ` — *${visit.service}*` : ''} אצל *Juliet Beauty Boutique* 💇‍♀️\n\n📍 *כתובת:*\n${SALON_ADDRESS}\n\n🚿 *הכנה לטיפול — חשוב!*\nלפני הגעתך *תחפפי* את השיער בשמפו *ללא מסכה*\nהשיער חייב להגיע *נקי ויבש* לטיפול 💆‍♀️\n\nאם יש שינוי בתור שלחי הודעה 🙏\n\n✅ לאישור תור | ❌ לביטול\nמחכה לך! 💫`;
+        }
+        try {
+          await client.sendMessage(chatId, msg);
+          visit.reminderSent = true;
+          sent++;
+          report.push(`✅ ${name} — ${apptStr}`);
+          await new Promise(r => setTimeout(r, 1500));
+        } catch(e) {
+          errors++;
+          report.push(`❌ ${name} — ${e.message}`);
+        }
+      }
+      saveCRM(crm);
+      // דוח לג'ולייט
+      if (sent > 0) {
+        try {
+          await client.sendMessage(JULIET_NUMBER,
+            `📅 *תזכורות נשלחו למחר!*\n\n✅ נשלחו: *${sent}*\n${errors ? `❌ נכשלו: *${errors}*\n` : ''}\n` +
+            report.join('\n')
+          );
+        } catch(e) {}
+      }
+      console.log(`📅 /send-reminders-now: ${sent} נשלחו, ${errors} נכשלו`);
+    })();
+    res.end(JSON.stringify({ success: true, message: 'שליחת תזכורות הופעלה!' }));
+    return;
+  }
+
   // ── שליחת הודעה קבוצתית ─────────────────────────────────────
   if (url.pathname === '/send-bulk' && req.method === 'POST') {
     const pass = url.searchParams.get('pass');

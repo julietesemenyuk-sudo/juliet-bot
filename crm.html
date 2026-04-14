@@ -557,6 +557,7 @@
     <button class="refresh" onclick="exportCSV()" style="background:rgba(90,220,100,.08);border-color:rgba(90,220,100,.3);color:#5adf8a" title="ייצוא לקוחות CSV">👥</button>
     <button class="refresh" onclick="exportAppointmentsCSV()" style="background:rgba(200,168,75,.1);border-color:rgba(200,168,75,.35);color:#c8a84b" title="ייצוא תורים CSV">📅</button>
     <button class="refresh" onclick="backupNow()" id="backup-btn" style="background:rgba(167,139,250,.1);border-color:rgba(167,139,250,.4);color:#a78bfa" title="גיבוי ל-GitHub עכשיו">☁️</button>
+    <button class="refresh" onclick="sendRemindersNow()" id="reminders-btn" style="background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.4);color:#fbbf24" title="שלח תזכורות למחר עכשיו">🔔 תזכורות</button>
     <button class="refresh" onclick="openApptModal()" style="background:rgba(200,168,75,.15);border-color:#c8a84b;color:#c8a84b">➕ תור</button>
     <button class="refresh" id="bulk-toggle-btn" onclick="toggleSelectMode()" style="background:rgba(37,211,102,.08);border-color:rgba(37,211,102,.3);color:#25d366">📲 שלח הודעה קבוצתית</button>
   </div>
@@ -1725,6 +1726,41 @@ async function backupNow() {
   } catch(e) {
     btn.textContent = '☁️';
     btn.disabled = false;
+  }
+}
+
+// ── שליחת תזכורות מה-CRM ────────────────────────────────────
+async function sendRemindersNow() {
+  const btn = document.getElementById('reminders-btn');
+  btn.textContent = '⏳ שולח...';
+  btn.disabled = true;
+  try {
+    const res = await fetch('/send-reminders-now?pass=' + getPass(), { method: 'POST' });
+    const data = await res.json();
+    if (!data.success) {
+      btn.textContent = '🔔 תזכורות';
+      btn.disabled = false;
+      if (data.clientReady === false) {
+        alert('❌ וואטסאפ לא מחובר!\n\nפתחי: ' + window.location.origin + '/qr\nוסרקי QR עם הטלפון 📱');
+      } else {
+        alert('❌ שגיאה: ' + (data.error || 'לא ידוע'));
+      }
+      return;
+    }
+    btn.textContent = '✅ נשלח!';
+    btn.style.color = '#5adf8a';
+    btn.style.borderColor = 'rgba(90,220,100,.5)';
+    setTimeout(() => {
+      btn.textContent = '🔔 תזכורות';
+      btn.style.color = '#fbbf24';
+      btn.style.borderColor = 'rgba(251,191,36,.4)';
+      btn.disabled = false;
+    }, 4000);
+    alert('✅ תזכורות נשלחו!\n\nתקבלי עדכון בוואטסאפ עם הפירוט 💎');
+  } catch(e) {
+    btn.textContent = '🔔 תזכורות';
+    btn.disabled = false;
+    alert('שגיאת חיבור: ' + e.message);
   }
 }
 
