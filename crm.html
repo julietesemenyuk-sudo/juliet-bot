@@ -1425,6 +1425,45 @@ function hideModal(id) {
   document.body.style.overflow = '';
 }
 
+// ── Autocomplete לקוחה בטופס תור ────────────────────────────
+function apptAutoComplete(val) {
+  const box = document.getElementById('appt-suggestions');
+  if (!val || val.length < 2) { box.style.display = 'none'; return; }
+  const q = val.toLowerCase();
+  const matches = allRows.filter(r =>
+    (r.name||'').toLowerCase().includes(q) || (r.phone||'').includes(q)
+  ).slice(0, 6);
+  if (!matches.length) { box.style.display = 'none'; return; }
+  box.innerHTML = matches.map(c => {
+    const lastV = (c.visits||[]).filter(v=>v.status==='done').sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
+    const lastSvc = lastV ? lastV.service : (c.lastService || '');
+    return `<div onclick="apptFillCustomer('${c.phone}')"
+      style="padding:10px 14px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.05);transition:background .15s"
+      onmouseenter="this.style.background='rgba(200,168,75,.1)'" onmouseleave="this.style.background=''">
+      <div style="font-size:13px;font-weight:700;color:#e8d9b8">${c.vip?'👑 ':''}${c.name||'—'}</div>
+      <div style="font-size:11px;color:#c8a84b;margin-top:2px">${c.phone||''}${lastSvc?' · '+lastSvc:''}</div>
+    </div>`;
+  }).join('');
+  box.style.display = 'block';
+}
+
+function apptFillCustomer(phone) {
+  const c = allRows.find(r => r.phone === phone);
+  if (!c) return;
+  document.getElementById('appt-name').value = c.name || '';
+  document.getElementById('appt-phone').value = c.phone || '';
+  // מלא שירות אחרון אם קיים
+  const lastV = (c.visits||[]).filter(v=>v.status==='done').sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
+  const lastSvc = lastV ? lastV.service : (c.lastService || '');
+  if (lastSvc) {
+    const sel = document.getElementById('appt-service');
+    for (let i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].text === lastSvc) { sel.selectedIndex = i; break; }
+    }
+  }
+  document.getElementById('appt-suggestions').style.display = 'none';
+}
+
 // ── תור חדש ─────────────────────────────────────────────────
 function openApptModal(prefillDate, prefillTime) {
   const today = new Date().toISOString().split('T')[0];
@@ -1880,8 +1919,9 @@ async function deleteReminder(id) {
       <h3 style="color:var(--gold);margin:0;font-size:17px">➕ הוספת תור חדש</h3>
       <button class="modal-close" onclick="closeApptModal(null)" style="font-size:20px">✕</button>
     </div>
-    <div class="form-row"><label>👤 שם לקוחה *</label>
-      <input class="form-input" id="appt-name" placeholder="שם מלא"/>
+    <div class="form-row" style="position:relative"><label>👤 שם לקוחה *</label>
+      <input class="form-input" id="appt-name" placeholder="שם מלא..." oninput="apptAutoComplete(this.value)" autocomplete="off"/>
+      <div id="appt-suggestions" style="display:none;position:absolute;top:100%;right:0;left:0;background:#111;border:1px solid rgba(200,168,75,.3);border-radius:0 0 10px 10px;z-index:9;max-height:180px;overflow-y:auto"></div>
     </div>
     <div class="form-row"><label>📞 טלפון</label>
       <input class="form-input" id="appt-phone" placeholder="050-0000000" type="tel"/>
