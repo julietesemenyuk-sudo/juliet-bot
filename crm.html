@@ -775,6 +775,13 @@ function clearFilters() {
 }
 
 function renderRows(rows) {
+  // הסר כפילויות — אם יש לקוחה עם מספר טלפון אמיתי, הסתר את גרסת lee_
+  const realPhones = new Set(rows.filter(r => !r.phone.startsWith('lee_')).map(r => r.name?.trim().toLowerCase()).filter(Boolean));
+  rows = rows.filter(r => {
+    if (!r.phone.startsWith('lee_')) return true;
+    return !realPhones.has((r.name||'').trim().toLowerCase());
+  });
+
   const tbody = document.getElementById('tbody');
   if (!rows.length) {
     tbody.innerHTML = '<tr><td colspan="7" class="empty">אין לקוחות עדיין 💎</td></tr>';

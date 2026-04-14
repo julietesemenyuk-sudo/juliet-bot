@@ -478,10 +478,28 @@ http.createServer((req, res) => {
         if (!phone) { res.writeHead(400); res.end('{}'); return; }
         if (!crm[phone]) crm[phone] = { phone, name: d.name || 'לקוחה', firstContact: new Date().toISOString(), visits: [], source: 'crm' };
         if (d.name) crm[phone].name = d.name;
+        // מיזוג lee_ כפילויות — אם יש רשומת lee_ עם אותו שם, העבר ביקורים ומחק
+        const nameLower = (d.name||'').trim().toLowerCase();
+        if (nameLower) {
+          Object.keys(crm).forEach(k => {
+            if (k.startsWith('lee_') && (crm[k].name||'').trim().toLowerCase() === nameLower) {
+              (crm[k].visits||[]).forEach(v => {
+                const exists = (crm[phone].visits||[]).some(vv => vv.date === v.date && vv.service === v.service);
+                if (!exists) crm[phone].visits.push(v);
+              });
+              delete crm[k];
+            }
+          });
+        }
         crm[phone].visits = crm[phone].visits || [];
+        // שמור שעה בזמן ישראל (UTC+3)
+        const [yr,mo,dy] = (d.date||'').split('-').map(Number);
+        const [hr,mn] = (d.time||'09:00').split(':').map(Number);
+        const israelDate = new Date(Date.UTC(yr, mo-1, dy, hr-3, mn, 0));
         crm[phone].visits.push({
-          date: new Date(d.date + 'T' + (d.time || '09:00') + ':00').toISOString(),
+          date: israelDate.toISOString(),
           service: d.service || '',
+          notes: d.notes || '',
           source: 'crm',
           status: 'scheduled'
         });
@@ -512,7 +530,9 @@ http.createServer((req, res) => {
         const idx = parseInt(d.visitIndex);
         if (crm[phone] && Array.isArray(crm[phone].visits) && crm[phone].visits[idx]) {
           const v = crm[phone].visits[idx];
-          v.date = new Date(d.date + 'T' + (d.time || '09:00') + ':00').toISOString();
+          const [yr2,mo2,dy2] = (d.date||'').split('-').map(Number);
+          const [hr2,mn2] = (d.time||'09:00').split(':').map(Number);
+          v.date = new Date(Date.UTC(yr2, mo2-1, dy2, hr2-3, mn2, 0)).toISOString();
           if (d.service) v.service = d.service;
           if (d.notes !== undefined) v.notes = d.notes;
           if (d.name) crm[phone].name = d.name;
