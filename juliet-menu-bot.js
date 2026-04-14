@@ -957,6 +957,105 @@ http.createServer((req, res) => {
     return;
   }
 
+  // ── כרטיס לקוחה דיגיטלי ─────────────────────────────────────
+  if (url.pathname.startsWith('/customer-card/')) {
+    const pass = url.searchParams.get('pass');
+    if (pass !== CRM_PASS) { res.writeHead(401); res.end('Unauthorized'); return; }
+    const phone = decodeURIComponent(url.pathname.replace('/customer-card/', ''));
+    const crm = loadCRM();
+    const c = crm[phone];
+    if (!c) { res.writeHead(404); res.end('לקוחה לא נמצאה'); return; }
+    const visits = (c.visits || []).sort((a,b) => new Date(b.date)-new Date(a.date));
+    const totalVisits = visits.filter(v=>v.status!=='cancelled').length;
+    const lastVisit = visits.find(v=>v.status!=='cancelled');
+    const nextVisit = visits.find(v=>v.status!=='cancelled' && new Date(v.date)>new Date());
+    const tags = [];
+    if (c.vip) tags.push('⭐ VIP');
+    if (totalVisits === 0) tags.push('🆕 חדשה');
+    if (totalVisits >= 5) tags.push('💎 נאמנה');
+    const html = `<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>כרטיס לקוחה — ${c.name||phone}</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;600;700;900&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Heebo',sans-serif;background:#0d0d1a;color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+  .card{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);border:1px solid rgba(212,175,55,0.3);border-radius:24px;width:100%;max-width:480px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.5)}
+  .header{background:linear-gradient(135deg,#d4af37,#f0d060,#d4af37);padding:32px 28px 24px;text-align:center;position:relative}
+  .header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:rgba(255,255,255,0.3)}
+  .avatar{width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.25);display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 12px;border:3px solid rgba(255,255,255,0.5)}
+  .name{font-size:24px;font-weight:900;color:#0d0d1a;margin-bottom:4px}
+  .phone-tag{font-size:14px;color:rgba(0,0,0,0.6);font-weight:600}
+  .tags{display:flex;gap:8px;justify-content:center;margin-top:10px;flex-wrap:wrap}
+  .tag{background:rgba(0,0,0,0.15);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;color:#0d0d1a}
+  .body{padding:24px 28px}
+  .section{margin-bottom:24px}
+  .section-title{font-size:11px;font-weight:700;color:#d4af37;text-transform:uppercase;letter-spacing:2px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+  .section-title::after{content:'';flex:1;height:1px;background:rgba(212,175,55,0.2)}
+  .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .info-box{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:14px;text-align:center}
+  .info-box .val{font-size:22px;font-weight:900;color:#d4af37}
+  .info-box .lbl{font-size:11px;color:rgba(255,255,255,0.5);margin-top:4px}
+  .visit-row{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(255,255,255,0.04);border-radius:10px;margin-bottom:8px;border-right:3px solid #d4af37}
+  .visit-row .date{font-size:13px;color:rgba(255,255,255,0.7)}
+  .visit-row .svc{font-size:13px;font-weight:600;color:#fff}
+  .visit-row.cancelled{opacity:0.4;border-right-color:#666}
+  .notes-box{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:14px;font-size:13px;color:rgba(255,255,255,0.75);line-height:1.6;white-space:pre-wrap}
+  .footer{background:rgba(0,0,0,0.3);padding:16px 28px;text-align:center;border-top:1px solid rgba(255,255,255,0.06)}
+  .footer span{font-size:11px;color:rgba(255,255,255,0.3);font-style:italic}
+  .wa-btn{display:inline-flex;align-items:center;gap:8px;background:#25d366;color:#fff;text-decoration:none;padding:10px 20px;border-radius:20px;font-weight:700;font-size:14px;margin-top:10px}
+  @media print{body{background:#fff}.card{box-shadow:none;border-color:#ddd}*{-webkit-print-color-adjust:exact!important}}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <div class="avatar">💇‍♀️</div>
+    <div class="name">${c.name || 'לקוחה'}</div>
+    <div class="phone-tag">📞 ${phone}</div>
+    ${tags.length ? `<div class="tags">${tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>` : ''}
+  </div>
+  <div class="body">
+    <div class="section">
+      <div class="section-title">סטטיסטיקה</div>
+      <div class="info-grid">
+        <div class="info-box"><div class="val">${totalVisits}</div><div class="lbl">ביקורים</div></div>
+        <div class="info-box"><div class="val">${nextVisit ? new Date(nextVisit.date).toLocaleDateString('he-IL') : '—'}</div><div class="lbl">תור קרוב</div></div>
+        <div class="info-box"><div class="val">${lastVisit ? new Date(lastVisit.date).toLocaleDateString('he-IL') : '—'}</div><div class="lbl">ביקור אחרון</div></div>
+        <div class="info-box"><div class="val">${lastVisit && lastVisit.service ? lastVisit.service.slice(0,10) : '—'}</div><div class="lbl">שירות אחרון</div></div>
+      </div>
+    </div>
+    ${visits.length ? `
+    <div class="section">
+      <div class="section-title">היסטוריית ביקורים</div>
+      ${visits.slice(0,6).map(v=>`
+      <div class="visit-row${v.status==='cancelled'?' cancelled':''}">
+        <span class="date">${new Date(v.date).toLocaleDateString('he-IL')} ${new Date(v.date).toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'})}</span>
+        <span class="svc">${v.service||'טיפול'}${v.status==='cancelled'?' ❌':''}</span>
+      </div>`).join('')}
+    </div>` : ''}
+    ${c.notes ? `
+    <div class="section">
+      <div class="section-title">הערות</div>
+      <div class="notes-box">${c.notes}</div>
+    </div>` : ''}
+    <div style="text-align:center;margin-top:8px">
+      <a class="wa-btn" href="https://wa.me/972${phone.replace(/^0/,'')}">💬 שלח WhatsApp</a>
+    </div>
+  </div>
+  <div class="footer">
+    <span>Juliet Beauty Boutique 💎 הציונות 61 דירה 14, אשדוד</span>
+  </div>
+</div>
+</body></html>`;
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    res.end(html);
+    return;
+  }
+
   // בדיקת חיים
   res.writeHead(200);
   res.end('Juliet Bot is running 💎');
@@ -1782,7 +1881,8 @@ async function handleJulietCommand(message) {
           `🚿 *הכנה לטיפול — חשוב!*\n` +
           `לפני הגעתך *תחפפי* את השיער בשמפו *ללא מסכה*\n` +
           `השיער חייב להגיע *נקי ויבש* לטיפול 💆‍♀️\n\n` +
-          `אם יש שינוי בתור שלחי הודעה 🙏\nמחכה לך! 💫`;
+          `אם יש שינוי בתור שלחי הודעה 🙏\n\n` +
+          `✅ לאישור תור | ❌ לביטול\nמחכה לך! 💫`;
       } else {
         msg = `היי ${firstName}! 💎\n\n` +
           `תזכורת לתור מחר ב-*${apptStr}*${visit.service ? ` — *${visit.service}*` : ''} אצל *Juliet Beauty Boutique* 💇‍♀️\n\n` +
@@ -1790,7 +1890,8 @@ async function handleJulietCommand(message) {
           `🚿 *הכנה לטיפול — חשוב!*\n` +
           `לפני הגעתך *תחפפי* את השיער בשמפו *ללא מסכה*\n` +
           `השיער חייב להגיע *נקי ויבש* לטיפול 💆‍♀️\n\n` +
-          `אם יש שינוי בתור שלחי הודעה 🙏\nמחכה לך! 💫`;
+          `אם יש שינוי בתור שלחי הודעה 🙏\n\n` +
+          `✅ לאישור תור | ❌ לביטול\nמחכה לך! 💫`;
       }
 
       try {
@@ -2334,6 +2435,39 @@ client.on('message', async (message) => {
     crm[cleanPhone].chatLog.push({ from: 'customer', text: body, time: new Date().toISOString() });
     if (crm[cleanPhone].chatLog.length > 50) crm[cleanPhone].chatLog = crm[cleanPhone].chatLog.slice(-50);
     saveCRM(crm);
+  }
+
+  // ── אישור / ביטול תור מהלקוחה ✅ ❌ ──────────────────────────
+  if (body === '✅' || body === '❌') {
+    const cleanPhone = from.replace('@c.us', '').replace('972', '0');
+    const crm = loadCRM();
+    const customer = crm[cleanPhone];
+    if (customer && customer.visits) {
+      const tomorrowKey = getIsraelTomorrowKey();
+      const visit = customer.visits.find(v => {
+        if (!v.date || v.status === 'cancelled') return false;
+        const d = new Date(new Date(v.date).toLocaleString('en-US', { timeZone: 'Asia/Jerusalem' }));
+        const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        return k === tomorrowKey;
+      });
+      if (visit) {
+        const firstName = (customer.name || 'יקרה').split(' ')[0];
+        const apptStr = new Date(visit.date).toLocaleTimeString('he-IL', { timeZone:'Asia/Jerusalem', hour:'2-digit', minute:'2-digit' });
+        if (body === '✅') {
+          visit.confirmed = true;
+          saveCRM(crm);
+          await message.reply(`✅ *תודה ${firstName}!* אישרת את התור ל-*${apptStr}* מחר 💎\nמחכה לך! 💫`);
+          try { await client.sendMessage(JULIET_NUMBER, `✅ *אישור תור!*\n\n👤 *${customer.name || cleanPhone}*\nאישרה את התור למחר ב-*${apptStr}*`); } catch(e) {}
+        } else {
+          visit.status = 'cancelled';
+          saveCRM(crm);
+          await message.reply(`אוקיי 🙏 ביטלנו את התור שלך.\nאם תרצי לקבוע מחדש — כתבי לנו ונשמח לעזור! 💎`);
+          try { await client.sendMessage(JULIET_NUMBER, `❌ *ביטול תור!*\n\n👤 *${customer.name || cleanPhone}* (${cleanPhone})\nביטלה את התור למחר ב-*${apptStr}*`); } catch(e) {}
+        }
+        return;
+      }
+    }
+    // אין תור מחר — המשך לתגובה רגילה
   }
 
   // ── תגובה להקלטה קולית ───────────────────────────────────────
@@ -3822,7 +3956,8 @@ function startReminderJob() {
                   `🚿 *הכנה לטיפול — חשוב!*\n` +
                   `לפני הגעתך *תחפפי* את השיער בשמפו *ללא מסכה*\n` +
                   `השיער חייב להגיע *נקי ויבש* לטיפול 💆‍♀️\n\n` +
-                  `אם יש שינוי בתור שלחי הודעה 🙏\nמחכה לך! 💫`;
+                  `אם יש שינוי בתור שלחי הודעה 🙏\n\n` +
+                  `✅ לאישור תור | ❌ לביטול\nמחכה לך! 💫`;
               } else {
                 msg = `היי ${firstName}! 💎\n\n` +
                   `תזכורת לתור מחר ב-*${apptStr}*${visit.service ? ` — *${visit.service}*` : ''} אצל *Juliet Beauty Boutique* 💇‍♀️\n\n` +
@@ -3830,7 +3965,8 @@ function startReminderJob() {
                   `🚿 *הכנה לטיפול — חשוב!*\n` +
                   `לפני הגעתך *תחפפי* את השיער בשמפו *ללא מסכה*\n` +
                   `השיער חייב להגיע *נקי ויבש* לטיפול 💆‍♀️\n\n` +
-                  `אם יש שינוי בתור שלחי הודעה 🙏\nמחכה לך! 💫`;
+                  `אם יש שינוי בתור שלחי הודעה 🙏\n\n` +
+                  `✅ לאישור תור | ❌ לביטול\nמחכה לך! 💫`;
               }
               try {
                 await client.sendMessage(chatId, msg);
@@ -3865,17 +4001,17 @@ function startReminderJob() {
               }
             }
 
-            // ── חידוש שורשים 6 חודשים אחרי ──────────────────
+            // ── חידוש שורשים 7 חודשים אחרי ──────────────────
             if (!visit.renewalSent && apptTime < now) {
               const daysSince = (now - apptTime) / 86400000;
-              if (daysSince >= 180 && daysSince <= 195) {
+              if (daysSince >= 210 && daysSince <= 225) {
                 const name = customer.name || 'יקרה';
                 const firstName = name.split(' ')[0];
                 try {
                   const chatId = '972' + phone.replace(/^0/, '') + '@c.us';
                   await client.sendMessage(chatId,
                     `היי ${firstName}! 💎\n\n` +
-                    `עברו כבר *6 חודשים* מה${visit.service || 'טיפול'} שלך 🌿\n\n` +
+                    `עברו כבר *7 חודשים* מה${visit.service || 'טיפול'} שלך 🌿\n\n` +
                     `הגיע הזמן לחדש שורשים! זוכרת כמה יצא יפה? 😊\n\n` +
                     `כתבי *"קביעה"* ונסדר לך תור בהקדם 💎`
                   );
@@ -3883,6 +4019,30 @@ function startReminderJob() {
                   changed = true;
                   console.log(`🌿 תזכורת חידוש נשלחה ל-${customer.name || phone}`);
                 } catch(e) {}
+              }
+            }
+
+            // ── הודעת follow-up ב-19:00 אחרי הטיפול ────────────
+            if (!visit.followUpSent && israelHour === 19 && apptTime < now) {
+              const hoursSince = (now - apptTime) / 3600000;
+              if (hoursSince >= 2 && hoursSince <= 12) {
+                const name = customer.name || 'יקרה';
+                const firstName = name.split(' ')[0];
+                const isLee = phone.startsWith('lee_');
+                if (!isLee) {
+                  try {
+                    const chatId = '972' + phone.replace(/^0/, '') + '@c.us';
+                    await client.sendMessage(chatId,
+                      `${firstName}! 💎\n\n` +
+                      `איך השיער מרגיש אחרי הטיפול? 🌟\n\n` +
+                      `שמחה שהיית אצלי היום! 🤍\n\n` +
+                      `אם יש משהו שרצית לשאול — אני כאן 😊`
+                    );
+                    visit.followUpSent = true;
+                    changed = true;
+                    console.log(`💬 follow-up נשלח ל-${customer.name || phone}`);
+                  } catch(e) {}
+                }
               }
             }
           }
@@ -3902,9 +4062,9 @@ function startReminderJob() {
           const apptStr = new Date(customer.pendingAppointment).toLocaleTimeString('he-IL', { timeZone: 'Asia/Jerusalem', hour: '2-digit', minute: '2-digit' });
           let msg;
           if (hasCity(name)) {
-            msg = `היי ${firstName}! 💎\n\nתזכורת לתור מחר ב-*${apptStr}* אצל *Juliet Beauty Boutique* 💇‍♀️\n\n📍 *כתובת הסלון:*\n${SALON_ADDRESS}\n\n✨ מכיוון שאת מגיעה מרחוק — תרצי לשלוח לי את הכתובת המדויקת שלך? אדאג שיהיה לך קל להגיע 📍\n\n🚿 *הכנה לטיפול — חשוב!*\nלפני הגעתך *תחפפי* את השיער בשמפו *ללא מסכה*\nהשיער חייב להגיע *נקי ויבש* לטיפול 💆‍♀️\n\nאם יש שינוי בתור שלחי הודעה 🙏\nמחכה לך! 💫`;
+            msg = `היי ${firstName}! 💎\n\nתזכורת לתור מחר ב-*${apptStr}* אצל *Juliet Beauty Boutique* 💇‍♀️\n\n📍 *כתובת הסלון:*\n${SALON_ADDRESS}\n\n✨ מכיוון שאת מגיעה מרחוק — תרצי לשלוח לי את הכתובת המדויקת שלך? אדאג שיהיה לך קל להגיע 📍\n\n🚿 *הכנה לטיפול — חשוב!*\nלפני הגעתך *תחפפי* את השיער בשמפו *ללא מסכה*\nהשיער חייב להגיע *נקי ויבש* לטיפול 💆‍♀️\n\nאם יש שינוי בתור שלחי הודעה 🙏\n\n✅ לאישור תור | ❌ לביטול\nמחכה לך! 💫`;
           } else {
-            msg = `היי ${firstName}! 💎\n\nתזכורת לתור מחר ב-*${apptStr}* אצל *Juliet Beauty Boutique* 💇‍♀️\n\n📍 *כתובת:*\n${SALON_ADDRESS}\n\n🚿 *הכנה לטיפול — חשוב!*\nלפני הגעתך *תחפפי* את השיער בשמפו *ללא מסכה*\nהשיער חייב להגיע *נקי ויבש* לטיפול 💆‍♀️\n\nאם יש שינוי בתור שלחי הודעה 🙏\nמחכה לך! 💫`;
+            msg = `היי ${firstName}! 💎\n\nתזכורת לתור מחר ב-*${apptStr}* אצל *Juliet Beauty Boutique* 💇‍♀️\n\n📍 *כתובת:*\n${SALON_ADDRESS}\n\n🚿 *הכנה לטיפול — חשוב!*\nלפני הגעתך *תחפפי* את השיער בשמפו *ללא מסכה*\nהשיער חייב להגיע *נקי ויבש* לטיפול 💆‍♀️\n\nאם יש שינוי בתור שלחי הודעה 🙏\n\n✅ לאישור תור | ❌ לביטול\nמחכה לך! 💫`;
           }
           try {
             const chatId = '972' + phone.replace(/^0/, '') + '@c.us';

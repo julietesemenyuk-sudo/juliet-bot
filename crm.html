@@ -537,6 +537,7 @@
       <div class="profile-phone" id="p-phone">—</div>
       <div class="profile-badges" id="p-badges"></div>
     </div>
+    <a id="p-card-btn" href="#" target="_blank" title="כרטיס לקוחה" style="background:none;border:1px solid rgba(200,168,75,.4);color:var(--gold);font-size:13px;cursor:pointer;line-height:1;padding:5px 9px;border-radius:8px;text-decoration:none;margin-left:6px;flex-shrink:0">🪪</a>
     <button class="profile-close" onclick="closeProfilePanel()">✕</button>
   </div>
   <div class="profile-tabs">
@@ -1297,6 +1298,10 @@ function openProfile(phone) {
   if (c.businessType === 'universe' || c.interestedIn) badges.push('<span class="badge badge-universe">🤖 Universe</span>');
   if (c.leadStatus === 'hot') badges.push('<span class="badge badge-hot">🔥 Hot Lead</span>');
   document.getElementById('p-badges').innerHTML = badges.join('');
+
+  // כרטיס לקוחה — לינק דינמי
+  const cardBtn = document.getElementById('p-card-btn');
+  if (cardBtn) cardBtn.href = `${window.location.origin}/customer-card/${encodeURIComponent(phone)}?pass=${getPass()}`;
 
   // פתיחת טאב ראשון
   switchProfileTab('overview', document.querySelector('.profile-tab'));
