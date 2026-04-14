@@ -1412,14 +1412,15 @@ async function saveNotes() {
   } catch(e) { alert('שגיאה בשמירה'); }
 }
 
-// ── פתיחת/סגירת מודאל — inline style בלי CSS ────────────────
+// ── פתיחת/סגירת מודאל ────────────────────────────────────────
 function showModal(id) {
   const el = document.getElementById(id);
-  el.style.display = 'flex';
+  el.style.cssText = 'display:flex !important;position:fixed !important;top:0 !important;left:0 !important;right:0 !important;bottom:0 !important;z-index:99999 !important;background:rgba(0,0,0,.85);align-items:center;justify-content:center;overflow-y:auto;-webkit-overflow-scrolling:touch';
   document.body.style.overflow = 'hidden';
 }
 function hideModal(id) {
-  document.getElementById(id).style.display = 'none';
+  const el = document.getElementById(id);
+  el.style.cssText = 'display:none';
   document.body.style.overflow = '';
 }
 
@@ -1835,7 +1836,7 @@ async function deleteReminder(id) {
 <!-- ═══ מודאלים — מחוץ לכל stacking context ═══ -->
 
 <!-- מודאל לקוחה -->
-<div id="modal-bg" onclick="closeModal(event)" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:99999;align-items:center;justify-content:center">
+<div id="modal-bg" onclick="closeModal(event)" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);z-index:99999;align-items:center;justify-content:center">
   <div class="modal" style="max-width:580px" onclick="event.stopPropagation()">
     <div class="modal-head">
       <h3 id="modal-title">לקוחה</h3>
@@ -1872,7 +1873,7 @@ async function deleteReminder(id) {
 </div>
 
 <!-- מודאל תור חדש -->
-<div id="appt-modal-bg" onclick="closeApptModal(event)" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.82);z-index:99999;align-items:center;justify-content:center;overflow-y:auto">
+<div id="appt-modal-bg" onclick="closeApptModal(event)" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.82);z-index:99999;align-items:center;justify-content:center;overflow-y:auto">
   <div class="modal2" onclick="event.stopPropagation()">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
       <h3 style="color:var(--gold);margin:0;font-size:17px">➕ הוספת תור חדש</h3>
@@ -1911,7 +1912,7 @@ async function deleteReminder(id) {
 </div>
 
 <!-- מודאל עריכת תור -->
-<div id="edit-appt-modal-bg" onclick="closeEditApptModal(event)" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.82);z-index:99999;align-items:center;justify-content:center;overflow-y:auto">
+<div id="edit-appt-modal-bg" onclick="closeEditApptModal(event)" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.82);z-index:99999;align-items:center;justify-content:center;overflow-y:auto">
   <div class="modal2" onclick="event.stopPropagation()">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
       <h3 style="color:var(--gold);margin:0;font-size:17px">✏️ עריכת תור</h3>
