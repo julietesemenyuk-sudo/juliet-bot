@@ -640,6 +640,31 @@ http.createServer((req, res) => {
     return;
   }
 
+  // ── סטטוס תזכורות מחר ─────────────────────────────────────────
+  if (url.pathname === '/reminder-status') {
+    const pass = url.searchParams.get('pass');
+    if (pass !== CRM_PASS) { res.writeHead(401); res.end('Unauthorized'); return; }
+    const crm = loadCRM();
+    const tomorrowKey = getIsraelTomorrowKey();
+    const israelHour = getIsraelHour();
+    const pending = [], sent = [], leeSkipped = [];
+    Object.entries(crm).forEach(([phone, c]) => {
+      (c.visits||[]).forEach(v => {
+        if (!v.date) return;
+        const vd = new Date(new Date(v.date).toLocaleString('en-US',{timeZone:'Asia/Jerusalem'}));
+        const vKey = `${vd.getFullYear()}-${String(vd.getMonth()+1).padStart(2,'0')}-${String(vd.getDate()).padStart(2,'0')}`;
+        if (vKey !== tomorrowKey) return;
+        const entry = { name: c.name, phone, time: vd.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'}), service: v.service, reminderSent: !!v.reminderSent };
+        if (phone.startsWith('lee_')) leeSkipped.push(entry);
+        else if (v.reminderSent) sent.push(entry);
+        else pending.push(entry);
+      });
+    });
+    res.writeHead(200, {'Content-Type':'application/json;charset=utf-8'});
+    res.end(JSON.stringify({ tomorrowKey, israelHour, pending, sent, leeSkipped }));
+    return;
+  }
+
   // ── ניקוי תורים שגויים מ-Lee ──────────────────────────────────
   if (url.pathname === '/clear-lee-data' && req.method === 'POST') {
     const pass = url.searchParams.get('pass');
@@ -3574,8 +3599,13 @@ function startReminderJob() {
             const visitDateKey = visit.date.slice(0, 10); // YYYY-MM-DD
             const apptTime = new Date(visit.date).getTime();
 
-            // ── תזכורת ב-10:00 עבור תורים של מחר ─────────────
-            if (!visit.reminderSent && israelHour === 10 && visitDateKey === tomorrowKey) {
+            // ── תזכורת בין 10:00-11:59 עבור תורים של מחר ────────
+            // visitDateKey בזמן ישראל (לא UTC)
+            const visitIsraelDate = new Date(new Date(visit.date).toLocaleString('en-US',{timeZone:'Asia/Jerusalem'}));
+            const visitIsraelKey = `${visitIsraelDate.getFullYear()}-${String(visitIsraelDate.getMonth()+1).padStart(2,'0')}-${String(visitIsraelDate.getDate()).padStart(2,'0')}`;
+            // דלג על lee_ כי אין להן מספר WhatsApp
+            const isLeePhone = phone.startsWith('lee_');
+            if (!visit.reminderSent && israelHour >= 10 && israelHour < 12 && visitIsraelKey === tomorrowKey && !isLeePhone) {
               const name = customer.name || 'יקרה';
               const firstName = name.split(' ')[0];
               const apptStr = new Date(visit.date).toLocaleTimeString('he-IL', { timeZone: 'Asia/Jerusalem', hour: '2-digit', minute: '2-digit' });
@@ -3596,8 +3626,10 @@ function startReminderJob() {
               try {
                 await client.sendMessage(chatId, msg);
                 visit.reminderSent = true;
+                visit.reminderSentDate = getIsraelTodayKey();
                 changed = true;
-                console.log(`📅 תזכורת 10:00 נשלחה ל-${customer.name || phone}`);
+                console.log(`📅 תזכורת נשלחה ל-${customer.name || phone} לתור ${visitIsraelKey}`);
+                await new Promise(r => setTimeout(r, 1500));
               } catch(e) { console.log('שגיאת תזכורת:', e.message); }
             }
 
