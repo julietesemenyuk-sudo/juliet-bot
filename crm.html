@@ -27,9 +27,7 @@
       radial-gradient(ellipse 40% 30% at 50% 50%,rgba(90,150,255,.03),transparent);
     pointer-events:none;z-index:0;animation:bgPulse 8s ease-in-out infinite alternate}
   @keyframes bgPulse{0%{opacity:.7}100%{opacity:1}}
-  body > *{position:relative;z-index:1}
-  /* modals חייבים z-index גבוה מכל שאר הילדים */
-  #modal-bg,#appt-modal-bg,#edit-appt-modal-bg,#profile-overlay,#profile-panel{position:fixed !important;z-index:9999 !important}
+  body > *:not(#modal-bg):not(#appt-modal-bg):not(#edit-appt-modal-bg):not(#profile-overlay):not(#profile-panel):not(.profile-panel){position:relative;z-index:1}
 
   /* ── כותרת ── */
   .crm-header{text-align:center;margin-bottom:28px;padding-bottom:22px;border-bottom:1px solid rgba(200,168,75,.1);position:relative}
@@ -529,146 +527,8 @@
   </div>
 </div>
 
-<!-- מודאל לקוחה (שיחה + היסטוריה + הערות) -->
-<div class="modal-bg" id="modal-bg" onclick="closeModal(event)">
-  <div class="modal" style="max-width:580px">
-    <div class="modal-head">
-      <h3 id="modal-title">לקוחה</h3>
-      <button class="modal-close" onclick="closeModal(null)">✕</button>
-    </div>
-    <div style="padding:0 14px">
-      <div class="modal-tabs">
-        <button class="modal-tab active" onclick="switchModalTab('chat',this)">💬 שיחה</button>
-        <button class="modal-tab" onclick="switchModalTab('history',this)">📋 היסטוריה</button>
-        <button class="modal-tab" onclick="switchModalTab('notes',this)">📝 הערות</button>
-      </div>
-    </div>
-    <div class="modal-body" id="modal-body"></div>
-    <div id="modal-history" style="display:none;padding:14px;overflow-y:auto;max-height:400px"></div>
-    <div id="modal-notes" style="display:none;padding:14px">
-      <div class="form-row">
-        <label>⭐ סטטוס VIP</label>
-        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
-          <input type="checkbox" id="note-vip" style="width:16px;height:16px;accent-color:#c8a84b"/>
-          <span style="font-size:13px">לקוחה VIP 👑</span>
-        </label>
-      </div>
-      <div class="form-row">
-        <label>🎨 צבע / גוון מועדף</label>
-        <input class="form-input" id="note-color" placeholder="לדוג': אפר בהיר, 7N, חינה..."/>
-      </div>
-      <div class="form-row">
-        <label>⚠️ אלרגיות / מגבלות</label>
-        <input class="form-input" id="note-allergy" placeholder="לדוג': אלרגית לאמוניה..."/>
-      </div>
-      <div class="form-row">
-        <label>📝 הערות כלליות</label>
-        <textarea class="form-input" id="note-text" placeholder="כל דבר חשוב שכדאי לזכור..."></textarea>
-      </div>
-      <button class="form-btn" onclick="saveNotes()">💾 שמור הערות</button>
-    </div>
-  </div>
-</div>
-
-<!-- מודאל תור חדש -->
-<div class="modal-bg" id="appt-modal-bg" onclick="closeApptModal(event)">
-  <div class="modal2" onclick="event.stopPropagation()">
-    <div style="width:40px;height:4px;background:rgba(255,255,255,.15);border-radius:2px;margin:0 auto 18px;display:none" class="modal-handle"></div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-      <h3 style="color:var(--gold);margin:0;font-size:17px">➕ הוספת תור חדש</h3>
-      <button class="modal-close" onclick="closeApptModal(null)" style="font-size:20px">✕</button>
-    </div>
-    <div class="form-row">
-      <label>👤 שם לקוחה *</label>
-      <input class="form-input" id="appt-name" placeholder="שם מלא"/>
-    </div>
-    <div class="form-row">
-      <label>📞 טלפון</label>
-      <input class="form-input" id="appt-phone" placeholder="050-0000000" type="tel"/>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="form-row">
-        <label>📅 תאריך *</label>
-        <input class="form-input" id="appt-date" type="date"/>
-      </div>
-      <div class="form-row">
-        <label>⏰ שעה</label>
-        <input class="form-input" id="appt-time" type="time" value="10:00"/>
-      </div>
-    </div>
-    <div class="form-row">
-      <label>💇 שירות</label>
-      <select class="form-input" id="appt-service">
-        <option value="">בחרי שירות...</option>
-        <option>החלקת שורש</option>
-        <option>החלקה מלאה</option>
-        <option>גוונים</option>
-        <option>צבע</option>
-        <option>מסגרת</option>
-        <option>תוספות שיער</option>
-        <option>ייעוץ</option>
-        <option>אחר</option>
-      </select>
-    </div>
-    <div class="form-row">
-      <label>📝 הערה (אופציונלי)</label>
-      <input class="form-input" id="appt-notes" placeholder="לדוג': להביא תמונה, לקוחה VIP..."/>
-    </div>
-    <div style="display:flex;gap:8px;margin-top:4px">
-      <button class="form-btn" onclick="submitAppointment()">✅ שמור תור</button>
-      <button class="form-btn" style="background:transparent;border-color:rgba(255,255,255,.1);color:#5e5c58;width:auto;padding:12px 20px" onclick="closeApptModal(null)">ביטול</button>
-    </div>
-  </div>
-</div>
-
 <!-- כפתור פלואטינג הוספת תור -->
 <button class="fab" onclick="openApptModal()" title="הוסף תור חדש">+</button>
-
-<!-- מודאל עריכת תור -->
-<div class="modal-bg" id="edit-appt-modal-bg" onclick="closeEditApptModal(event)">
-  <div class="modal2" onclick="event.stopPropagation()">
-    <div style="width:40px;height:4px;background:rgba(255,255,255,.15);border-radius:2px;margin:0 auto 18px;display:none" class="modal-handle"></div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-      <h3 style="color:var(--gold);margin:0;font-size:17px">✏️ עריכת תור</h3>
-      <button class="modal-close" onclick="closeEditApptModal(null)" style="font-size:20px">✕</button>
-    </div>
-    <input type="hidden" id="edit-appt-phone-hidden"/>
-    <input type="hidden" id="edit-appt-idx-hidden"/>
-    <div class="form-row">
-      <label>👤 שם לקוחה</label>
-      <input class="form-input" id="edit-appt-name" placeholder="שם מלא"/>
-    </div>
-    <div class="form-row">
-      <label>📅 תאריך *</label>
-      <input class="form-input" id="edit-appt-date" type="date"/>
-    </div>
-    <div class="form-row">
-      <label>⏰ שעה</label>
-      <input class="form-input" id="edit-appt-time" type="time"/>
-    </div>
-    <div class="form-row">
-      <label>💇 שירות</label>
-      <select class="form-input" id="edit-appt-service">
-        <option value="">בחרי שירות...</option>
-        <option>החלקת שורש</option>
-        <option>החלקה מלאה</option>
-        <option>גוונים</option>
-        <option>צבע</option>
-        <option>מסגרת</option>
-        <option>תוספות שיער</option>
-        <option>ייעוץ</option>
-        <option>אחר</option>
-      </select>
-    </div>
-    <div class="form-row">
-      <label>📝 הערה</label>
-      <textarea class="form-input" id="edit-appt-notes" placeholder="הערה לתור..." style="min-height:60px"></textarea>
-    </div>
-    <button class="form-btn" style="margin-top:8px" onclick="submitEditAppointment()">💾 שמור שינויים</button>
-    <button class="form-btn form-btn-danger" style="margin-top:8px" onclick="deleteAppointment()">🗑 מחק תור</button>
-    <button class="form-btn" style="background:transparent;margin-top:6px" onclick="closeEditApptModal(null)">ביטול</button>
-  </div>
-</div>
 
 <script>
 let allRows = [];
@@ -1300,13 +1160,13 @@ function openChat(phone) {
       </div>`;
     }).join('');
   }
-  document.getElementById('modal-bg').classList.add('open');
+  showModal('modal-bg');
   setTimeout(() => { body.scrollTop = body.scrollHeight; }, 50);
 }
 
 function closeModal(e) {
   if (e && e.target !== document.getElementById('modal-bg')) return;
-  document.getElementById('modal-bg').classList.remove('open');
+  hideModal('modal-bg');
 }
 
 // ════════════════════════════════════════════════
@@ -1527,7 +1387,7 @@ function openChat(phone) {
 
   // איפוס טאב
   switchModalTab('chat', document.querySelector('.modal-tab'));
-  document.getElementById('modal-bg').classList.add('open');
+  showModal('modal-bg');
   setTimeout(() => { chatBody.scrollTop = chatBody.scrollHeight; }, 50);
 }
 
@@ -1555,22 +1415,11 @@ async function saveNotes() {
 // ── פתיחת/סגירת מודאל — inline style בלי CSS ────────────────
 function showModal(id) {
   const el = document.getElementById(id);
-  el.style.cssText = [
-    'display:flex',
-    'position:fixed',
-    'top:0','left:0','right:0','bottom:0',
-    'width:100vw','height:100vh',
-    'background:rgba(0,0,0,0.82)',
-    'z-index:99999',
-    'align-items:center',
-    'justify-content:center',
-    'overflow-y:auto',
-    '-webkit-overflow-scrolling:touch'
-  ].join(';');
+  el.style.display = 'flex';
   document.body.style.overflow = 'hidden';
 }
 function hideModal(id) {
-  document.getElementById(id).style.cssText = 'display:none';
+  document.getElementById(id).style.display = 'none';
   document.body.style.overflow = '';
 }
 
@@ -1982,5 +1831,121 @@ async function deleteReminder(id) {
   }
 }
 </script>
+
+<!-- ═══ מודאלים — מחוץ לכל stacking context ═══ -->
+
+<!-- מודאל לקוחה -->
+<div id="modal-bg" onclick="closeModal(event)" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:99999;align-items:center;justify-content:center">
+  <div class="modal" style="max-width:580px" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <h3 id="modal-title">לקוחה</h3>
+      <button class="modal-close" onclick="closeModal(null)">✕</button>
+    </div>
+    <div style="padding:0 14px">
+      <div class="modal-tabs">
+        <button class="modal-tab active" onclick="switchModalTab('chat',this)">💬 שיחה</button>
+        <button class="modal-tab" onclick="switchModalTab('history',this)">📋 היסטוריה</button>
+        <button class="modal-tab" onclick="switchModalTab('notes',this)">📝 הערות</button>
+      </div>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div id="modal-history" style="display:none;padding:14px;overflow-y:auto;max-height:400px"></div>
+    <div id="modal-notes" style="display:none;padding:14px">
+      <div class="form-row"><label>⭐ סטטוס VIP</label>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" id="note-vip" style="width:16px;height:16px;accent-color:#c8a84b"/>
+          <span style="font-size:13px">לקוחה VIP 👑</span>
+        </label>
+      </div>
+      <div class="form-row"><label>🎨 צבע / גוון מועדף</label>
+        <input class="form-input" id="note-color" placeholder="לדוג': אפר בהיר, 7N, חינה..."/>
+      </div>
+      <div class="form-row"><label>⚠️ אלרגיות / מגבלות</label>
+        <input class="form-input" id="note-allergy" placeholder="לדוג': אלרגית לאמוניה..."/>
+      </div>
+      <div class="form-row"><label>📝 הערות כלליות</label>
+        <textarea class="form-input" id="note-text" placeholder="כל דבר חשוב שכדאי לזכור..."></textarea>
+      </div>
+      <button class="form-btn" onclick="saveNotes()">💾 שמור הערות</button>
+    </div>
+  </div>
+</div>
+
+<!-- מודאל תור חדש -->
+<div id="appt-modal-bg" onclick="closeApptModal(event)" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.82);z-index:99999;align-items:center;justify-content:center;overflow-y:auto">
+  <div class="modal2" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <h3 style="color:var(--gold);margin:0;font-size:17px">➕ הוספת תור חדש</h3>
+      <button class="modal-close" onclick="closeApptModal(null)" style="font-size:20px">✕</button>
+    </div>
+    <div class="form-row"><label>👤 שם לקוחה *</label>
+      <input class="form-input" id="appt-name" placeholder="שם מלא"/>
+    </div>
+    <div class="form-row"><label>📞 טלפון</label>
+      <input class="form-input" id="appt-phone" placeholder="050-0000000" type="tel"/>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="form-row"><label>📅 תאריך *</label>
+        <input class="form-input" id="appt-date" type="date"/>
+      </div>
+      <div class="form-row"><label>⏰ שעה</label>
+        <input class="form-input" id="appt-time" type="time" value="10:00"/>
+      </div>
+    </div>
+    <div class="form-row"><label>💇 שירות</label>
+      <select class="form-input" id="appt-service">
+        <option value="">בחרי שירות...</option>
+        <option>החלקת שורש</option><option>החלקה מלאה</option>
+        <option>גוונים</option><option>צבע</option><option>מסגרת</option>
+        <option>תוספות שיער</option><option>ייעוץ</option><option>אחר</option>
+      </select>
+    </div>
+    <div class="form-row"><label>📝 הערה (אופציונלי)</label>
+      <input class="form-input" id="appt-notes" placeholder="לדוג': להביא תמונה..."/>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="form-btn" onclick="submitAppointment()">✅ שמור תור</button>
+      <button class="form-btn" style="background:transparent;border-color:rgba(255,255,255,.1);color:#5e5c58;width:auto;padding:12px 20px" onclick="closeApptModal(null)">ביטול</button>
+    </div>
+  </div>
+</div>
+
+<!-- מודאל עריכת תור -->
+<div id="edit-appt-modal-bg" onclick="closeEditApptModal(event)" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.82);z-index:99999;align-items:center;justify-content:center;overflow-y:auto">
+  <div class="modal2" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <h3 style="color:var(--gold);margin:0;font-size:17px">✏️ עריכת תור</h3>
+      <button class="modal-close" onclick="closeEditApptModal(null)" style="font-size:20px">✕</button>
+    </div>
+    <input type="hidden" id="edit-appt-phone-hidden"/>
+    <input type="hidden" id="edit-appt-idx-hidden"/>
+    <div class="form-row"><label>👤 שם לקוחה</label>
+      <input class="form-input" id="edit-appt-name" placeholder="שם מלא"/>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="form-row"><label>📅 תאריך *</label>
+        <input class="form-input" id="edit-appt-date" type="date"/>
+      </div>
+      <div class="form-row"><label>⏰ שעה</label>
+        <input class="form-input" id="edit-appt-time" type="time"/>
+      </div>
+    </div>
+    <div class="form-row"><label>💇 שירות</label>
+      <select class="form-input" id="edit-appt-service">
+        <option value="">בחרי שירות...</option>
+        <option>החלקת שורש</option><option>החלקה מלאה</option>
+        <option>גוונים</option><option>צבע</option><option>מסגרת</option>
+        <option>תוספות שיער</option><option>ייעוץ</option><option>אחר</option>
+      </select>
+    </div>
+    <div class="form-row"><label>📝 הערה</label>
+      <textarea class="form-input" id="edit-appt-notes" placeholder="הערה לתור..." style="min-height:60px"></textarea>
+    </div>
+    <button class="form-btn" style="margin-top:8px" onclick="submitEditAppointment()">💾 שמור שינויים</button>
+    <button class="form-btn form-btn-danger" style="margin-top:8px" onclick="deleteAppointment()">🗑 מחק תור</button>
+    <button class="form-btn" style="background:transparent;margin-top:6px" onclick="closeEditApptModal(null)">ביטול</button>
+  </div>
+</div>
+
 </body>
 </html>
