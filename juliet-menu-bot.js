@@ -357,8 +357,6 @@ http.createServer((req, res) => {
         <a href="/reset-session" style="color:#888;font-size:14px;font-family:Arial">לא עובד? לחצי כאן לאיפוס חיבור</a>
       </body></html>`);
     } else {
-      // clientReady=false ואין QR — מנסה reconnect אוטומטי
-      try { client.initialize().catch(()=>{}); } catch(e) {}
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
       res.end(`<html><body style="background:#000;color:#c8a84b;font-family:Arial;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:20px">
         <h2>⏳ מתחבר לוואטסאפ...</h2>
