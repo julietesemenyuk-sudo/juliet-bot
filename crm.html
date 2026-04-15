@@ -694,9 +694,7 @@ function daysDiff(iso) {
   if (!iso) return 999;
   return Math.floor((Date.now() - new Date(iso)) / 86400000);
 }
-function getPass() {
-  return new URLSearchParams(window.location.search).get('pass') || 'juliet2026';
-}
+function getPass() { return ''; } // auth via cookie — no pass in URL
 function toKey(y,m,d) {
   return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
 }
@@ -812,7 +810,7 @@ function renderDashboard(rows) {
 
 async function loadData() {
   try {
-    const res = await fetch('customers.json?pass=' + getPass() + '&t=' + Date.now());
+    const res = await fetch('customers.json?t='&t=' + Date.now());
     const crm = await res.json();
     allRows = Object.values(crm);
     if (currentTab === 'calendar') {
@@ -1312,7 +1310,7 @@ function openProfile(phone) {
 
   // כרטיס לקוחה — לינק דינמי
   const cardBtn = document.getElementById('p-card-btn');
-  if (cardBtn) cardBtn.href = `${window.location.origin}/customer-card/${encodeURIComponent(phone)}?pass=${getPass()}`;
+  if (cardBtn) cardBtn.href = `${window.location.origin}/customer-card/${encodeURIComponent(phone)}`;
 
   // פתיחת טאב ראשון
   switchProfileTab('overview', document.querySelector('.profile-tab'));
@@ -1445,7 +1443,7 @@ async function saveProfileNotes() {
   };
   const vip = document.getElementById('pn-vip')?.checked || false;
   try {
-    await fetch('/save-note?pass=' + getPass(), {
+    await fetch('/save-note'', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ phone: currentProfilePhone, notes, vip })
@@ -1535,7 +1533,7 @@ async function saveNotes() {
   };
   const vip = document.getElementById('note-vip').checked;
   try {
-    await fetch('/save-note?pass=' + getPass(), {
+    await fetch('/save-note'', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ phone: currentModalPhone, notes, vip })
@@ -1656,7 +1654,7 @@ async function submitEditAppointment() {
   const notes   = document.getElementById('edit-appt-notes').value.trim();
   if (!date) { alert('נא לבחור תאריך'); return; }
   try {
-    const res = await fetch('/edit-appointment?pass=' + getPass(), {
+    const res = await fetch('/edit-appointment'', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ phone, visitIndex, name, date, time, service, notes })
@@ -1676,7 +1674,7 @@ async function deleteAppointment() {
   const name = c ? (c.name || phone) : phone;
   if (!confirm(`למחוק את התור של ${name}?`)) return;
   try {
-    await fetch('/delete-appointment?pass=' + getPass(), {
+    await fetch('/delete-appointment'', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ phone, visitIndex })
@@ -1694,7 +1692,7 @@ async function submitAppointment() {
   const service = document.getElementById('appt-service').value;
   if (!name || !phone || !date) { alert('נא למלא שם, טלפון ותאריך'); return; }
   try {
-    const res = await fetch('/save-appointment?pass=' + getPass(), {
+    const res = await fetch('/save-appointment'', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ name, phone, date, time, service })
@@ -1715,7 +1713,7 @@ async function backupNow() {
   btn.textContent = '⏳';
   btn.disabled = true;
   try {
-    const res = await fetch('/backup-now?pass=' + getPass(), { method: 'POST' });
+    const res = await fetch('/backup-now'', { method: 'POST' });
     const data = await res.json();
     if (data.ok) {
       btn.textContent = '✅';
@@ -1745,7 +1743,7 @@ async function sendRemindersFromDay(key, btn) {
   btn.innerHTML = '⏳ שולח...';
   btn.disabled = true;
   try {
-    const res = await fetch('/send-reminders-now?pass=' + getPass(), { method: 'POST' });
+    const res = await fetch('/send-reminders-now'', { method: 'POST' });
     const data = await res.json();
     if (!data.success) {
       btn.innerHTML = original;
@@ -1778,7 +1776,7 @@ async function sendRemindersNow() {
   btn.textContent = '⏳ שולח...';
   btn.disabled = true;
   try {
-    const res = await fetch('/send-reminders-now?pass=' + getPass(), { method: 'POST' });
+    const res = await fetch('/send-reminders-now'', { method: 'POST' });
     const data = await res.json();
     if (!data.success) {
       btn.textContent = '🔔 תזכורות';
@@ -1864,7 +1862,7 @@ async function syncLee() {
 
   // בדוק אם פרטי Lee מוגדרים
   try {
-    const statusRes = await fetch('/sync-lee-status?pass=' + getPass());
+    const statusRes = await fetch('/sync-lee-status'');
     const status = await statusRes.json();
     if (!status.hasCredentials) {
       alert('⚠️ פרטי Lee לא הוגדרו!\n\nהוסיפי ב-Railway → Variables:\nLEE_API_KEY=המפתח מ-Lee (הגדרות → API)');
@@ -1876,14 +1874,14 @@ async function syncLee() {
   btn.disabled = true;
 
   try {
-    await fetch('/sync-lee?pass=' + getPass(), { method: 'POST' });
+    await fetch('/sync-lee'', { method: 'POST' });
 
     // פול לסטטוס כל 3 שניות
     let attempts = 0;
     const poll = setInterval(async () => {
       attempts++;
       try {
-        const sRes = await fetch('/sync-lee-status?pass=' + getPass());
+        const sRes = await fetch('/sync-lee-status'');
         const s = await sRes.json();
         if (!s.running && s.lastRun) {
           clearInterval(poll);
@@ -1918,7 +1916,7 @@ async function clearLeeData() {
   btn.disabled = true;
   btn.textContent = '⏳ מנקה...';
   try {
-    const res = await fetch('/clear-lee-data?pass=' + getPass(), { method: 'POST' });
+    const res = await fetch('/clear-lee-data'', { method: 'POST' });
     const data = await res.json();
     btn.textContent = `✅ נוקו ${data.cleared} תורים`;
     setTimeout(() => { btn.textContent = '🗑️ נקה תורים שגויים'; btn.disabled = false; }, 3000);
@@ -1967,7 +1965,7 @@ async function uploadPhoto(type) {
     reader.onload = async (e) => {
       const base64 = e.target.result; // full data URL
       try {
-        const res = await fetch('/save-photo?pass=' + getPass(), {
+        const res = await fetch('/save-photo'', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ phone: currentProfilePhone, type, data: base64 })
@@ -2048,7 +2046,7 @@ async function sendBulkMessage() {
   if (!confirm(`לשלוח הודעה ל-${selectedPhones.size} לקוחות?`)) return;
 
   try {
-    const res = await fetch('/send-bulk?pass=' + getPass(), {
+    const res = await fetch('/send-bulk'', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ phones: [...selectedPhones], message })
@@ -2075,7 +2073,7 @@ async function loadWaitlist() {
   const list = document.getElementById('waitlist-list');
   list.innerHTML = '<div class="waitlist-empty">⏳ טוען...</div>';
   try {
-    const res = await fetch('/waitlist?pass=' + getPass());
+    const res = await fetch('/waitlist'');
     const data = await res.json();
     renderWaitlist(data);
   } catch(e) {
@@ -2116,7 +2114,7 @@ async function addWaitlistEntry() {
   const notes = document.getElementById('wl-notes').value.trim();
   if (!name || !phone) { alert('נא למלא שם וטלפון'); return; }
   try {
-    const res = await fetch('/add-waitlist?pass=' + getPass(), {
+    const res = await fetch('/add-waitlist'', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, phone, service, preferredDay, notes })
@@ -2137,7 +2135,7 @@ async function addWaitlistEntry() {
 async function removeWaitlist(id) {
   if (!confirm('להסיר מרשימת ההמתנה?')) return;
   try {
-    const res = await fetch('/remove-waitlist?pass=' + getPass(), {
+    const res = await fetch('/remove-waitlist'', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id })
@@ -2152,7 +2150,7 @@ async function notifyWaitlist(id, name) {
   const message = `היי ${name}! פנה מקום ב-Juliet Beauty Boutique 💎 רוצה לתאם תור? כתבי לי 🙏`;
   if (!confirm(`לשלוח הודעה ל-${name}?\n\n"${message}"`)) return;
   try {
-    const res = await fetch('/notify-waitlist?pass=' + getPass(), {
+    const res = await fetch('/notify-waitlist'', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, message })
@@ -2165,7 +2163,7 @@ async function notifyWaitlist(id, name) {
 
 function openApptFromWaitlist(id) {
   // load waitlist item and prefill appt modal
-  fetch('/waitlist?pass=' + getPass())
+  fetch('/waitlist'')
     .then(r => r.json())
     .then(items => {
       const item = items.find(i => i.id === id);
@@ -2217,7 +2215,7 @@ async function loadReminders() {
   const list = document.getElementById('reminders-list');
   list.innerHTML = '<div class="reminders-empty">⏳ טוען תזכורות...</div>';
   try {
-    const res = await fetch('/get-reminders?pass=' + getPass());
+    const res = await fetch('/get-reminders'');
     const reminders = await res.json();
     renderReminders(reminders);
   } catch(e) {
@@ -2269,7 +2267,7 @@ async function addReminder() {
   const datetime = date + 'T' + time + ':00';
 
   try {
-    const res = await fetch('/save-reminder?pass=' + getPass(), {
+    const res = await fetch('/save-reminder'', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text, datetime, phone })
@@ -2291,7 +2289,7 @@ async function addReminder() {
 async function deleteReminder(id) {
   if (!confirm('למחוק את התזכורת?')) return;
   try {
-    const res = await fetch('/delete-reminder?pass=' + getPass(), {
+    const res = await fetch('/delete-reminder'', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id })

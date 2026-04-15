@@ -8,6 +8,7 @@ const path = require('path');
 const { spawn } = require('child_process');
 const Anthropic = require('@anthropic-ai/sdk');
 const nodemailer = require('nodemailer');
+const crypto = require('crypto');
 
 // ── Claude AI ──────────────────────────────────────────────────
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY || '' });
@@ -316,6 +317,55 @@ const CRM_PASS = process.env.CRM_PASSWORD || 'juliet2026';
 let currentQR = null; // שמירת ה-QR הנוכחי
 let clientReady = false; // האם הבוט מחובר באמת
 
+// ── אבטחה — ניהול סשנים ─────────────────────────────────────
+const SESSION_DURATION = 8 * 60 * 60 * 1000; // 8 שעות
+const sessions = new Map();       // token → expiry
+const loginAttempts = new Map();  // ip → { count, resetAt }
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOCKOUT_MS = 15 * 60 * 1000; // 15 דקות
+
+function parseCookies(req) {
+  const list = {};
+  (req.headers.cookie || '').split(';').forEach(c => {
+    const [k, ...v] = c.trim().split('=');
+    if (k) list[k.trim()] = decodeURIComponent(v.join('=').trim());
+  });
+  return list;
+}
+
+function checkAuth(req) {
+  const token = parseCookies(req)['juliet_sid'];
+  if (!token) return false;
+  const expiry = sessions.get(token);
+  if (!expiry || Date.now() > expiry) { sessions.delete(token); return false; }
+  return true;
+}
+
+function setSessionCookie(res) {
+  const token = crypto.randomBytes(32).toString('hex');
+  sessions.set(token, Date.now() + SESSION_DURATION);
+  res.setHeader('Set-Cookie', `juliet_sid=${token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=28800`);
+}
+
+function addSecurityHeaders(res) {
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'no-referrer');
+  res.setHeader('Cache-Control', 'no-store, no-cache');
+}
+
+function sendUnauth(res) {
+  addSecurityHeaders(res);
+  res.writeHead(401, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify({ error: 'unauthorized' }));
+}
+
+// ניקוי סשנים פגי תוקף כל שעה
+setInterval(() => {
+  const now = Date.now();
+  sessions.forEach((expiry, token) => { if (now > expiry) sessions.delete(token); });
+}, 60 * 60 * 1000);
+
 http.createServer((req, res) => {
   const url = new URL(req.url, 'http://localhost');
 
@@ -367,21 +417,80 @@ http.createServer((req, res) => {
     return;
   }
 
-  // דף CRM — עם סיסמה
+  // ── כניסה לCRM — POST ──────────────────────────────────────
+  if (url.pathname === '/login' && req.method === 'POST') {
+    const ip = req.socket.remoteAddress || 'unknown';
+    const now = Date.now();
+    const attempt = loginAttempts.get(ip) || { count: 0, resetAt: now + LOCKOUT_MS };
+    // בדיקת נעילה
+    if (attempt.count >= MAX_LOGIN_ATTEMPTS && now < attempt.resetAt) {
+      const minLeft = Math.ceil((attempt.resetAt - now) / 60000);
+      addSecurityHeaders(res);
+      res.writeHead(429, { 'Content-Type': 'text/html; charset=utf-8' });
+      res.end(`<html dir="rtl"><body style="font-family:Arial;background:#0a0a0a;color:#c8a84b;display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column">
+        <h2>💎 Juliet CRM</h2><p style="color:#e74c3c">יותר מדי ניסיונות שגויים. נסי שוב בעוד ${minLeft} דקות.</p>
+      </body></html>`);
+      return;
+    }
+    let body = '';
+    req.on('data', c => { body += c; });
+    req.on('end', () => {
+      const params = new URLSearchParams(body);
+      const pass = params.get('pass') || '';
+      if (pass === CRM_PASS) {
+        // הצלחה — אפס ניסיונות, הגדר cookie
+        loginAttempts.delete(ip);
+        setSessionCookie(res);
+        addSecurityHeaders(res);
+        res.writeHead(302, { 'Location': '/crm' });
+        res.end();
+      } else {
+        // כישלון — עדכן מונה
+        attempt.count = (now < attempt.resetAt ? attempt.count : 0) + 1;
+        attempt.resetAt = now + LOCKOUT_MS;
+        loginAttempts.set(ip, attempt);
+        addSecurityHeaders(res);
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+        res.end(`<html dir="rtl"><body style="font-family:Arial;background:#0a0a0a;color:#c8a84b;display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column">
+          <h2>💎 Juliet CRM</h2>
+          <p style="color:#e74c3c;margin-bottom:10px">❌ סיסמה שגויה (${MAX_LOGIN_ATTEMPTS - attempt.count} ניסיונות נותרו)</p>
+          <form method="post" action="/login">
+            <input name="pass" type="password" placeholder="סיסמה" autofocus style="padding:10px;margin:10px;border-radius:6px;border:1px solid #c8a84b;background:#111;color:#fff;font-size:16px;display:block"/>
+            <button type="submit" style="padding:10px 20px;background:#c8a84b;border:none;border-radius:6px;cursor:pointer;font-size:16px;width:100%">כניסה 🔐</button>
+          </form>
+        </body></html>`);
+      }
+    });
+    return;
+  }
+
+  // ── לוגאאוט ────────────────────────────────────────────────
+  if (url.pathname === '/logout') {
+    const token = parseCookies(req)['juliet_sid'];
+    if (token) sessions.delete(token);
+    addSecurityHeaders(res);
+    res.setHeader('Set-Cookie', 'juliet_sid=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0');
+    res.writeHead(302, { 'Location': '/crm' });
+    res.end();
+    return;
+  }
+
+  // דף CRM — עם cookie
   if (url.pathname === '/crm') {
-    const pass = url.searchParams.get('pass');
-    if (pass !== CRM_PASS) {
-      res.writeHead(401, { 'Content-Type': 'text/html; charset=utf-8' });
+    if (!checkAuth(req)) {
+      addSecurityHeaders(res);
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
       res.end(`<html dir="rtl"><body style="font-family:Arial;background:#0a0a0a;color:#c8a84b;display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column">
         <h2>💎 Juliet CRM</h2>
-        <form method="get" action="/crm">
-          <input name="pass" type="password" placeholder="סיסמה" style="padding:10px;margin:10px;border-radius:6px;border:1px solid #c8a84b;background:#111;color:#fff;font-size:16px"/>
-          <button type="submit" style="padding:10px 20px;background:#c8a84b;border:none;border-radius:6px;cursor:pointer;font-size:16px">כניסה</button>
+        <form method="post" action="/login">
+          <input name="pass" type="password" placeholder="סיסמה" autofocus style="padding:10px;margin:10px;border-radius:6px;border:1px solid #c8a84b;background:#111;color:#fff;font-size:16px;display:block"/>
+          <button type="submit" style="padding:10px 20px;background:#c8a84b;border:none;border-radius:6px;cursor:pointer;font-size:16px;width:100%">כניסה 🔐</button>
         </form>
       </body></html>`);
       return;
     }
     if (fs.existsSync(CRM_HTML)) {
+      addSecurityHeaders(res);
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
       res.end(fs.readFileSync(CRM_HTML));
     } else {
@@ -392,9 +501,9 @@ http.createServer((req, res) => {
 
   // נתוני לקוחות JSON
   if (url.pathname === '/customers.json') {
-    const pass = url.searchParams.get('pass');
-    if (pass !== CRM_PASS) { res.writeHead(401); res.end('{}'); return; }
+    if (!checkAuth(req)) { sendUnauth(res); return; }
     const crm = loadCRM();
+    addSecurityHeaders(res);
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(crm));
     return;
@@ -468,6 +577,7 @@ http.createServer((req, res) => {
 
   // ── שמירת תור ידנית מה-CRM ──────────────────────────────────
   if (url.pathname === '/save-appointment' && req.method === 'POST') {
+    if (!checkAuth(req)) { sendUnauth(res); return; }
     let body = '';
     req.on('data', c => { body += c; });
     req.on('end', () => {
@@ -520,6 +630,7 @@ http.createServer((req, res) => {
 
   // ── עריכת תור קיים ──────────────────────────────────────────
   if (url.pathname === '/edit-appointment' && req.method === 'POST') {
+    if (!checkAuth(req)) { sendUnauth(res); return; }
     let body = '';
     req.on('data', c => { body += c; });
     req.on('end', () => {
@@ -547,6 +658,7 @@ http.createServer((req, res) => {
 
   // ── מחיקת תור ────────────────────────────────────────────────
   if (url.pathname === '/delete-appointment' && req.method === 'POST') {
+    if (!checkAuth(req)) { sendUnauth(res); return; }
     let body = '';
     req.on('data', c => { body += c; });
     req.on('end', () => {
@@ -568,6 +680,7 @@ http.createServer((req, res) => {
 
   // ── שמירת הערה על לקוחה ──────────────────────────────────────
   if (url.pathname === '/save-note' && req.method === 'POST') {
+    if (!checkAuth(req)) { sendUnauth(res); return; }
     let body = '';
     req.on('data', c => { body += c; });
     req.on('end', () => {
@@ -612,8 +725,8 @@ http.createServer((req, res) => {
 
   // ── גיבוי ידני ל-GitHub ───────────────────────────────────────
   if (url.pathname === '/backup-now' && req.method === 'POST') {
-    const pass = url.searchParams.get('pass');
-    if (pass !== CRM_PASS) { res.writeHead(401); res.end('Unauthorized'); return; }
+    if (!checkAuth(req)) { sendUnauth(res); return; }
+
     res.writeHead(200, {'Content-Type':'application/json'});
     const crm = loadCRM();
     const count = Object.keys(crm).length;
@@ -627,8 +740,8 @@ http.createServer((req, res) => {
 
   // ── סטטוס גיבוי ──────────────────────────────────────────────
   if (url.pathname === '/backup-status') {
-    const pass = url.searchParams.get('pass');
-    if (pass !== CRM_PASS) { res.writeHead(401); res.end('Unauthorized'); return; }
+    if (!checkAuth(req)) { sendUnauth(res); return; }
+
     const crm = loadCRM();
     const hasToken = !!process.env.GITHUB_TOKEN;
     res.writeHead(200, {'Content-Type':'application/json'});
@@ -642,8 +755,8 @@ http.createServer((req, res) => {
 
   // ── סטטוס תזכורות מחר ─────────────────────────────────────────
   if (url.pathname === '/reminder-status') {
-    const pass = url.searchParams.get('pass');
-    if (pass !== CRM_PASS) { res.writeHead(401); res.end('Unauthorized'); return; }
+    if (!checkAuth(req)) { sendUnauth(res); return; }
+
     const crm = loadCRM();
     const tomorrowKey = getIsraelTomorrowKey();
     const israelHour = getIsraelHour();
@@ -667,8 +780,8 @@ http.createServer((req, res) => {
 
   // ── ניקוי תורים שגויים מ-Lee ──────────────────────────────────
   if (url.pathname === '/clear-lee-data' && req.method === 'POST') {
-    const pass = url.searchParams.get('pass');
-    if (pass !== CRM_PASS) { res.writeHead(401); res.end('{}'); return; }
+    if (!checkAuth(req)) { sendUnauth(res); return; }
+
     const crm = loadCRM();
     let cleared = 0;
     Object.keys(crm).forEach(phone => {
@@ -696,8 +809,8 @@ http.createServer((req, res) => {
 
   // ── שמירת תזכורת אישית ──────────────────────────────────────
   if (url.pathname === '/save-reminder' && req.method === 'POST') {
-    const pass = url.searchParams.get('pass');
-    if (pass !== CRM_PASS) { res.writeHead(401); res.end('{}'); return; }
+    if (!checkAuth(req)) { sendUnauth(res); return; }
+
     let body = '';
     req.on('data', c => { body += c; });
     req.on('end', () => {
@@ -716,8 +829,8 @@ http.createServer((req, res) => {
 
   // ── קבלת תזכורות ──────────────────────────────────────────
   if (url.pathname === '/get-reminders') {
-    const pass = url.searchParams.get('pass');
-    if (pass !== CRM_PASS) { res.writeHead(401); res.end('[]'); return; }
+    if (!checkAuth(req)) { sendUnauth(res); return; }
+
     const reminders = loadReminders();
     res.writeHead(200, {'Content-Type':'application/json'});
     res.end(JSON.stringify(reminders));
@@ -726,8 +839,8 @@ http.createServer((req, res) => {
 
   // ── מחיקת תזכורת ──────────────────────────────────────────
   if (url.pathname === '/delete-reminder' && req.method === 'POST') {
-    const pass = url.searchParams.get('pass');
-    if (pass !== CRM_PASS) { res.writeHead(401); res.end('{}'); return; }
+    if (!checkAuth(req)) { sendUnauth(res); return; }
+
     let body = '';
     req.on('data', c => { body += c; });
     req.on('end', () => {
@@ -763,8 +876,8 @@ http.createServer((req, res) => {
 
   // ── שמירת תמונה לפני/אחרי ──────────────────────────────────
   if (url.pathname === '/save-photo' && req.method === 'POST') {
-    const pass = url.searchParams.get('pass');
-    if (pass !== CRM_PASS) { res.writeHead(401); res.end('{}'); return; }
+    if (!checkAuth(req)) { sendUnauth(res); return; }
+
     let body = '';
     req.on('data', c => { body += c; });
     req.on('end', () => {
@@ -809,8 +922,8 @@ http.createServer((req, res) => {
 
   // ── קבלת תמונה לפני/אחרי ──────────────────────────────────
   if (url.pathname === '/get-photo') {
-    const pass = url.searchParams.get('pass');
-    if (pass !== CRM_PASS) { res.writeHead(401); res.end('Unauthorized'); return; }
+    if (!checkAuth(req)) { sendUnauth(res); return; }
+
     const phone = (url.searchParams.get('phone') || '').replace(/\D/g,'').replace(/^972/,'0');
     const type = url.searchParams.get('type') === 'after' ? 'after' : 'before';
     if (!phone) { res.writeHead(400); res.end(''); return; }
@@ -832,8 +945,8 @@ http.createServer((req, res) => {
 
   // ── שליחת תזכורות מה-CRM (HTTP trigger) ─────────────────────
   if (url.pathname === '/send-reminders-now' && req.method === 'POST') {
-    const pass = url.searchParams.get('pass');
-    if (pass !== CRM_PASS) { res.writeHead(401); res.end('{}'); return; }
+    if (!checkAuth(req)) { sendUnauth(res); return; }
+
     if (!clientReady) {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ success: false, error: 'WhatsApp לא מחובר', clientReady: false }));
@@ -848,8 +961,8 @@ http.createServer((req, res) => {
 
   // ── שליחת הודעה קבוצתית ─────────────────────────────────────
   if (url.pathname === '/send-bulk' && req.method === 'POST') {
-    const pass = url.searchParams.get('pass');
-    if (pass !== CRM_PASS) { res.writeHead(401); res.end('{}'); return; }
+    if (!checkAuth(req)) { sendUnauth(res); return; }
+
     let body = '';
     req.on('data', c => { body += c; });
     req.on('end', async () => {
@@ -895,16 +1008,16 @@ http.createServer((req, res) => {
   function saveWaitlist(data) { fs.writeFileSync(WAITLIST_FILE, JSON.stringify(data, null, 2)); }
 
   if (url.pathname === '/waitlist') {
-    const pass = url.searchParams.get('pass');
-    if (pass !== CRM_PASS) { res.writeHead(401); res.end('[]'); return; }
+    if (!checkAuth(req)) { sendUnauth(res); return; }
+
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(loadWaitlist()));
     return;
   }
 
   if (url.pathname === '/add-waitlist' && req.method === 'POST') {
-    const pass = url.searchParams.get('pass');
-    if (pass !== CRM_PASS) { res.writeHead(401); res.end('{}'); return; }
+    if (!checkAuth(req)) { sendUnauth(res); return; }
+
     let body = '';
     req.on('data', c => { body += c; });
     req.on('end', () => {
@@ -930,8 +1043,8 @@ http.createServer((req, res) => {
   }
 
   if (url.pathname === '/remove-waitlist' && req.method === 'POST') {
-    const pass = url.searchParams.get('pass');
-    if (pass !== CRM_PASS) { res.writeHead(401); res.end('{}'); return; }
+    if (!checkAuth(req)) { sendUnauth(res); return; }
+
     let body = '';
     req.on('data', c => { body += c; });
     req.on('end', () => {
@@ -948,8 +1061,8 @@ http.createServer((req, res) => {
   }
 
   if (url.pathname === '/notify-waitlist' && req.method === 'POST') {
-    const pass = url.searchParams.get('pass');
-    if (pass !== CRM_PASS) { res.writeHead(401); res.end('{}'); return; }
+    if (!checkAuth(req)) { sendUnauth(res); return; }
+
     let body = '';
     req.on('data', c => { body += c; });
     req.on('end', async () => {
@@ -975,8 +1088,8 @@ http.createServer((req, res) => {
 
   // ── כרטיס לקוחה דיגיטלי ─────────────────────────────────────
   if (url.pathname.startsWith('/customer-card/')) {
-    const pass = url.searchParams.get('pass');
-    if (pass !== CRM_PASS) { res.writeHead(401); res.end('Unauthorized'); return; }
+    if (!checkAuth(req)) { sendUnauth(res); return; }
+
     const phone = decodeURIComponent(url.pathname.replace('/customer-card/', ''));
     const crm = loadCRM();
     const c = crm[phone];
