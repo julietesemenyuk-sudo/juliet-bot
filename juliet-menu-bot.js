@@ -1316,7 +1316,11 @@ const FAQ_ANSWERS = {
 • *2,500 ₪ ל-100 גרם*
 
 📸 לא בטוחה כמה גרם את צריכה?
-שלחי תמונה של השיער שלך ואעזור לך 😊`,
+שלחי תמונה של השיער שלך ואעזור לך 😊
+
+בינתיים — צפי בעבודות אמיתיות:
+📸 *אינסטגרם:* @juliet_beauty_boutique
+🌐 *שירותי הסלון:* https://juliet-universe-official.netlify.app/shop.html`,
 
   '5': `💬 *שאלה אחרת?*
 
@@ -2814,6 +2818,9 @@ client.on('message', async (message) => {
         `💰 *מחיר מותאם אישית*\n\n` +
         `${name ? name + ', ' : ''}המחיר תלוי באורך ועובי השיער שלך 💎\n\n` +
         `📸 *שלחי תמונה של השיער* — ויוליה תחזור אלייך עם מחיר מדויק בהקדם! 🙏\n\n` +
+        `בינתיים — אפשר לראות עבודות אמיתיות:\n` +
+        `📸 *אינסטגרם:* @juliet_beauty_boutique\n` +
+        `🌐 *שירותי הסלון:* https://juliet-universe-official.netlify.app/shop.html\n\n` +
         `🗓️ _הטיפולים בתיאום מראש בלבד_`
       );
     } else if (body === '5') {
@@ -3017,8 +3024,12 @@ client.on('message', async (message) => {
       await notifyPriceRequest(from, name, 'החלקה אורגנית OXO');
       await message.reply(
         `💰 *מחיר מותאם אישית*\n\n` +
-        `${name ? name + ', ' : ''}המחיר תלוי באורך ועובי השיער 💎\n\n` +
-        `📸 *שלחי תמונה של השיער* — ויוליה תחזור אלייך עם מחיר בהקדם! 🙏`
+        `${name ? name + ', ' : ''}המחיר תלוי באורך ועובי השיער שלך 💎\n\n` +
+        `📸 *שלחי תמונה של השיער* — ויוליה תחזור אלייך עם מחיר מדויק בהקדם! 🙏\n\n` +
+        `בינתיים — אפשר לראות עבודות אמיתיות:\n` +
+        `📸 *אינסטגרם:* @juliet_beauty_boutique\n` +
+        `🌐 *שירותי הסלון:* https://juliet-universe-official.netlify.app/shop.html\n\n` +
+        `🗓️ _הטיפולים בתיאום מראש בלבד_`
       );
     } else if (FAQ_ANSWERS[body]) {
       await message.reply(FAQ_ANSWERS[body]);
