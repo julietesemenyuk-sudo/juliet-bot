@@ -1138,11 +1138,10 @@ const AI_MENU = `אני לא רק עושה שיער — אני בונה עסקי
 *את רוצה שאעשה את זה גם לעסק שלך?*
 
 1️⃣ אתר / דף נחיתה — החל מ-₪1,499
-2️⃣ אתר + בוט וואטסאפ — ₪2,999
-3️⃣ VIP מלא — ₪4,900
-4️⃣ סרטון AI לעסק (מ-₪590)
-5️⃣ לא בטוחה? — אני אעזרי לבחור
-6️⃣ חזרה
+2️⃣ VIP מלא — ₪4,900
+3️⃣ סרטון AI לעסק (מ-₪590)
+4️⃣ לא בטוחה? — אני אעזרי לבחור
+5️⃣ חזרה
 
 _כתבי מספר_ 😊`;
 
@@ -2651,14 +2650,21 @@ client.on('message', async (message) => {
       userState[from].step = 'faq';
       await message.reply(FAQ_MENU);
     } else if (body === '4') {
-      // פנייה אישית — בדיקת שעה
-      if (hour >= 20 || hour < 8) {
-        await message.reply(`היי ${name} 💎\n\nתודה שפנית ל-*Juliet Beauty*! 🙏\n\nהטיפולים אצלנו *בתיאום מראש בלבד*\n_(ללא שבת)_\n\nיוליה תחזור אלייך בהקדם! 💎\n\nאפשר להשאיר הודעה ונחזור אלייך 😊`);
-        userState[from].step = 'personal_after_hours';
-      } else {
-        userState[from].step = 'personal';
-        await message.reply(`💬 *פנייה אישית*\n\n${name ? `${name}, ` : ''}ג'ולייט תחזור אלייך בהקדם! 🙏\n\n📸 @juliet_beauty_boutique\n🌐 https://juliet-beauty-boutique.netlify.app/`);
-      }
+      // לדבר ישירות עם ג'ולייט — שיחה עוברת אליה
+      userState[from].step = 'personal';
+      userState[from].julietHandling = Date.now();
+      await message.reply(`💬 *שיחה ישירה עם ג'ולייט*\n\n${name ? `${name}, ` : ''}רגע קטן — ג'ולייט תיכנס לשיחה עוד רגע! 🙏\n\n_כל הודעה שתשלחי תגיע ישירות אלי_ 💎`);
+      // עדכון ג'ולייט
+      try {
+        const cleanPhone = from.replace('@c.us','').replace('972','0');
+        await client.sendMessage(JULIET_NUMBER,
+          `💬 *לקוחה רוצה לדבר ישירות!*\n\n` +
+          `👤 *${name || cleanPhone}*\n` +
+          `📞 ${cleanPhone}\n\n` +
+          `היא מחכה לך עכשיו 💎\n` +
+          `https://wa.me/972${cleanPhone.replace(/^0/,'')}`
+        );
+      } catch(e) {}
     } else {
       await message.reply(`בחרי מספר בין 1-4 בבקשה 😊\n\n${MAIN_MENU}`);
     }
@@ -4053,25 +4059,28 @@ function startReminderJob() {
               } catch(e) { console.log('שגיאת תזכורת:', e.message); }
             }
 
-            // ── ביקורת ב-20:00 אחרי תור שעבר (היום / אתמול) ───
-            if (!visit.reviewSent && israelHour === 20 && apptTime < now) {
+            // ── ביקורת ב-11:00 יום אחרי הטיפול ───────────────
+            if (!visit.reviewSent && israelHour === 11 && apptTime < now) {
               const hoursSince = (now - apptTime) / 3600000;
-              if (hoursSince >= 2 && hoursSince <= 30) {
+              if (hoursSince >= 14 && hoursSince <= 38) {
                 const name = customer.name || 'יקרה';
                 const firstName = name.split(' ')[0];
-                try {
-                  const chatId = '972' + phone.replace(/^0/, '') + '@c.us';
-                  await client.sendMessage(chatId,
-                    `${firstName}! 💎 איך השיער מרגיש היום?\n\n` +
-                    `שמחה שהיית אצלי 🤍\n\n` +
-                    `ביקורת קטנה שלך עוזרת לי להגיע לעוד נשים מדהימות 🙏\n\n` +
-                    `⭐ *גוגל (מומלץ!):*\n${GOOGLE_REVIEW_LINK}\n\n` +
-                    `_תודה מהלב, את הכי טובה!_ 💎`
-                  );
-                  visit.reviewSent = true;
-                  changed = true;
-                  console.log(`⭐ ביקורת נשלחה ל-${customer.name || phone}`);
-                } catch(e) {}
+                const isLee = phone.startsWith('lee_');
+                if (!isLee) {
+                  try {
+                    const chatId = '972' + phone.replace(/^0/, '') + '@c.us';
+                    await client.sendMessage(chatId,
+                      `${firstName}! 💎 איך השיער נראה הבוקר? 🌅\n\n` +
+                      `מקווה שאת מרוצה ומרגישה יפה! 🤍\n\n` +
+                      `אם יש רגע — ביקורת קטנה עוזרת לי מאוד להגיע לעוד נשים 🙏\n\n` +
+                      `⭐ *דרוגי אותי בגוגל:*\n${GOOGLE_REVIEW_LINK}\n\n` +
+                      `_תודה מהלב, את הכי טובה!_ 💎`
+                    );
+                    visit.reviewSent = true;
+                    changed = true;
+                    console.log(`⭐ ביקורת נשלחה ל-${customer.name || phone}`);
+                  } catch(e) {}
+                }
               }
             }
 
