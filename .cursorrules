@@ -1,0 +1,76 @@
+# 💎 Juliet Universe — Cursor Rules
+# קרא קובץ זה לפני כל פעולה בפרויקט.
+# עדכן תמיד גם את PROJECT_MEMORY.md אחרי שינויים.
+
+## זהות הפרויקט
+- **בעלת הפרויקט:** Juliet Universe — מעצבת שיער ויוצרת AI מישראל, אשדוד
+- **הסלון:** Juliet Beauty Boutique — הציונות 61 דירה 14, אשדוד
+- **שירותים:** החלקה אורגנית OXO, תוספות שיער (קראטין), צבע והייליטס
+- **מספר ג'ולייט:** 972586210365
+
+## קבצי הפרויקט
+| קובץ | תפקיד |
+|------|--------|
+| `juliet-menu-bot.js` | בוט וואטסאפ + HTTP server (Node.js) |
+| `crm.html` | ממשק CRM — מוגש ב-`/crm?pass=juliet2026` |
+| `PROJECT_MEMORY.md` | **קרא תמיד לפני עבודה** — סטטוס + משימות |
+| `CRM_ARCHITECTURE.md` | **קרא תמיד לפני עבודה** — ארכיטקטורה מלאה |
+
+## כללי עבודה קריטיים
+
+### 1. תואם עם Claude Code
+- Claude Code עובד על אותם קבצים — **תמיד קרא PROJECT_MEMORY.md לפני שינויים**
+- אחרי שינוי משמעותי — **עדכן PROJECT_MEMORY.md**
+- לפני push — ודא שאין conflict עם שינויים של Claude
+
+### 2. סביבה
+- **Production:** Railway — `https://juliet-bot-production.up.railway.app`
+- **נתונים:** Railway Volume ב-`/data/customers.json`
+- **סיסמה:** `juliet2026`
+- **Timezone:** Israel (UTC+3)
+
+### 3. כללי קוד
+- שפה: עברית בכל הטקסטים והודעות
+- `const` שנצרכים ב-HTTP handlers — להגדיר **לפני** `http.createServer()` או לקרוא כ-function שמוגדרת אחרי
+- `SALON_ADDRESS`, `JULIET_NUMBER`, `getIsraelTomorrowKey()` — מוגדרים אחרי יצירת ה-HTTP server
+- אל תגע ב-`client.initialize()` — נקרא פעם אחת בלבד בסוף הקובץ
+- iOS Safari fix: `html{overflow-x:hidden}` לא `body`
+- modals: `position:fixed` עם `cssText` + `!important`
+
+### 4. CSS Variables (crm.html)
+```css
+--gold: #c8a84b
+--purple: #a78bfa
+--blue: #5a96ff
+--green: #5adf8a
+--red: #ff6060
+--bg: #0a0a0f
+--text: rgba(255,255,255,0.92)
+--text-dim: rgba(255,255,255,0.4)
+```
+
+### 5. מבנה customers.json
+```json
+{
+  "0501234567": {
+    "phone", "name", "firstContact", "lastSeen", "vip", "muted",
+    "visits": [{ "date"(ISO), "service", "status", "reminderSent", "reviewSent", "confirmed" }],
+    "notes": { "color", "allergy", "general" },
+    "chatLog": [{ "from", "text", "time" }]
+  }
+}
+```
+
+### 6. Endpoints חשובים
+- `POST /send-reminders-now?pass=` — שולח תזכורות
+- `GET /status` — סטטוס JSON (clientReady, waUser)
+- `GET /qr` — QR לחיבור וואטסאפ
+- `GET /reset-session` — מחיקת סשן + restart
+- `POST /save-appointment?pass=` — שמירת תור
+- `POST /backup-now?pass=` — גיבוי GitHub
+
+## ⚠️ אל תשנה ללא תיאום
+- לוגיקת `client.on('ready')` — מכיל jobs קריטיים
+- `startReminderJob()` — חלון תזכורות 10:00–20:00
+- `LocalAuth dataPath: '/data/.wwebjs_auth'` — נתיב סשן Railway
+- `CRM_PASS = process.env.CRM_PASSWORD || 'juliet2026'`
